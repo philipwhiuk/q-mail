@@ -13,6 +13,7 @@ import android.support.annotation.WorkerThread;
 
 import com.fsck.k9.Globals;
 import com.fsck.k9.R;
+import com.fsck.k9.ical.ICalPart;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Message;
@@ -23,6 +24,7 @@ import com.fsck.k9.mail.internet.Viewable;
 import com.fsck.k9.mail.internet.Viewable.Flowed;
 import com.fsck.k9.mailstore.util.FlowedMessageUtils;
 import com.fsck.k9.message.extractors.AttachmentInfoExtractor;
+import com.fsck.k9.message.extractors.ICalendarInfoExtractor;
 import com.fsck.k9.message.html.HtmlConverter;
 import com.fsck.k9.message.html.HtmlProcessor;
 import com.fsck.k9.ui.crypto.MessageCryptoAnnotations;
@@ -50,20 +52,23 @@ public class MessageViewInfoExtractor {
     private final Context context;
     private final AttachmentInfoExtractor attachmentInfoExtractor;
     private final HtmlProcessor htmlProcessor;
+    private final ICalendarInfoExtractor iCalendarInfoExtractor;
 
 
     public static MessageViewInfoExtractor getInstance() {
         Context context = Globals.getContext();
         AttachmentInfoExtractor attachmentInfoExtractor = AttachmentInfoExtractor.getInstance();
+        ICalendarInfoExtractor iCalendarInfoExtractor = ICalendarInfoExtractor.getInstance();
         HtmlProcessor htmlProcessor = HtmlProcessor.newInstance();
-        return new MessageViewInfoExtractor(context, attachmentInfoExtractor, htmlProcessor);
+        return new MessageViewInfoExtractor(context, attachmentInfoExtractor, iCalendarInfoExtractor, htmlProcessor);
     }
 
     @VisibleForTesting
     MessageViewInfoExtractor(Context context, AttachmentInfoExtractor attachmentInfoExtractor,
-            HtmlProcessor htmlProcessor) {
+            ICalendarInfoExtractor iCalendarInfoExtractor, HtmlProcessor htmlProcessor) {
         this.context = context;
         this.attachmentInfoExtractor = attachmentInfoExtractor;
+        this.iCalendarInfoExtractor = iCalendarInfoExtractor;
         this.htmlProcessor = htmlProcessor;
     }
 
@@ -89,36 +94,46 @@ public class MessageViewInfoExtractor {
         }
 
         List<AttachmentViewInfo> attachmentInfos = new ArrayList<>();
+        List<ICalendarViewInfo> iCalendarInfos = new ArrayList<>();
         ViewableExtractedText viewable = extractViewableAndAttachments(
-                Collections.singletonList(rootPart), attachmentInfos);
+                Collections.singletonList(rootPart), attachmentInfos, iCalendarInfos);
 
         List<AttachmentViewInfo> extraAttachmentInfos = new ArrayList<>();
         String extraViewableText = null;
+
+        //TODO: What are extra parts
         if (extraParts != null) {
             ViewableExtractedText extraViewable =
-                    extractViewableAndAttachments(extraParts, extraAttachmentInfos);
+                    extractViewableAndAttachments(extraParts, extraAttachmentInfos,
+                            new ArrayList<ICalendarViewInfo>());
             extraViewableText = extraViewable.text;
         }
+
 
         AttachmentResolver attachmentResolver = AttachmentResolver.createFromPart(rootPart);
 
         boolean isMessageIncomplete = !message.isSet(Flag.X_DOWNLOADED_FULL) ||
                 MessageExtractor.hasMissingParts(message);
 
-        return MessageViewInfo.createWithExtractedContent(message, isMessageIncomplete, rootPart, viewable.html,
-                attachmentInfos, cryptoResultAnnotation, attachmentResolver, extraViewableText, extraAttachmentInfos);
+        return MessageViewInfo.createWithExtractedContent(
+                message, isMessageIncomplete, rootPart, viewable.html,
+                attachmentInfos, iCalendarInfos,
+                cryptoResultAnnotation, attachmentResolver, extraViewableText, extraAttachmentInfos);
     }
 
     private ViewableExtractedText extractViewableAndAttachments(List<Part> parts,
-            List<AttachmentViewInfo> attachmentInfos) throws MessagingException {
+            List<AttachmentViewInfo> attachmentInfos, List<ICalendarViewInfo> iCalendarViewInfos)
+            throws MessagingException {
         ArrayList<Viewable> viewableParts = new ArrayList<>();
         ArrayList<Part> attachments = new ArrayList<>();
+        ArrayList<ICalPart> iCalendars = new ArrayList<>();
 
         for (Part part : parts) {
-            MessageExtractor.findViewablesAndAttachments(part, viewableParts, attachments);
+            MessageExtractor.findViewablesAndAttachments(part, viewableParts, attachments, iCalendars);
         }
 
         attachmentInfos.addAll(attachmentInfoExtractor.extractAttachmentInfoForView(attachments));
+        iCalendarViewInfos.addAll(iCalendarInfoExtractor.extractICalendarInfoForView(iCalendars));
         return extractTextFromViewables(viewableParts);
     }
 
@@ -224,7 +239,7 @@ public class MessageViewInfoExtractor {
     private StringBuilder buildHtml(Viewable viewable, boolean prependDivider) {
         StringBuilder html = new StringBuilder();
         if (viewable instanceof Textual) {
-            Part part = ((Textual)viewable).getPart();
+            Part part = ((Textual) viewable).getPart();
             addHtmlDivider(html, part, prependDivider);
 
             String t = MessageExtractor.getTextFromPart(part);

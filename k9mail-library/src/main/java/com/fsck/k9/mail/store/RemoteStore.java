@@ -7,6 +7,7 @@ import java.util.Map;
 import android.content.Context;
 import android.net.ConnectivityManager;
 
+import com.fsck.k9.mail.K9HttpClient.K9HttpClientFactory;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.ServerSettings.Type;
@@ -14,9 +15,9 @@ import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.ssl.DefaultTrustedSocketFactory;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
+import com.fsck.k9.mail.store.ews.EwsStore;
 import com.fsck.k9.mail.store.imap.ImapStore;
 import com.fsck.k9.mail.store.pop3.Pop3Store;
-import com.fsck.k9.mail.store.webdav.WebDavHttpClient;
 import com.fsck.k9.mail.store.webdav.WebDavStore;
 
 
@@ -60,7 +61,10 @@ public abstract class RemoteStore extends Store {
             } else if (uri.startsWith("pop3")) {
                 store = new Pop3Store(storeConfig, new DefaultTrustedSocketFactory(context));
             } else if (uri.startsWith("webdav")) {
-                store = new WebDavStore(storeConfig, new WebDavHttpClient.WebDavHttpClientFactory());
+                store = new WebDavStore(storeConfig, new K9HttpClientFactory());
+            } else if (uri.startsWith("ews")) {
+                store = new EwsStore(storeConfig,
+                        new DefaultTrustedSocketFactory(context));
             }
 
             if (store != null) {
@@ -82,7 +86,7 @@ public abstract class RemoteStore extends Store {
      */
     public static void removeInstance(StoreConfig storeConfig) {
         String uri = storeConfig.getStoreUri();
-        if (uri.startsWith("local")) {
+        if (uri != null && uri.startsWith("local")) {
             throw new RuntimeException("Asked to get non-local Store object but given " +
                     "LocalStore URI");
         }
@@ -109,6 +113,8 @@ public abstract class RemoteStore extends Store {
             return Pop3Store.decodeUri(uri);
         } else if (uri.startsWith("webdav")) {
             return WebDavStore.decodeUri(uri);
+        } else if (uri.startsWith("ews")) {
+            return EwsStore.decodeUri(uri);
         } else {
             throw new IllegalArgumentException("Not a valid store URI");
         }
@@ -133,6 +139,8 @@ public abstract class RemoteStore extends Store {
             return Pop3Store.createUri(server);
         } else if (Type.WebDAV == server.type) {
             return WebDavStore.createUri(server);
+        } else if (Type.EWS == server.type) {
+            return EwsStore.createUri(server);
         } else {
             throw new IllegalArgumentException("Not a valid store URI");
         }

@@ -96,13 +96,13 @@ public class AccountSetupOutgoing extends K9Activity implements OnClickListener,
         mAccount = Preferences.getPreferences(this).getAccount(accountUuid);
 
         try {
-            if (new URI(mAccount.getStoreUri()).getScheme().startsWith("webdav")) {
+            String storeUriScheme = new URI(mAccount.getStoreUri()).getScheme();
+            if (storeUriScheme.startsWith("webdav") || storeUriScheme.startsWith("ews")) {
                 mAccount.setTransportUri(mAccount.getStoreUri());
                 AccountSetupCheckSettings.actionCheckSettings(this, mAccount, CheckDirection.OUTGOING);
             }
         } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Timber.e("Unable to create URI for incoming store", e);
         }
 
 

@@ -24,6 +24,9 @@ public class AccountCreator {
             case WebDAV: {
                 return DeletePolicy.ON_DELETE;
             }
+            case EWS: {
+                return DeletePolicy.ON_DELETE;
+            }
             case SMTP: {
                 throw new IllegalStateException("Delete policy doesn't apply to SMTP");
             }

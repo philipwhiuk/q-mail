@@ -392,6 +392,7 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="account_setup_account_type_pop_action">POP3</string>
     <string name="account_setup_account_type_imap_action">IMAP</string>
     <string name="account_setup_account_type_webdav_action">Exchange (WebDAV)</string>
+    <string name="account_setup_account_type_ews_action">Exchange (EWS)</string>
 
     <string name="account_setup_auth_type_normal_password">Normal password</string>
     <string name="account_setup_auth_type_insecure_password">Password, transmitted insecurely</string>
@@ -412,6 +413,16 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="account_setup_incoming_security_ssl_label">SSL/TLS</string>
     <string name="account_setup_incoming_security_tls_label">STARTTLS</string>
     <string name="account_setup_incoming_invalid_setting_combo_notice">\"<xliff:g id="setting_1_label">%1$s</xliff:g> = <xliff:g id="setting_1_value">%2$s</xliff:g>\" is not valid with \"<xliff:g id="setting_2_label">%3$s</xliff:g> = <xliff:g id="setting_2_value">%4$s</xliff:g>\"</string>
+
+
+    <string name="account_setup_incoming_exchange_version_label">Exchange version</string>
+    <string name="account_setup_incoming_exchange_version_2007sp1_label">Exchange 2007 SP1</string>
+    <string name="account_setup_incoming_exchange_version_2010_label">Exchange 2010</string>
+    <string name="account_setup_incoming_exchange_version_2010sp1_label">Exchange 2010 SP1</string>
+    <string name="account_setup_incoming_exchange_version_2010sp2_label">Exchange 2010 SP2</string>
+
+    <string name="account_setup_incoming_exchange_path_label">Exchange path</string>
+    <string name="account_setup_incoming_exchange_path_hint">Optional</string>
 
     <string name="account_setup_incoming_delete_policy_label">When I delete a message</string>
     <string name="account_setup_incoming_delete_policy_never_label">Do not delete on server</string>

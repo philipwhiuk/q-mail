@@ -3,6 +3,7 @@ package com.fsck.k9.mail.store.webdav;
 import com.fsck.k9.mail.FetchProfile;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Folder;
+import com.fsck.k9.mail.K9HttpClient;
 import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessageRetrievalListener;
@@ -348,7 +349,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
      */
     private void fetchMessages(List<WebDavMessage> messages, MessageRetrievalListener<WebDavMessage> listener, int lines)
             throws MessagingException {
-        WebDavHttpClient httpclient;
+        K9HttpClient httpclient;
         httpclient = store.getHttpClient();
 
         /**
@@ -405,7 +406,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
                     int currentLines = 0;
 
                     try {
-                        istream = WebDavHttpClient.getUngzippedContent(entity);
+                        istream = K9HttpClient.getUngzippedContent(entity);
 
                         if (lines != -1) {
                             //Convert the ungzipped input stream into a StringBuilder
@@ -655,7 +656,7 @@ class WebDavFolder extends Folder<WebDavMessage> {
     public List<? extends Message> appendWebDavMessages(List<? extends Message> messages) throws MessagingException {
         List<Message> retMessages = new ArrayList<Message>(messages.size());
 
-        WebDavHttpClient httpclient = store.getHttpClient();
+        K9HttpClient httpclient = store.getHttpClient();
 
         for (Message message : messages) {
             HttpGeneric httpmethod;

@@ -22,7 +22,8 @@ public class ServerSettings {
         IMAP(143, 993),
         SMTP(587, 465),
         WebDAV(80, 443),
-        POP3(110, 995);
+        POP3(110, 995),
+        EWS(80, 443);
 
         public final int defaultPort;
 

@@ -4,12 +4,13 @@ package com.fsck.k9.activity.setup;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion;
 import timber.log.Timber;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.K9Activity;
@@ -20,6 +21,7 @@ import com.fsck.k9.setup.ServerNameSuggester;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static com.fsck.k9.mail.ServerSettings.Type.EWS;
 import static com.fsck.k9.mail.ServerSettings.Type.IMAP;
 import static com.fsck.k9.mail.ServerSettings.Type.POP3;
 import static com.fsck.k9.mail.ServerSettings.Type.SMTP;
@@ -53,6 +55,7 @@ public class AccountSetupAccountType extends K9Activity implements OnClickListen
         findViewById(R.id.pop).setOnClickListener(this);
         findViewById(R.id.imap).setOnClickListener(this);
         findViewById(R.id.webdav).setOnClickListener(this);
+        findViewById(R.id.ews).setOnClickListener(this);
 
         String accountUuid = getIntent().getStringExtra(EXTRA_ACCOUNT);
         mAccount = Preferences.getPreferences(this).getAccount(accountUuid);
@@ -75,7 +78,7 @@ public class AccountSetupAccountType extends K9Activity implements OnClickListen
         mAccount.setTransportUri(transportUri.toString());
     }
 
-    private void setupDav() throws URISyntaxException {
+    private void setupWebDav() throws URISyntaxException {
         URI uriForDecode = new URI(mAccount.getStoreUri());
 
         /*
@@ -100,6 +103,33 @@ public class AccountSetupAccountType extends K9Activity implements OnClickListen
         mAccount.setStoreUri(uri.toString());
     }
 
+    private void setupEWS() throws URISyntaxException {
+        URI uriForDecode = new URI(mAccount.getStoreUri());
+
+        //TODO: Different EWS auth types?
+        /*
+         * The user info we have been given from
+         * AccountSetupBasics.onManualSetup() is encoded as an IMAP store
+         * URI: AuthType:UserName:Password (no fields should be empty).
+         * However, AuthType is not applicable to EWS nor to its store
+         * URI. Re-encode without it, using just the UserName and Password.
+         */
+        String userPass = "";
+        String[] userInfo = uriForDecode.getUserInfo().split(":");
+        if (userInfo.length > 1) {
+            userPass = userInfo[1];
+        }
+        if (userInfo.length > 2) {
+            userPass = userPass + ":" + userInfo[2];
+        }
+
+        String domainPart = EmailHelper.getDomainFromEmailAddress(mAccount.getEmail());
+        String suggestedServerName = serverNameSuggester.suggestServerName(EWS, domainPart);
+        URI uri = new URI("ews+ssl+", userPass, suggestedServerName, uriForDecode.getPort(),
+                "/"+ ExchangeVersion.Exchange2010_SP2.name()+"/EWS/Exchange.asmx", null, null);
+        mAccount.setStoreUri(uri.toString());
+    }
+
     public void onClick(View v) {
         try {
             switch (v.getId()) {
@@ -112,7 +142,11 @@ public class AccountSetupAccountType extends K9Activity implements OnClickListen
                     break;
                 }
                 case R.id.webdav: {
-                    setupDav();
+                    setupWebDav();
+                    break;
+                }
+                case R.id.ews: {
+                    setupEWS();
                     break;
                 }
             }

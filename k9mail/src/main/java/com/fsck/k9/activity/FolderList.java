@@ -108,18 +108,22 @@ public class FolderList extends K9ListActivity {
                 public void run() {
                     mActionBarTitle.setText(getString(R.string.folders_title));
 
-                    if (mUnreadMessageCount == 0) {
-                        mActionBarUnread.setVisibility(View.GONE);
-                    } else {
-                        mActionBarUnread.setText(String.format("%d", mUnreadMessageCount));
-                        mActionBarUnread.setVisibility(View.VISIBLE);
+                    if (mActionBarUnread != null) {
+                        if (mUnreadMessageCount == 0) {
+                            mActionBarUnread.setVisibility(View.GONE);
+                        } else {
+                            mActionBarUnread.setText(String.format("%d", mUnreadMessageCount));
+                            mActionBarUnread.setVisibility(View.VISIBLE);
+                        }
                     }
 
-                    String operation = mAdapter.mListener.getOperation(FolderList.this);
-                    if (operation.length() < 1) {
-                        mActionBarSubTitle.setText(mAccount.getEmail());
-                    } else {
-                        mActionBarSubTitle.setText(operation);
+                    if (mActionBarSubTitle != null) {
+                        String operation = mAdapter.mListener.getOperation(FolderList.this);
+                        if (operation.length() < 1) {
+                            mActionBarSubTitle.setText(mAccount.getEmail());
+                        } else {
+                            mActionBarSubTitle.setText(operation);
+                        }
                     }
                 }
             });

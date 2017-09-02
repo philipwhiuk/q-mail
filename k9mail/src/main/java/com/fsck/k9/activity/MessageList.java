@@ -495,7 +495,8 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
         }
 
         // now we know if we are in single account mode and need a subtitle
-        mActionBarSubTitle.setVisibility((!mSingleFolderMode) ? View.GONE : View.VISIBLE);
+        if (mActionBarSubTitle != null)
+            mActionBarSubTitle.setVisibility((!mSingleFolderMode) ? View.GONE : View.VISIBLE);
 
         return true;
     }
@@ -1171,16 +1172,18 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
     }
 
     public void setActionBarSubTitle(String subTitle) {
-        mActionBarSubTitle.setText(subTitle);
+        if (mActionBarSubTitle != null)
+            mActionBarSubTitle.setText(subTitle);
     }
 
     public void setActionBarUnread(int unread) {
-        if (unread == 0) {
-            mActionBarUnread.setVisibility(View.GONE);
-        } else {
-            mActionBarUnread.setVisibility(View.VISIBLE);
-            mActionBarUnread.setText(String.format("%d", unread));
-        }
+        if (mActionBarUnread != null)
+            if (unread == 0) {
+                mActionBarUnread.setVisibility(View.GONE);
+            } else {
+                mActionBarUnread.setVisibility(View.VISIBLE);
+                mActionBarUnread.setText(String.format("%d", unread));
+            }
     }
 
     @Override

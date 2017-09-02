@@ -156,20 +156,24 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         private void setViewTitle() {
             mActionBarTitle.setText(getString(R.string.accounts_title));
 
-            if (mUnreadMessageCount == 0) {
-                mActionBarUnread.setVisibility(View.GONE);
-            } else {
-                mActionBarUnread.setText(String.format("%d", mUnreadMessageCount));
-                mActionBarUnread.setVisibility(View.VISIBLE);
+            if (mActionBarUnread != null) {
+                if (mUnreadMessageCount == 0) {
+                    mActionBarUnread.setVisibility(View.GONE);
+                } else {
+                    mActionBarUnread.setText(String.format("%d", mUnreadMessageCount));
+                    mActionBarUnread.setVisibility(View.VISIBLE);
+                }
             }
 
-            String operation = mListener.getOperation(Accounts.this);
-            operation = operation.trim();
-            if (operation.length() < 1) {
-                mActionBarSubTitle.setVisibility(View.GONE);
-            } else {
-                mActionBarSubTitle.setVisibility(View.VISIBLE);
-                mActionBarSubTitle.setText(operation);
+            if (mActionBarSubTitle != null) {
+                String operation = mListener.getOperation(Accounts.this);
+                operation = operation.trim();
+                if (operation.length() < 1) {
+                    mActionBarSubTitle.setVisibility(View.GONE);
+                } else {
+                    mActionBarSubTitle.setVisibility(View.VISIBLE);
+                    mActionBarSubTitle.setText(operation);
+                }
             }
         }
         public void refreshTitle() {

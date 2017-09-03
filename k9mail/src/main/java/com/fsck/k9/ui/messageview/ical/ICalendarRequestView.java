@@ -1,5 +1,6 @@
 package com.fsck.k9.ui.messageview.ical;
 
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.text.TextUtils;
@@ -8,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import biweekly.util.Frequency;
+import biweekly.util.Recurrence;
 import com.fsck.k9.FontSizes;
 import com.fsck.k9.K9;
 import com.fsck.k9.R;
@@ -16,10 +19,8 @@ import com.fsck.k9.helper.ICalendarHelper;
 import com.fsck.k9.ical.ICalData.ICalendarData;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
 
-import biweekly.util.Frequency;
-import biweekly.util.Recurrence;
 
-public class ICalendarReplyView extends ICalendarView implements View.OnClickListener, View.OnLongClickListener {
+public class ICalendarRequestView extends ICalendarView implements View.OnClickListener, View.OnLongClickListener {
 
     private Context mContext;
     private TextView summaryView;
@@ -27,12 +28,12 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
     private TextView organizerView;
     private TextView organizerLabel;
 
-    private TextView acceptedView;
-    private TextView acceptedLabel;
-    private TextView declinedView;
-    private TextView declinedLabel;
-    private TextView tentativeView;
-    private TextView tentativeLabel;
+    private TextView requiredView;
+    private TextView requiredLabel;
+    private TextView optionalView;
+    private TextView optionalLabel;
+    private TextView fyiView;
+    private TextView fyiLabel;
 
     private TextView locationView;
     private TextView locationLabel;
@@ -45,14 +46,13 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
 
     private ICalendarViewInfo viewInfo;
     private ICalendarData iCalendar;
-
     private Button viewButton;
     private Button downloadButton;
     private ICalendarViewCallback callback;
     private boolean showSummary;
 
 
-    public ICalendarReplyView(Context context, AttributeSet attrs) {
+    public ICalendarRequestView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
         mContacts = Contacts.getInstance(mContext);
@@ -70,13 +70,12 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
         organizerView = (TextView) findViewById(R.id.organizer);
         organizerLabel = (TextView) findViewById(R.id.organizer_label);
 
-        acceptedView = (TextView) findViewById(R.id.accepted);
-        acceptedLabel = (TextView) findViewById(R.id.accepted_label);
-        declinedLabel = (TextView) findViewById(R.id.declined_label);
-        declinedView = (TextView) findViewById(R.id.declined);
-        declinedLabel = (TextView) findViewById(R.id.declined_label);
-        tentativeView = (TextView) findViewById(R.id.tentative);
-        tentativeLabel = (TextView) findViewById(R.id.tentative_label);
+        requiredView = (TextView) findViewById(R.id.required);
+        requiredLabel = (TextView) findViewById(R.id.required_label);
+        optionalView = (TextView) findViewById(R.id.optional);
+        optionalLabel = (TextView) findViewById(R.id.optional_label);
+        fyiView = (TextView) findViewById(R.id.fyi);
+        fyiLabel = (TextView) findViewById(R.id.fyi_label);
 
         locationView = (TextView) findViewById(R.id.location);
         locationLabel = (TextView) findViewById(R.id.location_label);
@@ -86,6 +85,10 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
 
         mFontSizes.setViewTextSize(organizerView, mFontSizes.getICalendarViewOrganizer());
         mFontSizes.setViewTextSize(organizerLabel, mFontSizes.getICalendarViewOrganizer());
+        mFontSizes.setViewTextSize(requiredView, mFontSizes.getICalendarViewRequired());
+        mFontSizes.setViewTextSize(requiredLabel, mFontSizes.getICalendarViewRequired());
+        mFontSizes.setViewTextSize(optionalView, mFontSizes.getICalendarViewOptional());
+        mFontSizes.setViewTextSize(optionalLabel, mFontSizes.getICalendarViewOptional());
         mFontSizes.setViewTextSize(locationView, mFontSizes.getICalendarViewLocation());
         mFontSizes.setViewTextSize(locationLabel, mFontSizes.getICalendarViewLocation());
         mFontSizes.setViewTextSize(dateTimeView, mFontSizes.getICalendarViewDateTime());
@@ -154,10 +157,6 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
         final CharSequence optional = ICalendarHelper.toFriendly(iCalendar.getOptional(), contacts);
         final CharSequence fyi = ICalendarHelper.toFriendly(iCalendar.getFyi(), contacts);
 
-        final CharSequence accepted = ICalendarHelper.toFriendly(iCalendar.getAccepted(), contacts);
-        final CharSequence declined = ICalendarHelper.toFriendly(iCalendar.getDeclined(), contacts);
-        final CharSequence tentative = ICalendarHelper.toFriendly(iCalendar.getTentative(), contacts);
-
         if(iCalendar.getRecurrenceRule() == null) {
             mRecurrenceView.setVisibility(GONE);
         } else {
@@ -170,9 +169,11 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
             summaryView.setVisibility(GONE);
             summaryLabel.setVisibility(GONE);
         }
-        updateField(acceptedView, accepted, acceptedLabel);
-        updateField(declinedView, declined, declinedLabel);
-        updateField(tentativeView, tentative, tentativeLabel);
+        //TODO: Not show organizer if it's the same as the email sender
+        updateField(organizerView, organizer, organizerLabel);
+        updateField(requiredView, required, requiredLabel);
+        updateField(optionalView, optional, optionalLabel);
+        updateField(fyiView, fyi, fyiLabel);
         updateField(locationView, iCalendar.getLocation(), locationLabel);
         updateField(dateTimeView, iCalendar.getDateTime(), dateTimeLabel);
 
@@ -181,13 +182,47 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
     private String buildRule(Recurrence recurrence, Resources resources) {
         Frequency frequency = recurrence.getFrequency();
         switch (frequency) {
-            case SECONDLY: return resources.getString(R.string.ical_recurrence_secondly);
-            case MINUTELY: return resources.getString(R.string.ical_recurrence_minutely);
-            case HOURLY: return resources.getString(R.string.ical_recurrence_hourly);
-            case DAILY: return resources.getString(R.string.ical_recurrence_daily);
-            case WEEKLY: return resources.getString(R.string.ical_recurrence_weekly);
-            case MONTHLY: return resources.getString(R.string.ical_recurrence_monthly);
-            case YEARLY: return resources.getString(R.string.ical_recurrence_yearly);
+            case SECONDLY:
+                if (recurrence.getInterval() == 1) {
+                    return resources.getString(R.string.ical_recurrence_secondly);
+                } else {
+                    return resources.getString(R.string.ical_recurrence_secondly_interval, recurrence.getInterval());
+                }
+            case MINUTELY:
+                if (recurrence.getInterval() == 1) {
+                    return resources.getString(R.string.ical_recurrence_minutely);
+                } else {
+                    return resources.getString(R.string.ical_recurrence_minutely_interval, recurrence.getInterval());
+                }
+            case HOURLY:
+                if (recurrence.getInterval() == 1) { return resources.getString(R.string.ical_recurrence_hourly);
+                } else {
+                    return resources.getString(R.string.ical_recurrence_hourly_interval, recurrence.getInterval());
+                }
+            case DAILY:
+                if (recurrence.getInterval() == 1) {
+                    return resources.getString(R.string.ical_recurrence_daily);
+                } else {
+                    return resources.getString(R.string.ical_recurrence_daily_interval, recurrence.getInterval());
+                }
+            case WEEKLY:
+                if (recurrence.getInterval() == 1) {
+                    return resources.getString(R.string.ical_recurrence_weekly);
+                } else {
+                    return resources.getString(R.string.ical_recurrence_weekly_interval, recurrence.getInterval());
+                }
+            case MONTHLY:
+                if (recurrence.getInterval() == 1) {
+                    return resources.getString(R.string.ical_recurrence_monthly);
+                } else {
+                    return resources.getString(R.string.ical_recurrence_monthly_interval, recurrence.getInterval());
+                }
+            case YEARLY:
+                if (recurrence.getInterval() == 1) {
+                    return resources.getString(R.string.ical_recurrence_yearly);
+                } else {
+                    return resources.getString(R.string.ical_recurrence_yearly_interval, recurrence.getInterval());
+                }
         }
         return "";
     }

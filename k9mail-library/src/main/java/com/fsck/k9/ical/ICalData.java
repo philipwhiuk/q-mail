@@ -20,6 +20,8 @@ public class ICalData {
 
     public static final String METHOD_PUBLISH = "PUBLISH";
     public static final String METHOD_REPLY = "REPLY";
+    public static final String METHOD_REQUEST = "REQUEST";
+    public static final String METHOD_COUNTER = "COUNTER";
 
     private List<ICalendarData> calendarData;
 
@@ -96,21 +98,21 @@ public class ICalData {
                 if (attendee.getParticipationStatus() != null) {
                     if (attendee.getParticipationStatus().equals(ParticipationStatus.ACCEPTED)) {
                         acceptedList.add(attendee);
-                    } else if (attendee.getParticipationLevel().equals(ParticipationStatus.CONFIRMED)) {
+                    } else if (attendee.getParticipationStatus().equals(ParticipationStatus.CONFIRMED)) {
                         confirmedList.add(attendee);
-                    } else if (attendee.getParticipationLevel().equals(ParticipationStatus.DECLINED)) {
+                    } else if (attendee.getParticipationStatus().equals(ParticipationStatus.DECLINED)) {
                         declinedList.add(attendee);
-                    } else if (attendee.getParticipationLevel().equals(ParticipationStatus.IN_PROCESS)) {
+                    } else if (attendee.getParticipationStatus().equals(ParticipationStatus.IN_PROCESS)) {
                         inProcessList.add(attendee);
-                    } else if (attendee.getParticipationLevel().equals(ParticipationStatus.COMPLETED)) {
+                    } else if (attendee.getParticipationStatus().equals(ParticipationStatus.COMPLETED)) {
                         completedList.add(attendee);
-                    } else if (attendee.getParticipationLevel().equals(ParticipationStatus.DELEGATED)) {
+                    } else if (attendee.getParticipationStatus().equals(ParticipationStatus.DELEGATED)) {
                         delegatedList.add(attendee);
-                    } else if (attendee.getParticipationLevel().equals(ParticipationStatus.SENT)) {
+                    } else if (attendee.getParticipationStatus().equals(ParticipationStatus.SENT)) {
                         sentList.add(attendee);
-                    } else if (attendee.getParticipationLevel().equals(ParticipationStatus.NEEDS_ACTION)) {
+                    } else if (attendee.getParticipationStatus().equals(ParticipationStatus.NEEDS_ACTION)) {
                         needsActionList.add(attendee);
-                    } else if (attendee.getParticipationLevel().equals(ParticipationStatus.TENTATIVE)) {
+                    } else if (attendee.getParticipationStatus().equals(ParticipationStatus.TENTATIVE)) {
                         tentativeList.add(attendee);
                     }
                 }

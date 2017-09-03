@@ -1,5 +1,6 @@
 package com.fsck.k9.ui.messageview.ical;
 
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.text.TextUtils;
@@ -8,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import biweekly.util.Frequency;
+import biweekly.util.Recurrence;
 import com.fsck.k9.FontSizes;
 import com.fsck.k9.K9;
 import com.fsck.k9.R;
@@ -16,10 +19,8 @@ import com.fsck.k9.helper.ICalendarHelper;
 import com.fsck.k9.ical.ICalData.ICalendarData;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
 
-import biweekly.util.Frequency;
-import biweekly.util.Recurrence;
 
-public class ICalendarReplyView extends ICalendarView implements View.OnClickListener, View.OnLongClickListener {
+public class ICalendarCounterView extends ICalendarView implements View.OnClickListener, View.OnLongClickListener {
 
     private Context mContext;
     private TextView summaryView;
@@ -52,7 +53,7 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
     private boolean showSummary;
 
 
-    public ICalendarReplyView(Context context, AttributeSet attrs) {
+    public ICalendarCounterView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
         mContacts = Contacts.getInstance(mContext);

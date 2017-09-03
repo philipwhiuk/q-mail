@@ -27,7 +27,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fsck.k9.K9;
 import com.fsck.k9.R;
 import com.fsck.k9.helper.ClipboardManager;
 import com.fsck.k9.helper.Contacts;
@@ -39,8 +38,10 @@ import com.fsck.k9.mailstore.AttachmentResolver;
 import com.fsck.k9.mailstore.AttachmentViewInfo;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
 import com.fsck.k9.mailstore.MessageViewInfo;
+import com.fsck.k9.ui.messageview.ical.ICalendarCounterView;
 import com.fsck.k9.ui.messageview.ical.ICalendarPublishView;
 import com.fsck.k9.ui.messageview.ical.ICalendarReplyView;
+import com.fsck.k9.ui.messageview.ical.ICalendarRequestView;
 import com.fsck.k9.ui.messageview.ical.ICalendarView;
 import com.fsck.k9.ui.messageview.ical.ICalendarViewCallback;
 import com.fsck.k9.view.MessageHeader.OnLayoutChangedListener;
@@ -48,8 +49,10 @@ import com.fsck.k9.view.MessageWebView;
 import com.fsck.k9.view.MessageWebView.OnPageFinishedListener;
 import timber.log.Timber;
 
+import static com.fsck.k9.ical.ICalData.METHOD_COUNTER;
 import static com.fsck.k9.ical.ICalData.METHOD_PUBLISH;
 import static com.fsck.k9.ical.ICalData.METHOD_REPLY;
+import static com.fsck.k9.ical.ICalData.METHOD_REQUEST;
 
 
 public class MessageContainerView extends LinearLayout implements OnLayoutChangedListener, OnCreateContextMenuListener {
@@ -477,10 +480,18 @@ public class MessageContainerView extends LinearLayout implements OnLayoutChange
                             break;
                         case METHOD_REPLY:
                             view = (ICalendarReplyView) mInflater
-                                    .inflate(R.layout.message_view_ical_publish, mCalendars, false);
+                                    .inflate(R.layout.message_view_ical_reply, mCalendars, false);
+                            break;
+                        case METHOD_REQUEST:
+                            view = (ICalendarRequestView) mInflater
+                                    .inflate(R.layout.message_view_ical_request, mCalendars, false);
+                            break;
+                        case METHOD_COUNTER:
+                            view = (ICalendarCounterView) mInflater
+                                    .inflate(R.layout.message_view_ical_counter, mCalendars, false);
                             break;
                         default:
-                            Timber.i(K9.LOG_TAG, "Unhandled iCalendar method type:"
+                            Timber.i("Unhandled iCalendar method type:"
                                     + iCalendarData.getMethod().getValue());
                             continue;
                     }

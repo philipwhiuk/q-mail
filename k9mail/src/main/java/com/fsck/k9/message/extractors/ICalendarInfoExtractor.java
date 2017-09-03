@@ -130,7 +130,7 @@ public class ICalendarInfoExtractor {
         if (underlyingPart instanceof LocalPart) {
             LocalPart localPart = (LocalPart) underlyingPart;
             String accountUuid = localPart.getAccountUuid();
-            long messagePartId = localPart.getId();
+            long messagePartId = localPart.getPartId();
             size = localPart.getSize();
             isContentAvailable = underlyingPart.getBody() != null;
             uri = AttachmentProvider.getAttachmentUri(accountUuid, messagePartId);

@@ -20,6 +20,7 @@ import com.fsck.k9.R;
 import com.fsck.k9.cache.TemporaryAttachmentStore;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
+import com.fsck.k9.controller.SimpleMessagingListener;
 import com.fsck.k9.helper.FileHelper;
 import com.fsck.k9.ical.ICalParser;
 import com.fsck.k9.mail.Message;
@@ -31,6 +32,7 @@ import com.fsck.k9.mailstore.LocalMessage;
 import com.fsck.k9.mailstore.LocalPart;
 
 import org.apache.commons.io.IOUtils;
+import timber.log.Timber;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -97,7 +99,7 @@ public class ICalendarController {
         LocalMessage message = localPart.getMessage();
 
         messageViewFragment.showICalendarLoadingDialog();
-        controller.loadAttachment(account, message, iCalendar.part, new MessagingListener() {
+        controller.loadAttachment(account, message, iCalendar.part, new SimpleMessagingListener() {
             @Override
             public void loadAttachmentFinished(Account account, Message message, Part part) {
                 messageViewFragment.hideICalendarLoadingDialogOnMainThread();
@@ -135,7 +137,7 @@ public class ICalendarController {
     }
 
     private File saveICalendarWithUniqueFileName(File directory) throws IOException {
-        String filename = FileHelper.sanitizeFilename(iCalendar.iCalData.getSummary());
+        String filename = FileHelper.sanitizeFilename(iCalendar.iCalData.getCalendarData().get(0).getSummary());
         File file = FileHelper.createUniqueFile(directory, filename);
 
         writeICalendarToStorage(file);
@@ -170,7 +172,7 @@ public class ICalendarController {
     }
 
     private Intent getBestViewIntentAndSaveFileIfNecessary() {
-        String displayName = iCalendar.iCalData.getSummary();
+        String displayName = iCalendar.iCalData.getCalendarData().get(0).getSummary();
         String inferredMimeType = MimeUtility.getMimeTypeByExtension(displayName);
 
         IntentAndResolvedActivitiesCount resolvedIntentInfo;
@@ -191,9 +193,7 @@ public class ICalendarController {
                 writeICalendarToStorage(tempFile);
                 viewIntent = createViewIntentForFileUri(resolvedIntentInfo.getMimeType(), Uri.fromFile(tempFile));
             } catch (IOException e) {
-                if (K9.DEBUG) {
-                    Log.e(K9.LOG_TAG, "Error while saving calendar to use file:// URI with ACTION_VIEW Intent", e);
-                }
+                Timber.e(e, "Error while saving attachment to use file:// URI with ACTION_VIEW Intent");
                 viewIntent = createViewIntentForICalendarProviderUri(MimeUtility.DEFAULT_ATTACHMENT_MIME_TYPE);
             }
         } else {
@@ -211,7 +211,7 @@ public class ICalendarController {
             return new IntentAndResolvedActivitiesCount(contentUriIntent, contentUriActivitiesCount);
         }
 
-        File tempFile = TemporaryAttachmentStore.getFile(context, iCalendar.iCalData.getSummary());
+        File tempFile = TemporaryAttachmentStore.getFile(context, iCalendar.iCalData.getCalendarData().get(0).getSummary());
         Uri tempFileUri = Uri.fromFile(tempFile);
         Intent fileUriIntent = createViewIntentForFileUri(mimeType, tempFileUri);
         int fileUriActivitiesCount = getResolvedIntentActivitiesCount(fileUriIntent);
@@ -339,9 +339,7 @@ public class ICalendarController {
                 File directory = params[0];
                 return saveICalendarWithUniqueFileName(directory);
             } catch (IOException e) {
-                if (K9.DEBUG) {
-                    Log.e(K9.LOG_TAG, "Error saving attachment", e);
-                }
+                Timber.e(K9.LOG_TAG, "Error saving attachment", e);
                 return null;
             }
         }

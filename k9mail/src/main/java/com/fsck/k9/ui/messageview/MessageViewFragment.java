@@ -563,7 +563,8 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
             }
             case R.id.dialog_calendar_progress: {
                 String message = getString(R.string.dialog_calendar_progress_title);
-                fragment = ProgressDialogFragment.newInstance(null, message);
+                int size = (int) currentICalendarViewInfo.size;
+                fragment = AttachmentDownloadDialogFragment.newInstance(size, message);
                 break;
             }
             default: {

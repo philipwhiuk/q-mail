@@ -13,6 +13,7 @@ import com.fsck.k9.K9;
 import com.fsck.k9.R;
 import com.fsck.k9.helper.Contacts;
 import com.fsck.k9.helper.ICalendarHelper;
+import com.fsck.k9.ical.ICalData.ICalendarData;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
 
 import biweekly.util.Frequency;
@@ -42,7 +43,9 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
     private FontSizes mFontSizes = K9.getFontSizes();
     private Contacts mContacts;
 
-    private ICalendarViewInfo iCalendar;
+    private ICalendarViewInfo viewInfo;
+    private ICalendarData iCalendar;
+
     private Button viewButton;
     private Button downloadButton;
     private ICalendarViewCallback callback;
@@ -61,6 +64,7 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
 
     @Override
     protected void onFinishInflate() {
+        super.onFinishInflate();
         summaryView = (TextView) findViewById(R.id.summary);
         summaryLabel = (TextView) findViewById(R.id.summary_label);
         organizerView = (TextView) findViewById(R.id.organizer);
@@ -123,19 +127,20 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
     }
 
     private void onViewButtonClick() {
-        callback.onViewICalendar(iCalendar);
+        callback.onViewICalendar(viewInfo);
     }
 
     private void onSaveButtonClick() {
-        callback.onSaveICalendar(iCalendar);
+        callback.onSaveICalendar(viewInfo);
     }
 
     private void onSaveButtonLongClick() {
-        callback.onSaveICalendarToUserProvidedDirectory(iCalendar);
+        callback.onSaveICalendarToUserProvidedDirectory(viewInfo);
     }
 
 
-    public void setICalendar(ICalendarViewInfo iCalendar) {
+    public void setICalendar(ICalendarViewInfo viewInfo, ICalendarData iCalendarData) {
+        this.viewInfo = viewInfo;
         this.iCalendar = iCalendar;
 
         displayICalendarInformation();
@@ -144,23 +149,23 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
     private void displayICalendarInformation() {
         final Contacts contacts = K9.showContactName() ? mContacts : null;
 
-        final CharSequence organizer = ICalendarHelper.toFriendly(iCalendar.iCalData.getOrganizer(), contacts);
-        final CharSequence required = ICalendarHelper.toFriendly(iCalendar.iCalData.getRequired(), contacts);
-        final CharSequence optional = ICalendarHelper.toFriendly(iCalendar.iCalData.getOptional(), contacts);
-        final CharSequence fyi = ICalendarHelper.toFriendly(iCalendar.iCalData.getFyi(), contacts);
+        final CharSequence organizer = ICalendarHelper.toFriendly(iCalendar.getOrganizer(), contacts);
+        final CharSequence required = ICalendarHelper.toFriendly(iCalendar.getRequired(), contacts);
+        final CharSequence optional = ICalendarHelper.toFriendly(iCalendar.getOptional(), contacts);
+        final CharSequence fyi = ICalendarHelper.toFriendly(iCalendar.getFyi(), contacts);
 
-        final CharSequence accepted = ICalendarHelper.toFriendly(iCalendar.iCalData.getAccepted(), contacts);
-        final CharSequence declined = ICalendarHelper.toFriendly(iCalendar.iCalData.getDeclined(), contacts);
-        final CharSequence tentative = ICalendarHelper.toFriendly(iCalendar.iCalData.getTentative(), contacts);
+        final CharSequence accepted = ICalendarHelper.toFriendly(iCalendar.getAccepted(), contacts);
+        final CharSequence declined = ICalendarHelper.toFriendly(iCalendar.getDeclined(), contacts);
+        final CharSequence tentative = ICalendarHelper.toFriendly(iCalendar.getTentative(), contacts);
 
-        if(iCalendar.iCalData.getRecurrenceRule() == null) {
+        if(iCalendar.getRecurrenceRule() == null) {
             mRecurrenceView.setVisibility(GONE);
         } else {
-            mRecurrenceView.setText(buildRule(iCalendar.iCalData.getRecurrenceRule().getValue(), getResources()));
+            mRecurrenceView.setText(buildRule(iCalendar.getRecurrenceRule().getValue(), getResources()));
         }
         
         if (showSummary) {
-            updateField(summaryView, iCalendar.iCalData.getSummary(), summaryLabel);
+            updateField(summaryView, iCalendar.getSummary(), summaryLabel);
         } else {
             summaryView.setVisibility(GONE);
             summaryLabel.setVisibility(GONE);
@@ -170,8 +175,8 @@ public class ICalendarReplyView extends ICalendarView implements View.OnClickLis
         updateField(acceptedView, accepted, acceptedLabel);
         updateField(declinedView, declined, declinedLabel);
         updateField(tentativeView, tentative, tentativeLabel);
-        updateField(locationView, iCalendar.iCalData.getLocation(), locationLabel);
-        updateField(dateTimeView, iCalendar.iCalData.getDateTime(), dateTimeLabel);
+        updateField(locationView, iCalendar.getLocation(), locationLabel);
+        updateField(dateTimeView, iCalendar.getDateTime(), dateTimeLabel);
 
     }
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
+import com.fsck.k9.ical.ICalData.ICalendarData;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
 
 public abstract class ICalendarView extends LinearLayout {
@@ -14,7 +15,7 @@ public abstract class ICalendarView extends LinearLayout {
 
     abstract public void setCallback(ICalendarViewCallback iCalendarCallback);
 
-    abstract public void setICalendar(ICalendarViewInfo iCalendar);
+    abstract public void setICalendar(ICalendarViewInfo viewInfo, ICalendarData iCalendar);
 
     abstract public void setShowSummary(boolean shouldShowSummary);
 }

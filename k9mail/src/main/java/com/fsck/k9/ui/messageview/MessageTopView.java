@@ -32,9 +32,6 @@ import com.fsck.k9.view.ThemeUtils;
 import com.fsck.k9.view.ToolableViewAnimator;
 import org.openintents.openpgp.OpenPgpError;
 
-import static com.fsck.k9.R.id.view;
-
-
 public class MessageTopView extends LinearLayout {
 
     public static final int PROGRESS_MAX = 1000;

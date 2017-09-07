@@ -14,6 +14,7 @@ import biweekly.property.Method;
 import biweekly.property.Organizer;
 import biweekly.property.RecurrenceRule;
 import com.fsck.k9.mail.Part;
+import timber.log.Timber;
 
 
 public class ICalData {
@@ -56,7 +57,7 @@ public class ICalData {
             if (iCal.getEvents().size() > 0) {
                 updateContentsFromEvent(iCal.getEvents().get(0));
             } else {
-                System.err.println("No events in iCal file");
+                Timber.w("No events in ICS file - other content is unsupported");
             }
         }
 

@@ -77,20 +77,20 @@ public class MessageViewInfoExtractor {
             throws MessagingException {
         Part rootPart;
         CryptoResultAnnotation cryptoResultAnnotation;
-        List<Part> extraParts;
+        List<Part> insecureParts;
 
         CryptoMessageParts cryptoMessageParts = MessageCryptoSplitter.split(message, annotations);
         if (cryptoMessageParts != null) {
             rootPart = cryptoMessageParts.contentPart;
             cryptoResultAnnotation = cryptoMessageParts.contentCryptoAnnotation;
-            extraParts = cryptoMessageParts.extraParts;
+            insecureParts = cryptoMessageParts.extraParts;
         } else {
             if (annotations != null && !annotations.isEmpty()) {
                 Timber.e("Got message annotations but no crypto root part!");
             }
             rootPart = message;
             cryptoResultAnnotation = null;
-            extraParts = null;
+            insecureParts = null;
         }
 
         List<AttachmentViewInfo> attachmentInfos = new ArrayList<>();
@@ -98,14 +98,13 @@ public class MessageViewInfoExtractor {
         ViewableExtractedText viewable = extractViewableAndAttachments(
                 Collections.singletonList(rootPart), attachmentInfos, iCalendarInfos);
 
-        List<AttachmentViewInfo> extraAttachmentInfos = new ArrayList<>();
+        List<AttachmentViewInfo> insecureAttachmentInfos = new ArrayList<>();
+        List<ICalendarViewInfo> insecureICalendarInfos = new ArrayList<>();
         String extraViewableText = null;
-
-        //TODO: What are extra parts
-        if (extraParts != null) {
+        
+        if (insecureParts != null) {
             ViewableExtractedText extraViewable =
-                    extractViewableAndAttachments(extraParts, extraAttachmentInfos,
-                            new ArrayList<ICalendarViewInfo>());
+                    extractViewableAndAttachments(insecureParts, insecureAttachmentInfos, insecureICalendarInfos);
             extraViewableText = extraViewable.text;
         }
 
@@ -118,7 +117,7 @@ public class MessageViewInfoExtractor {
         return MessageViewInfo.createWithExtractedContent(
                 message, isMessageIncomplete, rootPart, viewable.html,
                 attachmentInfos, iCalendarInfos,
-                cryptoResultAnnotation, attachmentResolver, extraViewableText, extraAttachmentInfos);
+                cryptoResultAnnotation, attachmentResolver, extraViewableText, insecureAttachmentInfos, insecureICalendarInfos);
     }
 
     private ViewableExtractedText extractViewableAndAttachments(List<Part> parts,

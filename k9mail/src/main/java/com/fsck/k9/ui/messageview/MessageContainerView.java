@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ContextMenu;
@@ -44,6 +45,7 @@ import com.fsck.k9.ui.messageview.ical.ICalendarReplyView;
 import com.fsck.k9.ui.messageview.ical.ICalendarRequestView;
 import com.fsck.k9.ui.messageview.ical.ICalendarView;
 import com.fsck.k9.ui.messageview.ical.ICalendarViewCallback;
+import com.fsck.k9.ui.messageview.ical.LockedICalendarView;
 import com.fsck.k9.view.MessageHeader.OnLayoutChangedListener;
 import com.fsck.k9.view.MessageWebView;
 import com.fsck.k9.view.MessageWebView.OnPageFinishedListener;
@@ -472,28 +474,9 @@ public class MessageContainerView extends LinearLayout implements OnLayoutChange
         if (messageViewInfo.iCalendarEvents != null) {
             for (ICalendarViewInfo iCalendarViewInfo : messageViewInfo.iCalendarEvents) {
                 for (ICalendarData iCalendarData : iCalendarViewInfo.iCalData.getCalendarData()) {
-                    ICalendarView view;
-                    switch (iCalendarData.getMethod().getValue()) {
-                        case METHOD_PUBLISH:
-                            view = (ICalendarPublishView) mInflater
-                                    .inflate(R.layout.message_view_ical_publish, mCalendars, false);
-                            break;
-                        case METHOD_REPLY:
-                            view = (ICalendarReplyView) mInflater
-                                    .inflate(R.layout.message_view_ical_reply, mCalendars, false);
-                            break;
-                        case METHOD_REQUEST:
-                            view = (ICalendarRequestView) mInflater
-                                    .inflate(R.layout.message_view_ical_request, mCalendars, false);
-                            break;
-                        case METHOD_COUNTER:
-                            view = (ICalendarCounterView) mInflater
-                                    .inflate(R.layout.message_view_ical_counter, mCalendars, false);
-                            break;
-                        default:
-                            Timber.i("Unhandled iCalendar method type:"
-                                    + iCalendarData.getMethod().getValue());
-                            continue;
+                    ICalendarView view = buildICalendarView(iCalendarData);
+                    if (view == null) {
+                        continue;
                     }
                     view.setCallback(iCalendarCallback);
                     view.setICalendar(iCalendarViewInfo, iCalendarData);
@@ -501,6 +484,41 @@ public class MessageContainerView extends LinearLayout implements OnLayoutChange
                     mCalendars.addView(view);
                 }
             }
+        }
+
+
+        if (messageViewInfo.extraICalendars != null) {
+            for (ICalendarViewInfo iCalendarViewInfo : messageViewInfo.extraICalendars) {
+                for (ICalendarData iCalendarData : iCalendarViewInfo.iCalData.getCalendarData()) {
+                    LockedICalendarView view = (LockedICalendarView) mInflater
+                            .inflate(R.layout.message_view_ical_locked, mCalendars, false);
+                    view.setCallback(iCalendarCallback);
+                    view.setICalendar(iCalendarViewInfo, iCalendarData);
+                    view.setShowSummary(subject == null || !subject.equals(iCalendarData.getSummary()));
+                    mCalendars.addView(view);
+                }
+            }
+        }
+    }
+
+    private @Nullable ICalendarView buildICalendarView(ICalendarData iCalendarData) {
+        switch (iCalendarData.getMethod().getValue()) {
+            case METHOD_PUBLISH:
+                return (ICalendarPublishView) mInflater
+                        .inflate(R.layout.message_view_ical_publish, mCalendars, false);
+            case METHOD_REPLY:
+                return (ICalendarReplyView) mInflater
+                        .inflate(R.layout.message_view_ical_reply, mCalendars, false);
+            case METHOD_REQUEST:
+                return (ICalendarRequestView) mInflater
+                        .inflate(R.layout.message_view_ical_request, mCalendars, false);
+            case METHOD_COUNTER:
+                return (ICalendarCounterView) mInflater
+                        .inflate(R.layout.message_view_ical_counter, mCalendars, false);
+            default:
+                Timber.i("Unhandled iCalendar method type:"
+                        + iCalendarData.getMethod().getValue());
+                return null;
         }
     }
 

@@ -17,14 +17,17 @@ public class MessageViewInfo {
     public final List<AttachmentViewInfo> attachments;
     public final String extraText;
     public final List<AttachmentViewInfo> extraAttachments;
+    public final List<ICalendarViewInfo> iCalendarEvents;
+    public final List<ICalendarViewInfo> extraICalendars;
 
 
     public MessageViewInfo(
             Message message, boolean isMessageIncomplete, Part rootPart,
             String text, List<AttachmentViewInfo> attachments,
+            List<ICalendarViewInfo> iCalendarEvents,
             CryptoResultAnnotation cryptoResultAnnotation,
             AttachmentResolver attachmentResolver,
-            String extraText, List<AttachmentViewInfo> extraAttachments) {
+            String extraText, List<AttachmentViewInfo> extraAttachments, List<ICalendarViewInfo> extraICalendars) {
         this.message = message;
         this.isMessageIncomplete = isMessageIncomplete;
         this.rootPart = rootPart;
@@ -32,28 +35,31 @@ public class MessageViewInfo {
         this.cryptoResultAnnotation = cryptoResultAnnotation;
         this.attachmentResolver = attachmentResolver;
         this.attachments = attachments;
+        this.iCalendarEvents = iCalendarEvents;
         this.extraText = extraText;
         this.extraAttachments = extraAttachments;
+        this.extraICalendars = extraICalendars;
     }
 
     public static MessageViewInfo createWithExtractedContent(
             Message message, boolean isMessageIncomplete, Part rootPart,
             String text, List<AttachmentViewInfo> attachments,
+            List<ICalendarViewInfo> iCalendarEvents,
             CryptoResultAnnotation cryptoResultAnnotation,
             AttachmentResolver attachmentResolver,
-            String extraText, List<AttachmentViewInfo> extraAttachments
+            String extraText, List<AttachmentViewInfo> extraAttachments, List<ICalendarViewInfo> extraICalendars
     ) {
         return new MessageViewInfo(
                 message, isMessageIncomplete, rootPart,
-                text, attachments,
+                text, attachments, iCalendarEvents,
                 cryptoResultAnnotation,
                 attachmentResolver,
-                extraText, extraAttachments
+                extraText, extraAttachments, extraICalendars
         );
     }
 
     public static MessageViewInfo createWithErrorState(Message message, boolean isMessageIncomplete) {
-        return new MessageViewInfo(message, isMessageIncomplete, null, null, null, null, null, null, null);
+        return new MessageViewInfo(message, isMessageIncomplete, null, null, null, null, null, null, null, null, null);
     }
 
 }

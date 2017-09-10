@@ -96,6 +96,7 @@ import com.fsck.k9.search.SqlQueryBuilder;
 
 import static com.fsck.k9.fragment.MLFProjectionInfo.ACCOUNT_UUID_COLUMN;
 import static com.fsck.k9.fragment.MLFProjectionInfo.FLAGGED_COLUMN;
+import static com.fsck.k9.fragment.MLFProjectionInfo.FOLDER_REMOTE_ID_COLUMN;
 import static com.fsck.k9.fragment.MLFProjectionInfo.FOLDER_NAME_COLUMN;
 import static com.fsck.k9.fragment.MLFProjectionInfo.ID_COLUMN;
 import static com.fsck.k9.fragment.MLFProjectionInfo.PROJECTION;
@@ -2320,9 +2321,9 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         Cursor cursor = (Cursor) adapter.getItem(position);
 
         String accountUuid = cursor.getString(ACCOUNT_UUID_COLUMN);
-        String folderName = cursor.getString(FOLDER_NAME_COLUMN);
+        String folderId = cursor.getString(FOLDER_REMOTE_ID_COLUMN);
         String messageUid = cursor.getString(UID_COLUMN);
-        return new MessageReference(accountUuid, folderName, messageUid, null);
+        return new MessageReference(accountUuid, folderId, messageUid, null);
     }
 
     private void openMessageAtPosition(int position) {
@@ -2585,7 +2586,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             boolean selectActive = activeMessage != null && activeMessage.getAccountUuid().equals(accountUuid);
 
             if (selectActive) {
-                query.append("(" + MessageColumns.UID + " = ? AND " + SpecialColumns.FOLDER_NAME + " = ?) OR (");
+                query.append("(" + MessageColumns.UID + " = ? AND " + SpecialColumns.FOLDER_REMOTE_ID + " = ?) OR (");
                 queryArgs.add(activeMessage.getUid());
                 queryArgs.add(activeMessage.getFolderId());
             }

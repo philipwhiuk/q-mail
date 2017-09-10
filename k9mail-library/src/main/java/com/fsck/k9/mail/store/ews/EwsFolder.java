@@ -1,8 +1,11 @@
 package com.fsck.k9.mail.store.ews;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +30,7 @@ import microsoft.exchange.webservices.data.core.service.item.Item;
 import microsoft.exchange.webservices.data.core.service.schema.ItemSchema;
 import microsoft.exchange.webservices.data.property.complex.FolderId;
 import microsoft.exchange.webservices.data.property.complex.ItemId;
+import microsoft.exchange.webservices.data.property.definition.PropertyDefinitionBase;
 import microsoft.exchange.webservices.data.search.FindItemsResults;
 import microsoft.exchange.webservices.data.search.FolderView;
 import microsoft.exchange.webservices.data.search.ItemView;
@@ -151,10 +155,11 @@ class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
     @Override
     public List<Message> getMessages(int start, int end, Date earliestDate, @Nullable MessageRetrievalListener<Message> listener)
             throws MessagingException {
+        
         ArrayList<Message> messages = new ArrayList<>();
         try {
             ItemView view = new ItemView(end - start, start);
-            view.getOrderBy().add(ItemSchema.DateTimeReceived, SortDirection.Descending);
+            view.getOrderBy().add(ItemSchema.DateTimeReceived, SortDirection.Ascending);
             view.setPropertySet(new PropertySet(BasePropertySet.IdOnly));
 
             FindItemsResults<Item> results = folder.findItems(view);
@@ -210,9 +215,37 @@ class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
     public void fetch(List<Message> messages, FetchProfile fp, MessageRetrievalListener<Message> listener)
             throws MessagingException {
         try {
+            if (messages.size() == 0) {
+                return;
+            }
+            ArrayList<PropertyDefinitionBase> requiredProperties = new ArrayList<>();
+            if (fp.contains(FetchProfile.Item.BODY) || fp.contains(FetchProfile.Item.BODY_SANE)
+                    || fp.contains(FetchProfile.Item.ENVELOPE)) {
+                requiredProperties.add(ItemSchema.MimeContent);
+            }
+
+            Map<String, EwsMessage> messageMap = new HashMap<>();
+            Map<String, Item> emails = new HashMap<>();
             for (Message message : messages) {
-                EmailMessage email = EmailMessage.bind(store.getService(), new ItemId(message.getUid()));
-                //TODO: FETCH Profiles
+                messageMap.put(message.getUid(), (EwsMessage) message);
+                emails.put(message.getUid(), EmailMessage.bind(store.getService(), new ItemId(message.getUid())));
+            }
+            PropertySet propertySet = new PropertySet(requiredProperties.iterator());
+            store.getService().loadPropertiesForItems(emails.values(), propertySet);
+
+            int messageNumber = 0;
+            for (Item emailMessage : emails.values()) {
+                String uid = emailMessage.getId().getUniqueId();
+                if (listener != null) {
+                    listener.messageStarted(uid, messageNumber++, messages.size());
+                }
+                InputStream bodyStream = new ByteArrayInputStream(emailMessage.getMimeContent().getContent());
+                EwsMessage message = messageMap.get(uid);
+                message.parse(bodyStream);
+
+                if (listener != null) {
+                    listener.messageFinished(message, messageNumber, messageMap.size());
+                }
             }
         } catch (Exception e) {
             throw new MessagingException("Failed to fetch messages", e);

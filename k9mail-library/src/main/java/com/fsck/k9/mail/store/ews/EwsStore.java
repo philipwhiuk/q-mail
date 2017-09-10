@@ -1,7 +1,7 @@
 package com.fsck.k9.mail.store.ews;
 
 import com.fsck.k9.mail.ConnectionSecurity;
-import com.fsck.k9.mail.Folder;
+import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.ssl.TrustedSocketFactory;
@@ -10,6 +10,8 @@ import com.fsck.k9.mail.store.StoreConfig;
 import microsoft.exchange.webservices.data.core.ExchangeService;
 import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion;
 import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
+import microsoft.exchange.webservices.data.core.exception.service.remote.ServiceResponseException;
+import microsoft.exchange.webservices.data.core.service.folder.Folder;
 import microsoft.exchange.webservices.data.credential.ExchangeCredentials;
 import microsoft.exchange.webservices.data.credential.WebCredentials;
 import microsoft.exchange.webservices.data.property.complex.FolderId;
@@ -90,20 +92,49 @@ public class EwsStore extends RemoteStore {
         return folder;
     }
 
-    private String getFolderIdFromName(String name) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
-    public List<? extends Folder> getPersonalNamespaces(boolean forceListAll) throws MessagingException {
+    public List<? extends com.fsck.k9.mail.Folder> getPersonalNamespaces(boolean forceListAll) throws MessagingException {
         folderCache.clear();
+        boolean foundInbox = false;
         try {
             FindFoldersResults results =
                     service.findFolders(WellKnownFolderName.MsgFolderRoot, new FolderView(Integer.MAX_VALUE));
             for (microsoft.exchange.webservices.data.core.service.folder.Folder folder: results.getFolders()) {
                 folderCache.put(folder.getId().getUniqueId(), new EwsFolder(this, folder));
             }
-
+            Folder inbox = Folder.bind(service, WellKnownFolderName.Inbox);
+            mStoreConfig.setInboxFolderId(inbox.getId().getUniqueId());
+            mStoreConfig.setAutoExpandFolderId(inbox.getId().getUniqueId());
+            try {
+                Folder drafts = Folder.bind(service, WellKnownFolderName.Drafts);
+                mStoreConfig.setDraftsFolderId(drafts.getId().getUniqueId());
+            } catch (ServiceResponseException e) {
+                mStoreConfig.setDraftsFolderId(K9MailLib.FOLDER_NONE);
+            }
+            try {
+                Folder sent = Folder.bind(service, WellKnownFolderName.SentItems);
+                mStoreConfig.setSentFolderId(sent.getId().getUniqueId());
+            } catch (ServiceResponseException e) {
+                mStoreConfig.setSentFolderId(K9MailLib.FOLDER_NONE);
+            }
+            try {
+                Folder deleted = Folder.bind(service, WellKnownFolderName.DeletedItems);
+                mStoreConfig.setTrashFolderId(deleted.getId().getUniqueId());
+            } catch (ServiceResponseException e) {
+                mStoreConfig.setTrashFolderId(K9MailLib.FOLDER_NONE);
+            }
+            try {
+                Folder junk = Folder.bind(service, WellKnownFolderName.JunkEmail);
+                mStoreConfig.setSpamFolderId(junk.getId().getUniqueId());
+            } catch (ServiceResponseException e) {
+                mStoreConfig.setSpamFolderId(K9MailLib.FOLDER_NONE);
+            }
+            try {
+                Folder archive = Folder.bind(service, WellKnownFolderName.ArchiveMsgFolderRoot);
+                mStoreConfig.setArchiveFolderId(archive.getId().getUniqueId());
+            } catch (ServiceResponseException e) {
+                mStoreConfig.setArchiveFolderId(K9MailLib.FOLDER_NONE);
+            }
         } catch (Exception e) {
             throw new MessagingException("Unable to find folders", e);
         }
@@ -115,9 +146,13 @@ public class EwsStore extends RemoteStore {
     @Override
     public void checkSettings() throws MessagingException {
         try {
-            service.findFolders(WellKnownFolderName.MsgFolderRoot, new FolderView(1));
+            getPersonalNamespaces(true);
         } catch (Exception e) {
-            throw new MessagingException(e.getMessage(), e);
+            Throwable cause = e;
+            while (cause.getCause() != null && cause.getCause().getMessage() != null) {
+                cause = cause.getCause();
+            }
+            throw new MessagingException(cause.getMessage(), e);
         }
     }
 

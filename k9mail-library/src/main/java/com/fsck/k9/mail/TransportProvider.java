@@ -6,6 +6,7 @@ import android.content.Context;
 import com.fsck.k9.mail.oauth.OAuth2TokenProvider;
 import com.fsck.k9.mail.ssl.DefaultTrustedSocketFactory;
 import com.fsck.k9.mail.store.StoreConfig;
+import com.fsck.k9.mail.transport.EwsTransport;
 import com.fsck.k9.mail.transport.smtp.SmtpTransport;
 import com.fsck.k9.mail.transport.WebDavTransport;
 
@@ -24,6 +25,8 @@ public class TransportProvider {
             return new SmtpTransport(storeConfig, new DefaultTrustedSocketFactory(context), oauth2TokenProvider);
         } else if (uri.startsWith("webdav")) {
             return new WebDavTransport(storeConfig);
+        } else if (uri.startsWith("ews")) {
+            return new EwsTransport(storeConfig, new DefaultTrustedSocketFactory(context));
         } else {
             throw new MessagingException("Unable to locate an applicable Transport for " + uri);
         }

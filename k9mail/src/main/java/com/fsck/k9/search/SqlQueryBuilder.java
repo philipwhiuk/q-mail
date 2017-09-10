@@ -109,6 +109,10 @@ public class SqlQueryBuilder {
         try {
             LocalStore localStore = account.getLocalStore();
             LocalFolder folder = localStore.getFolder(folderId);
+            if (folder == null) {
+                Timber.w("FolderID: " + folderId);
+                throw new RuntimeException();
+            }
             folder.open(Folder.OPEN_MODE_RO);
             folderDatabaseId = folder.getDatabaseId();
         } catch (MessagingException e) {

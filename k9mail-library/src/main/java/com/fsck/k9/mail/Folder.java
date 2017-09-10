@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import android.support.annotation.Nullable;
+
 import timber.log.Timber;
 
 
@@ -108,11 +110,12 @@ public abstract class Folder<T extends Message> {
      * @param start UID sequence start
      * @param end UID sequence end
      * @param earliestDate Date to start on
-     * @param listener Listener to notify as we download messages.
+     * @param listener Optional listener to notify as we download messages.
      * @return List of messages
      * @throws MessagingException on failure
      */
-    public abstract List<T> getMessages(int start, int end, Date earliestDate, MessageRetrievalListener<T> listener) throws MessagingException;
+    public abstract List<T> getMessages(int start, int end, Date earliestDate, @Nullable MessageRetrievalListener<T> listener)
+            throws MessagingException;
 
     public abstract boolean areMoreMessagesAvailable(int indexOfOldestMessage, Date earliestDate)
             throws IOException, MessagingException;

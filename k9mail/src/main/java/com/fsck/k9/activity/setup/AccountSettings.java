@@ -1032,7 +1032,7 @@ public class AccountSettings extends K9PreferenceActivity {
 
             int i = 1;
             for (Folder folder : folders) {
-                allFolderLabels[i] = folder.getId();
+                allFolderLabels[i] = folder.getName();
                 allFolderValues[i] = folder.getId();
                 i++;
             }

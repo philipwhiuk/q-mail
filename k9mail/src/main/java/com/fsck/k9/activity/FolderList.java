@@ -101,6 +101,15 @@ public class FolderList extends K9ListActivity {
     private TextView mActionBarSubTitle;
     private TextView mActionBarUnread;
 
+    //TODO: Rethink this
+    private final Handler handler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+            if(msg.arg1 == 1) {
+                Toast.makeText(getApplicationContext(), R.string.fetching_folders_failed, Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
     class FolderListHandler extends Handler {
 
         public void refreshTitle() {
@@ -707,7 +716,8 @@ public class FolderList extends K9ListActivity {
             public void listFoldersFailed(Account account, String message) {
                 if (account.equals(mAccount)) {
                     mHandler.progress(false);
-                    Toast.makeText(context, R.string.fetching_folders_failed, Toast.LENGTH_SHORT).show();
+                    android.os.Message msg = handler.obtainMessage();
+                    handler.sendMessage(msg);
                 }
                 super.listFoldersFailed(account, message);
             }

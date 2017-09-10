@@ -823,7 +823,6 @@ public class MessagingController {
                     Timber.d("SYNC: Expunging folder %s:%s", account.getDescription(), folderId);
                     remoteFolder.expunge();
                 }
-
             }
 
             notificationController.clearAuthenticationErrorNotification(account, true);

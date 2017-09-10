@@ -1,10 +1,13 @@
 package com.fsck.k9.mail.store.ews;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import android.support.annotation.Nullable;
 
 import com.fsck.k9.mail.FetchProfile;
 import com.fsck.k9.mail.Flag;
@@ -13,11 +16,22 @@ import com.fsck.k9.mail.MessageRetrievalListener;
 import com.fsck.k9.mail.MessagingException;
 
 import microsoft.exchange.webservices.data.core.ExchangeService;
+import microsoft.exchange.webservices.data.core.PropertySet;
+import microsoft.exchange.webservices.data.core.enumeration.property.BasePropertySet;
 import microsoft.exchange.webservices.data.core.enumeration.search.FolderTraversal;
+import microsoft.exchange.webservices.data.core.enumeration.search.SortDirection;
 import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
 import microsoft.exchange.webservices.data.core.service.folder.Folder;
+import microsoft.exchange.webservices.data.core.service.item.EmailMessage;
+import microsoft.exchange.webservices.data.core.service.item.Item;
+import microsoft.exchange.webservices.data.core.service.schema.ItemSchema;
 import microsoft.exchange.webservices.data.property.complex.FolderId;
+import microsoft.exchange.webservices.data.property.complex.ItemId;
+import microsoft.exchange.webservices.data.search.FindItemsResults;
 import microsoft.exchange.webservices.data.search.FolderView;
+import microsoft.exchange.webservices.data.search.ItemView;
+import timber.log.Timber;
+
 
 class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
 
@@ -25,6 +39,7 @@ class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
     private EwsStore store;
     private String displayName;
     private int messageCount;
+    private Folder folder;
 
     EwsFolder(EwsStore store, Folder folder)
             throws ServiceLocalException {
@@ -46,16 +61,23 @@ class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
     @Override
     public void open(int mode) throws MessagingException {
         messageCount = -1;
+        try {
+            folder = Folder.bind(store.getService(), folderId);
+            folder.getUnreadCount();
+            messageCount = folder.getTotalCount();
+        } catch (Exception e) {
+            throw new MessagingException("Unable to open folder", e);
+        }
     }
 
     @Override
     public void close() {
-        folderId = null;
+        folder = null;
     }
 
     @Override
     public boolean isOpen() {
-        return folderId != null;
+        return folder != null;
     }
 
     @Override
@@ -67,7 +89,6 @@ class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
     public boolean create(FolderType type) throws MessagingException {
         try {
             ExchangeService service = store.getService();
-
             service.createFolder(new Folder(service),
                     store.getRootFolderId());
         } catch (Exception e) {
@@ -106,7 +127,7 @@ class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
     @Override
     public int getUnreadMessageCount() throws MessagingException {
         try {
-            return Folder.bind(store.getService(), folderId).getUnreadCount();
+            return folder.getUnreadCount();
         } catch (Exception e) {
             throw new MessagingException("Unable to get message count", e);
         }
@@ -128,15 +149,41 @@ class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
     }
 
     @Override
-    public List<Message> getMessages(int start, int end, Date earliestDate, MessageRetrievalListener<Message> listener)
+    public List<Message> getMessages(int start, int end, Date earliestDate, @Nullable MessageRetrievalListener<Message> listener)
             throws MessagingException {
-        throw new UnsupportedOperationException();
+        ArrayList<Message> messages = new ArrayList<>();
+        try {
+            ItemView view = new ItemView(end - start, start);
+            view.getOrderBy().add(ItemSchema.DateTimeReceived, SortDirection.Descending);
+            view.setPropertySet(new PropertySet(BasePropertySet.IdOnly));
+
+            FindItemsResults<Item> results = folder.findItems(view);
+            List<Item> items = results.getItems();
+            int count = items.size();
+            for (int i = 0; i < items.size(); i++) {
+                String uid = items.get(i).getId().getUniqueId();
+                if (listener != null)
+                    listener.messageStarted(uid, i, count);
+                EwsMessage message = new EwsMessage(uid, this);
+                messages.add(message);
+                if (listener != null)
+                    listener.messageFinished(message, i, count);
+            }
+        } catch (Exception e) {
+            throw new MessagingException("Failed to fetch messages", e);
+        }
+        return messages;
     }
 
     @Override
     public boolean areMoreMessagesAvailable(int indexOfOldestMessage, Date earliestDate)
             throws IOException, MessagingException {
-        throw new UnsupportedOperationException();
+        try {
+            ItemView view = new ItemView(1, indexOfOldestMessage);
+            return folder.findItems(view).isMoreAvailable();
+        } catch (Exception e) {
+            throw new MessagingException("Failed to check for more messages", e);
+        }
     }
 
     @Override
@@ -162,7 +209,14 @@ class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
     @Override
     public void fetch(List<Message> messages, FetchProfile fp, MessageRetrievalListener<Message> listener)
             throws MessagingException {
-        throw new UnsupportedOperationException();
+        try {
+            for (Message message : messages) {
+                EmailMessage email = EmailMessage.bind(store.getService(), new ItemId(message.getUid()));
+                //TODO: FETCH Profiles
+            }
+        } catch (Exception e) {
+            throw new MessagingException("Failed to fetch messages", e);
+        }
     }
 
     @Override

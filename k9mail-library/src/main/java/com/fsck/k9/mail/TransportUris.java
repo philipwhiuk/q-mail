@@ -8,6 +8,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 import com.fsck.k9.mail.ServerSettings.Type;
+import com.fsck.k9.mail.store.ews.EwsStore;
 import com.fsck.k9.mail.store.webdav.WebDavStore;
 
 
@@ -26,6 +27,8 @@ public class TransportUris {
             return decodeSmtpUri(uri);
         } else if (uri.startsWith("webdav")) {
             return decodeWebDavUri(uri);
+        } else if (uri.startsWith("ews")) {
+            return decodeEwsUri(uri);
         } else {
             throw new IllegalArgumentException("Not a valid transport URI");
         }
@@ -44,6 +47,8 @@ public class TransportUris {
             return createSmtpUri(server);
         } else if (Type.WebDAV == server.type) {
             return createWebDavUri(server);
+        } else if (Type.EWS == server.type) {
+            return createEwsUri(server);
         } else {
             throw new IllegalArgumentException("Not a valid transport URI");
         }
@@ -209,6 +214,30 @@ public class TransportUris {
      */
     private static String createWebDavUri(ServerSettings server) {
         return WebDavStore.createUri(server);
+    }
+
+    /**
+     * Decodes a EWSTransport URI.
+     *
+     * <p>
+     * <b>Note:</b> Everything related to sending messages via EWS is handled by
+     * {@link EwsStore}. So the transport URI is the same as the store URI.
+     * </p>
+     */
+    private static ServerSettings decodeEwsUri(String uri) {
+        return EwsStore.decodeUri(uri);
+    }
+
+    /**
+     * Creates a EWSTransport URI.
+     *
+     * <p>
+     * <b>Note:</b> Everything related to sending messages via EWS is handled by
+     * {@link EwsStore}. So the transport URI is the same as the store URI.
+     * </p>
+     */
+    private static String createEwsUri(ServerSettings server) {
+        return EwsStore.createUri(server);
     }
 
     private static String encodeUtf8(String s) {

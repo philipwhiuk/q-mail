@@ -218,6 +218,7 @@ public class MessageViewInfoExtractorTest {
 
     @Test
     public void testTextPlusRfc822Message() throws MessagingException {
+        K9ActivityCommon.setLanguage(context, "en");
         Locale.setDefault(Locale.US);
         TimeZone.setDefault(TimeZone.getTimeZone("GMT+01:00"));
 

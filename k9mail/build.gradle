@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 if (!rootProject.optimizeForDevelopment) {
     apply from: '../gradle/plugins/checkstyle-android.gradle'
@@ -40,8 +41,10 @@ dependencies {
 
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
 
+    testCompile "org.jetbrains.kotlin:kotlin-stdlib-jre7:${kotlinVersion}"
     testCompile "org.robolectric:robolectric:${robolectricVersion}"
     testCompile "junit:junit:${junitVersion}"
+    testCompile "com.google.truth:truth:${truthVersion}"
     testCompile "org.mockito:mockito-core:${mockitoVersion}"
     testCompile "org.jdom:jdom2:2.0.6"
 }
@@ -54,8 +57,8 @@ android {
         applicationId "com.fsck.k9"
         testApplicationId "com.fsck.k9.tests"
 
-        versionCode 23500
-        versionName '5.300-SNAPSHOT'
+        versionCode 23501
+        versionName '5.301-SNAPSHOT'
 
         minSdkVersion 15
         targetSdkVersion 22

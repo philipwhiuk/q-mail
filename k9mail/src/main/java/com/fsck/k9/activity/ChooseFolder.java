@@ -4,7 +4,14 @@ package com.fsck.k9.activity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -42,6 +49,7 @@ public class ChooseFolder extends K9ListActivity {
     public static final String EXTRA_SHOW_CURRENT = "com.fsck.k9.ChooseFolder_showcurrent";
     public static final String EXTRA_SHOW_FOLDER_NONE = "com.fsck.k9.ChooseFolder_showOptionNone";
     public static final String EXTRA_SHOW_DISPLAYABLE_ONLY = "com.fsck.k9.ChooseFolder_showDisplayableOnly";
+    public static final String EXTRA_SHOW_AS_TREE_STRUCTURE = "com.fsck.k9.ChooseFolder_showAsTreeStructure";
 
 
     String mFolderId;
@@ -50,16 +58,34 @@ public class ChooseFolder extends K9ListActivity {
     MessageReference mMessageReference;
 
     private class FolderIdNamePair {
-        @NonNull String id;
+        @NonNull final String id;
         @NonNull String name;
+        final int level;
+        String paddedName;
 
-        private FolderIdNamePair(@NonNull String folderId, @NonNull String folderName) {
+        private FolderIdNamePair(@NonNull String folderId, @NonNull String folderName, int depthLevel) {
             id = folderId;
             name = folderName;
+            level = depthLevel;
+            updatePaddedName();
+        }
+
+        private void updatePaddedName() {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < level; i++) {
+                builder.append("    ");
+            }
+            builder.append(name);
+            paddedName = builder.toString();
+        }
+
+        void setName(String newName) {
+            name = newName;
+            updatePaddedName();
         }
 
         public String toString() {
-            return name;
+            return paddedName;
         }
 
         public boolean equals(Object o) {
@@ -78,6 +104,7 @@ public class ChooseFolder extends K9ListActivity {
     boolean mHideCurrentFolder = true;
     boolean mShowOptionNone = false;
     boolean mShowDisplayableOnly = false;
+    boolean mShowAsTreeStructure = false;
 
     /**
      * What folders to display.<br/>
@@ -123,6 +150,9 @@ public class ChooseFolder extends K9ListActivity {
         if (intent.getStringExtra(EXTRA_SHOW_DISPLAYABLE_ONLY) != null) {
             mShowDisplayableOnly = true;
         }
+        if (intent.getStringExtra(EXTRA_SHOW_AS_TREE_STRUCTURE) != null) {
+            mShowAsTreeStructure = true;
+        }
         if (mFolderId == null)
             mFolderId = "";
 
@@ -163,7 +193,7 @@ public class ChooseFolder extends K9ListActivity {
         });
     }
 
-    class ChooseFolderHandler extends Handler {
+    private class ChooseFolderHandler extends Handler {
         private static final int MSG_PROGRESS = 1;
         private static final int MSG_SET_SELECTED_FOLDER = 2;
 
@@ -188,7 +218,7 @@ public class ChooseFolder extends K9ListActivity {
             sendMessage(msg);
         }
 
-        public void setSelectedFolder(int position) {
+        void setSelectedFolder(int position) {
             android.os.Message msg = new android.os.Message();
             msg.what = MSG_SET_SELECTED_FOLDER;
             msg.arg1 = position;
@@ -297,20 +327,17 @@ public class ChooseFolder extends K9ListActivity {
                 return;
             }
             Account.FolderMode aMode = mMode;
-
-            List<FolderIdNamePair> newFolders = new ArrayList<>();
             List<FolderIdNamePair> topFolders = new ArrayList<>();
+            Map<String, String> folderMap = new HashMap<>();
 
             for (Folder folder : folders) {
                 String folderId = folder.getId();
                 String folderName = folder.getName();
 
                 // Inbox needs to be compared case-insensitively
-                if (mHideCurrentFolder && (folderId.equals(mFolderId) || (
+                boolean showNotShowInTopSection = mHideCurrentFolder && (folderId.equals(mFolderId) || (
                         mAccount.getInboxFolderId().equalsIgnoreCase(mFolderId) &&
-                        mAccount.getInboxFolderId().equalsIgnoreCase(folderId)))) {
-                    continue;
-                }
+                                mAccount.getInboxFolderId().equalsIgnoreCase(folderId)));
                 Folder.FolderClass fMode = folder.getDisplayClass();
 
                 if ((aMode == FolderMode.FIRST_CLASS &&
@@ -323,12 +350,16 @@ public class ChooseFolder extends K9ListActivity {
                     continue;
                 }
 
-                if (folder.isInTopGroup()) {
-                    topFolders.add(new FolderIdNamePair(folderId, folderName));
-                } else {
-                    newFolders.add(new FolderIdNamePair(folderId, folderName));
+                if (folder.isInTopGroup() && !showNotShowInTopSection) {
+                    topFolders.add(new FolderIdNamePair(folderId, folderName, 0));
                 }
+                folderMap.put(folder.getId(), folder.getName());
             }
+
+            SortedMap<String, SortedMap> folderOrdering = buildHierarchy(folders);
+
+            List<FolderIdNamePair> newFolders = new ArrayList<>();
+            generateFolderPairs(newFolders, folderMap, folderOrdering, 0);
 
             final Comparator<FolderIdNamePair> comparator = new Comparator<FolderIdNamePair>() {
                 @Override
@@ -339,13 +370,14 @@ public class ChooseFolder extends K9ListActivity {
             };
 
             Collections.sort(topFolders, comparator);
-            Collections.sort(newFolders, comparator);
+
+
 
             List<FolderIdNamePair> localFolders = new ArrayList<>(newFolders.size() +
                     topFolders.size() + ((mShowOptionNone) ? 1 : 0));
 
             if (mShowOptionNone) {
-                localFolders.add(new FolderIdNamePair(K9.FOLDER_NONE, K9.FOLDER_NONE));
+                localFolders.add(new FolderIdNamePair(K9.FOLDER_NONE, K9.FOLDER_NONE, 0));
             }
 
             localFolders.addAll(topFolders);
@@ -362,7 +394,7 @@ public class ChooseFolder extends K9ListActivity {
                 int position = 0;
                 for (FolderIdNamePair folderTuple : localFolders) {
                     if (mAccount.getInboxFolderId().equalsIgnoreCase(folderTuple.id)) {
-                        folderTuple.name = getString(R.string.special_mailbox_name_inbox);
+                        folderTuple.setName(getString(R.string.special_mailbox_name_inbox));
                         folderList.add(folderTuple);
                         mHeldInbox = folderTuple.id;
                     } else if (!K9.ERROR_FOLDER_ID.equals(folderTuple.id) &&
@@ -410,6 +442,35 @@ public class ChooseFolder extends K9ListActivity {
 
             if (selectedFolder != -1) {
                 mHandler.setSelectedFolder(selectedFolder);
+            }
+        }
+
+        private SortedMap<String, SortedMap> buildHierarchy(List<LocalFolder> folders) {
+            SortedMap<String, SortedMap> folderStructure = new TreeMap<>();
+            for (Folder folder: folders) {
+                if (folder.getParentId() == null || "".equals(folder.getParentId())) {
+                    folderStructure.put(folder.getId(), buildHierarchy(folder.getId(), folders));
+                }
+            }
+            return folderStructure;
+        }
+
+        private SortedMap<String, SortedMap> buildHierarchy(String parentId, List<LocalFolder> folders) {
+            SortedMap<String, SortedMap> folderStructure = new TreeMap<>();
+            for (Folder folder: folders) {
+                if (parentId.equals(folder.getParentId())) {
+                    folderStructure.put(folder.getId(), buildHierarchy(folder.getId(), folders));
+                }
+            }
+            return folderStructure;
+        }
+
+        private void generateFolderPairs(List<FolderIdNamePair> folders, Map<String, String> folderNames,
+                SortedMap<String, SortedMap> folderOrdering, int level) {
+            for (Entry<String, SortedMap> entry : folderOrdering.entrySet()) {
+                folders.add(new FolderIdNamePair(entry.getKey(), folderNames.get(entry.getKey()), level));
+                //noinspection unchecked Recursive data structure, not possible.
+                generateFolderPairs(folders, folderNames, (SortedMap<String, SortedMap>) entry.getValue(), level+1);
             }
         }
     };

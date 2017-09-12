@@ -51,6 +51,11 @@ class Pop3Folder extends Folder<Pop3Message> {
     }
 
     @Override
+    public String getParentId() {
+        return null;
+    }
+
+    @Override
     public synchronized void open(int mode) throws MessagingException {
         if (isOpen()) {
             return;
@@ -118,6 +123,11 @@ class Pop3Folder extends Folder<Pop3Message> {
     @Override
     public boolean exists() throws MessagingException {
         return name.equalsIgnoreCase(pop3Store.getConfig().getInboxFolderId());
+    }
+
+    @Override
+    public boolean canHaveSubFolders() {
+        return false;
     }
 
     @Override

@@ -370,6 +370,11 @@ public class MessageTest {
         String id;
 
         @Override
+        public String getParentId() {
+            return null;
+        }
+
+        @Override
         public void open(int mode) throws MessagingException {}
 
         @Override
@@ -392,6 +397,11 @@ public class MessageTest {
 
         @Override
         public boolean exists() throws MessagingException {
+            return false;
+        }
+
+        @Override
+        public boolean canHaveSubFolders() {
             return false;
         }
 

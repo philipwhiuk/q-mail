@@ -42,16 +42,14 @@ import static com.fsck.k9.mail.helper.UrlEncodingHelper.encodeUtf8;
  * A folder is referenced by an ID and a name.
  *
  * In the ImapFolder, the ID is the path including / separators.
- * The name is also currently the full path including separators.
+ * The name the final portion of the path.
  *
  * ID: "Folder/Subfolder"
- * Name: "Folder/Subfolder"
+ * Name: "Subfolder"
  *
- * TODO: Implement child-parent relationship for folders and make the name just the child name (e.g. Subfolder)
-
  */
 class WebDavFolder extends Folder<WebDavMessage> {
-    private String name;
+    private String id;
     private String folderUrl;
     private boolean mIsOpen = false;
     private int messageCount = 0;
@@ -62,16 +60,16 @@ class WebDavFolder extends Folder<WebDavMessage> {
         return store;
     }
 
-    public WebDavFolder(WebDavStore nStore, String name) {
+    public WebDavFolder(WebDavStore nStore, String id) {
         super();
         store = nStore;
-        this.name = name;
+        this.id = id;
         buildFolderUrl();
     }
 
     private void buildFolderUrl() {
         String encodedName;
-        String[] urlParts = this.name.split("/");
+        String[] urlParts = this.id.split("/");
         String url = "";
         for (int i = 0, count = urlParts.length; i < count; i++) {
             if (i != 0) {
@@ -207,17 +205,28 @@ class WebDavFolder extends Folder<WebDavMessage> {
 
     @Override
     public String getId() {
-        return this.name;
+        return this.id;
+    }
+
+    @Override
+    public String getParentId() {
+        return id.split("/", 2)[0];
     }
 
     @Override
     public String getName() {
-        return this.name;
+        String[] idParts = id.split("/");
+        return idParts[idParts.length-1];
     }
 
     @Override
     public boolean exists() {
         return true;
+    }
+
+    @Override
+    public boolean canHaveSubFolders() {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override

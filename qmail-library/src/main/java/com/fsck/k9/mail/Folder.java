@@ -255,6 +255,6 @@ public abstract class Folder<T extends Message> {
 
     public List<T> search(String queryString, final Set<Flag> requiredFlags, final Set<Flag> forbiddenFlags)
         throws MessagingException {
-        throw new MessagingException("K-9 does not support searches on this folder type");
+        throw new MessagingException("Search not supported on this folder type");
     }
 }

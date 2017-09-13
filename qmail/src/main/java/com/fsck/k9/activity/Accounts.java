@@ -1277,7 +1277,10 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
 
     private static String[][] USED_LIBRARIES = new String[][] {
             new String[] {"Android Support Library", "https://developer.android.com/topic/libraries/support-library/index.html"},
+            new String[] {"biweekly", "https://github.com/mangstadt/biweekly"},
             new String[] {"ckChangeLog", "https://github.com/cketti/ckChangeLog"},
+            new String[] {"ews-android-api", "https://github.com/alipov/ews-android-api"},
+            new String[] {"ews-java-api", "https://github.com/OfficeDev/ews-java-api"},
             new String[] {"Commons IO", "http://commons.apache.org/io/"},
             new String[] {"Glide", "https://github.com/bumptech/glide"},
             new String[] {"HoloColorPicker", "https://github.com/LarsWerkman/HoloColorPicker"},
@@ -1287,6 +1290,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
             new String[] {"Mime4j", "http://james.apache.org/mime4j/"},
             new String[] {"Moshi", "https://github.com/square/moshi"},
             new String[] {"Okio", "https://github.com/square/okio"},
+            new String[] {"Open PGP API", "https://github.com/open-keychain/openpgp-api"},
             new String[] {"SafeContentResolver", "https://github.com/cketti/SafeContentResolver"},
             new String[] {"ShowcaseView", "https://github.com/amlcurran/ShowcaseView"},
             new String[] {"Timber", "https://github.com/JakeWharton/timber"},
@@ -1318,7 +1322,8 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                               getString(R.string.app_revision_url) +
                               "</a>"))
         .append("</p><hr/><p>")
-        .append(String.format(getString(R.string.app_copyright_fmt), Integer.toString(year), Integer.toString(year)))
+        .append(String.format(getString(R.string.app_copyright_fmt),
+                Integer.toString(year), Integer.toString(year), Integer.toString(year)))
         .append("</p><hr/><p>")
         .append(getString(R.string.app_license))
         .append("</p><hr/><p>");

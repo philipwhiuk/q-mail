@@ -40,6 +40,8 @@ Features required for 1.0.0 Release
 
 * Material Design
 * Target SDK: API 26
+* Removal of Apache HTTP Legacy
+* Update of libraries to latest versions
 * Microsoft Exchange Support
 * Google Mail labels support
 * Autocrypt Support

@@ -64,7 +64,11 @@ public class ICalData {
         private void updateContentsFromEvent(VEvent event) {
             summary = event.getSummary().getValue();
             organizer = event.getOrganizer();
-            location = event.getLocation().getValue();
+            if (event.getLocation() != null) {
+                location = event.getLocation().getValue();
+            } else {
+                location = "";
+            }
 
             if(event.getDateStart() != null) {
                 date = event.getDateStart().getValue().getTime();

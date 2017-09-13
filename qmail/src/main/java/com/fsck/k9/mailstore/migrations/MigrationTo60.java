@@ -39,7 +39,7 @@ class MigrationTo60 {
     private static final String PENDING_COMMAND_EXPUNGE = "com.fsck.k9.MessagingController.expunge";
 
 
-    public static void migratePendingCommands(SQLiteDatabase db) {
+    static void migratePendingCommands(SQLiteDatabase db) {
         List<PendingCommand> pendingCommands = new ArrayList<>();
 
         if (columnExists(db, "pending_commands", "arguments")) {
@@ -252,7 +252,7 @@ class MigrationTo60 {
 
     @VisibleForTesting
     static class OldPendingCommand {
-        public String command;
-        public String[] arguments;
+        String command;
+        String[] arguments;
     }
 }

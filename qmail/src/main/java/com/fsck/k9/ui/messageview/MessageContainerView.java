@@ -516,8 +516,7 @@ public class MessageContainerView extends LinearLayout implements OnLayoutChange
                 return (ICalendarCounterView) mInflater
                         .inflate(R.layout.message_view_ical_counter, mCalendars, false);
             default:
-                Timber.i("Unhandled iCalendar method type:"
-                        + iCalendarData.getMethod().getValue());
+                Timber.w("Unhandled iCalendar method type: %s", iCalendarData.getMethod().getValue());
                 return null;
         }
     }

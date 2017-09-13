@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
 
     <RelativeLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:padding="14dp">
 
         <TextView
@@ -25,7 +26,8 @@
             android:layout_width="wrap_content"
             android:layout_below="@+id/textView"
             android:layout_marginTop="8dp"
-            android:id="@+id/layout_bullet_1">
+            android:id="@+id/layout_bullet_1"
+            tools:ignore="UseCompoundDrawables">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -33,7 +35,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_margin="6dp"
                 style="@style/NegativeBulletPoint"
-                />
+                android:contentDescription="@string/apg" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -51,7 +53,7 @@
             android:layout_below="@+id/layout_bullet_1"
             android:layout_alignLeft="@+id/layout_bullet_1"
             android:layout_alignStart="@+id/layout_bullet_1"
-            >
+            tools:ignore="UseCompoundDrawables">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -59,7 +61,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_margin="6dp"
                 style="@style/NegativeBulletPoint"
-                />
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:layout_width="wrap_content"

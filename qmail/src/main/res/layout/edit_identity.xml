@@ -7,7 +7,7 @@
     android:scrollbarStyle="outsideInset">
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
         <TextView
             android:text="@string/edit_identity_description_label"
@@ -17,7 +17,7 @@
             android:textColor="?android:attr/textColorPrimary" />
         <EditText
             android:id="@+id/description"
-            android:singleLine="true"
+            android:maxLines="1"
             android:layout_height="wrap_content"
             android:layout_width="fill_parent" 
             android:hint="@string/edit_identity_description_hint"
@@ -30,7 +30,7 @@
             android:textColor="?android:attr/textColorPrimary" />
         <EditText
             android:id="@+id/name"
-            android:singleLine="true"
+            android:maxLines="1"
             android:layout_height="wrap_content"
             android:layout_width="fill_parent" 
             android:hint="@string/edit_identity_name_hint"
@@ -44,7 +44,7 @@
             />
         <EditText
             android:id="@+id/email"
-            android:singleLine="true"
+            android:maxLines="1"
             android:layout_height="wrap_content"
             android:layout_width="fill_parent" 
             android:hint="@string/edit_identity_email_hint"
@@ -58,7 +58,7 @@
             />
         <EditText
             android:id="@+id/reply_to"
-            android:singleLine="true"
+            android:maxLines="1"
             android:layout_height="wrap_content"
             android:layout_width="fill_parent" 
             android:hint="@string/edit_identity_reply_to_hint"
@@ -95,7 +95,6 @@
 	            android:textColor="?android:attr/textColorPrimary" />
 	        <EditText
 	            android:id="@+id/signature"
-	            android:singleLine="false"
 	            android:layout_height="wrap_content"
 	            android:layout_width="fill_parent" 
 	            android:hint="@string/edit_identity_signature_hint"/>

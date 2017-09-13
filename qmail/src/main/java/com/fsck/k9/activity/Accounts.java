@@ -161,7 +161,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
             if (mUnreadMessageCount == 0) {
                 mActionBarUnread.setVisibility(View.GONE);
             } else {
-                mActionBarUnread.setText(String.format("%d", mUnreadMessageCount));
+                mActionBarUnread.setText(String.format(Locale.ROOT, "%d", mUnreadMessageCount));
                 mActionBarUnread.setVisibility(View.VISIBLE);
             }
 
@@ -1855,7 +1855,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                     }
                 });
             } else {
-                Timber.e("Unhandled account type:" + account.getClass().getName());
+                Timber.e("Unhandled account type: %s", account.getClass().getName());
             }
 
             return view;

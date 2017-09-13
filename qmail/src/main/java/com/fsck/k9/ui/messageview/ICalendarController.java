@@ -10,7 +10,6 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.fsck.k9.Account;
@@ -19,14 +18,12 @@ import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.cache.TemporaryAttachmentStore;
 import com.fsck.k9.controller.MessagingController;
-import com.fsck.k9.controller.MessagingListener;
 import com.fsck.k9.controller.SimpleMessagingListener;
 import com.fsck.k9.helper.FileHelper;
 import com.fsck.k9.ical.ICalParser;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.MimeUtility;
-import com.fsck.k9.mailstore.AttachmentViewInfo;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
 import com.fsck.k9.mailstore.LocalMessage;
 import com.fsck.k9.mailstore.LocalPart;
@@ -318,7 +315,7 @@ public class ICalendarController {
             try {
                 context.startActivity(intent);
             } catch (ActivityNotFoundException e) {
-                Log.e(K9.LOG_TAG, "Could not display calendar", e);
+                Timber.e(e, "Could not display calendar");
 
                 String message = context.getString(R.string.message_view_no_viewer, ICalParser.MIME_TYPE);
                 displayMessageToUser(message);
@@ -339,7 +336,7 @@ public class ICalendarController {
                 File directory = params[0];
                 return saveICalendarWithUniqueFileName(directory);
             } catch (IOException e) {
-                Timber.e(K9.LOG_TAG, "Error saving attachment", e);
+                Timber.e(e, "Error saving attachment");
                 return null;
             }
         }

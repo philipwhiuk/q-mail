@@ -24,6 +24,7 @@ import com.fsck.k9.mailstore.LocalMessage;
 import com.fsck.k9.mailstore.LocalPart;
 import com.fsck.k9.provider.AttachmentProvider;
 import com.fsck.k9.provider.DecryptedFileProvider;
+import timber.log.Timber;
 
 import java.io.File;
 import java.io.IOException;
@@ -169,7 +170,7 @@ public class ICalendarInfoExtractor {
             uri = DecryptedFileProvider.getUriForProvidedFile(
                     context, file, decryptedTempFileBody.getEncoding(), mimeType);
         } catch (IOException e) {
-            Log.e(K9.LOG_TAG, "Decrypted temp file (no longer?) exists!", e);
+            Timber.e(e, "Decrypted temp file (no longer?) exists!");
             uri = null;
         }
         return uri;

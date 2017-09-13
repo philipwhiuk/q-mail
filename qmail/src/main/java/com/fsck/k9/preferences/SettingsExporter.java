@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -36,8 +37,9 @@ import org.xmlpull.v1.XmlSerializer;
 
 
 public class SettingsExporter {
-    public static final String EXPORT_FILENAME_PREFIX = "k9_settings_export";
-    public static final String EXPORT_FILENAME_SUFFIX = "k9s";
+    //TODO: K-9 vs Q-MAIL format
+    private static final String EXPORT_FILENAME_PREFIX = "k9_settings_export";
+    private static final String EXPORT_FILENAME_SUFFIX = "k9s";
 
     /**
      * File format version number.
@@ -92,6 +94,9 @@ public class SettingsExporter {
             }
 
             File file = FileHelper.createUniqueFile(dir, generateDatedExportFileName());
+            if (file == null) {
+                throw new Exception("Unable to create export file");
+            }
             String filename = file.getAbsolutePath();
             os = new FileOutputStream(filename);
 
@@ -540,7 +545,7 @@ public class SettingsExporter {
 
     public static String generateDatedExportFileName() {
         Calendar now = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
 
         return String.format("%s_%s.%s", EXPORT_FILENAME_PREFIX, dateFormat.format(now.getTime()), EXPORT_FILENAME_SUFFIX);
     }

@@ -57,12 +57,12 @@ fi
 #    k9mail-release-unsigned.apk "$SIGNING_NAME"
 
 # cleaning up
-cd $PROJECT_HOME/q-mail/build/outputs/apk
-if [ ! -f q-mail-debug.apk ]; then
-    echo 'q-mail-debug.apk was not found'
+cd $PROJECT_HOME/qmail/build/outputs/apk
+if [ ! -f qmail-debug.apk ]; then
+    echo 'qmail-debug.apk was not found'
     exit -3
 fi
 echo 'Build script ended successfully'
 echo -n 'apk is available at: '
-echo "$PROJECT_HOME/k9mail/build/outputs/apk/q-mail-debug.apk"
+echo "$PROJECT_HOME/k9mail/build/outputs/apk/qmail-debug.apk"
 exit 0

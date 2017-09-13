@@ -117,7 +117,11 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="status_syncing_blocked">Syncing blocked</string>
     <string name="status_syncing_off">Syncing disabled</string>
 
-    <string name="actionbar_selected"><xliff:g id="selection_count">%d</xliff:g> selected</string>
+
+    <plurals name="actionbar_selected">
+        <item quantity="one"><xliff:g id="selection_count">%d</xliff:g> selected</item>
+        <item quantity="other"><xliff:g id="selection_count">%d</xliff:g> selected</item>
+    </plurals>
     <string name="next_action">Next</string>
     <string name="previous_action">Previous</string>
     <!-- Used to confirm acceptance of dialog boxes, warnings, errors, etc. -->
@@ -197,8 +201,9 @@ Please submit bug reports, contribute new features and ask questions at
 
     <string name="status_loading_more_failed">Retry loading more messages</string>
 
-    <string name="load_more_messages_fmt">Load up
-    to <xliff:g id="messages_to_load">%d</xliff:g> more</string>
+    <plurals name="load_more_messages_fmt">
+        <item quantity="other">Load up to <xliff:g id="messages_to_load">%d</xliff:g> more</item>
+    </plurals>
 
     <string name="abbrev_gigabytes">GB</string>
     <string name="abbrev_megabytes">MB</string>
@@ -216,8 +221,12 @@ Please submit bug reports, contribute new features and ask questions at
         <item quantity="one"><xliff:g id="new_message_count">%d</xliff:g> new message</item>
         <item quantity="other"><xliff:g id="new_message_count">%d</xliff:g> new messages</item>
     </plurals>
-    <string name="notification_new_one_account_fmt"><xliff:g id="unread_message_count">%d</xliff:g> Unread (<xliff:g id="account">%s</xliff:g>)</string>
-    <string name="notification_additional_messages">+ <xliff:g id="additional_messages">%1$d</xliff:g> more on <xliff:g id="account">%2$s</xliff:g></string>
+    <plurals name="notification_new_one_account_fmt">
+        <item quantity="other"><xliff:g id="unread_message_count">%d</xliff:g> Unread (<xliff:g id="account">%s</xliff:g>)</item>
+    </plurals>
+    <plurals name="notification_additional_messages">
+        <item quantity="other">+ <xliff:g id="additional_messages">%1$d</xliff:g> more on <xliff:g id="account">%2$s</xliff:g></item>
+    </plurals>
 
     <string name="notification_action_reply">Reply</string>
     <string name="notification_action_mark_as_read">Mark Read</string>
@@ -1277,20 +1286,34 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="ical_location_label">Where:</string>
     <string name="ical_time_label">When:</string>
 
-    <string name="ical_recurrence_yearly">Repeats every year</string>
-    <string name="ical_recurrence_yearly_interval">Repeats every <xliff:g id="interval">%1$d</xliff:g> years</string>
-    <string name="ical_recurrence_monthly">Repeats every month</string>
-    <string name="ical_recurrence_monthly_interval">Repeats every <xliff:g id="interval">%1$d</xliff:g> months</string>
-    <string name="ical_recurrence_weekly">Repeats every week</string>
-    <string name="ical_recurrence_weekly_interval">Repeats every <xliff:g id="interval">%1$d</xliff:g> weeks</string>
-    <string name="ical_recurrence_daily">Repeats every day</string>
-    <string name="ical_recurrence_daily_interval">Repeats every <xliff:g id="interval">%1$d</xliff:g> days</string>
-    <string name="ical_recurrence_hourly">Repeats every hour</string>
-    <string name="ical_recurrence_hourly_interval">Repeats every <xliff:g id="interval">%1$d</xliff:g> hours</string>
-    <string name="ical_recurrence_minutely">Repeats every minute</string>
-    <string name="ical_recurrence_minutely_interval">Repeats every <xliff:g id="interval">%1$d</xliff:g> minutes</string>
-    <string name="ical_recurrence_secondly">Repeats every second</string>
-    <string name="ical_recurrence_secondly_interval">Repeats every <xliff:g id="interval">%1$d</xliff:g> seconds</string>
+    <plurals name="ical_recurrence_yearly">
+        <item quantity="one">Repeats every year</item>
+        <item quantity="other">Repeats every <xliff:g id="interval">%1$d</xliff:g> years</item>
+    </plurals>
+    <plurals name="ical_recurrence_monthly">
+        <item quantity="one">Repeats every month</item>
+        <item quantity="other">Repeats every <xliff:g id="interval">%1$d</xliff:g> months</item>
+    </plurals>
+    <plurals name="ical_recurrence_weekly">
+        <item quantity="one">Repeats every week</item>
+        <item quantity="other">Repeats every <xliff:g id="interval">%1$d</xliff:g> weeks</item>
+    </plurals>
+    <plurals name="ical_recurrence_daily">
+        <item quantity="one">Repeats every day</item>
+        <item quantity="other">Repeats every <xliff:g id="interval">%1$d</xliff:g> days</item>
+    </plurals>
+    <plurals name="ical_recurrence_hourly">
+        <item quantity="one">Repeats every hour</item>
+        <item quantity="other">Repeats every <xliff:g id="interval">%1$d</xliff:g> hours</item>
+    </plurals>
+    <plurals name="ical_recurrence_minute">
+        <item quantity="one">Repeats every minute</item>
+        <item quantity="other">Repeats every <xliff:g id="interval">%1$d</xliff:g> minutes</item>
+    </plurals>
+    <plurals name="ical_recurrence_second">
+        <item quantity="one">Repeats every second</item>
+        <item quantity="other">Repeats every <xliff:g id="interval">%1$d</xliff:g> seconds</item>
+    </plurals>
 
     <string name="message_view_status_calendar_not_saved">Unable to save attachment to SD card.</string>
     <string name="dialog_calendar_progress_title">Downloading calendar</string>

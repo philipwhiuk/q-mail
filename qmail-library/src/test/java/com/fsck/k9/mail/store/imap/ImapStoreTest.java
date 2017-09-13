@@ -249,8 +249,26 @@ public class ImapStoreTest {
     }
 
     @Test
-    public void getParentId_shouldReturnCorrectValue() {
-        String result = imapStore.getParentId("Folder.SubFolder");
+    public void getParentId_shouldReturnCorrectValue() throws IOException, MessagingException {
+        ImapConnection imapConnection = mock(ImapConnection.class);
+        when(imapConnection.hasCapability(Capabilities.SPECIAL_USE)).thenReturn(true);
+        List<ImapResponse> imapResponses = Arrays.asList(
+                createImapResponse("* LIST (\\HasNoChildren) \"/\" \"INBOX\""),
+                createImapResponse("* LIST (\\Noselect \\HasChildren) \"/\" \"[Gmail]\""),
+                createImapResponse("* LIST (\\HasNoChildren \\All) \"/\" \"[Gmail]/All Mail\""),
+                createImapResponse("* LIST (\\HasNoChildren \\Drafts) \"/\" \"[Gmail]/Drafts\""),
+                createImapResponse("* LIST (\\HasNoChildren \\Important) \"/\" \"[Gmail]/Important\""),
+                createImapResponse("* LIST (\\HasNoChildren \\Sent) \"/\" \"[Gmail]/Sent Mail\""),
+                createImapResponse("* LIST (\\HasNoChildren \\Junk) \"/\" \"[Gmail]/Spam\""),
+                createImapResponse("* LIST (\\HasNoChildren \\Flagged) \"/\" \"[Gmail]/Starred\""),
+                createImapResponse("* LIST (\\HasNoChildren \\Trash) \"/\" \"[Gmail]/Trash\""),
+                createImapResponse("5 OK Success")
+        );
+        when(imapConnection.executeSimpleCommand("LIST (SPECIAL-USE) \"\" \"*\"")).thenReturn(imapResponses);
+
+        imapStore.autoconfigureFolders(imapConnection);
+
+        String result = imapStore.getParentId("Folder/SubFolder");
 
         assertEquals("Folder", result);
     }

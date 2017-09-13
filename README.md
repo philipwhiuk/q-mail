@@ -1,69 +1,66 @@
-# K-9 Mail
-[![Build Status](https://k9mail.ci.cloudbees.com/job/master/badge/icon)](https://k9mail.ci.cloudbees.com/job/master/)
-[![Join the chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/k9mail/k-9)
+# Q-Mail
+[![Build Status](https://qmail.ci.cloudbees.com/job/master/badge/icon)](https://qmail.ci.cloudbees.com/job/master/)
 
-K-9 Mail is an open-source email client for Android.
+Q-Mail is an open-source email client for Android.
 
 
 ## Download
 
-K-9 Mail can be downloaded from a couple of sources:
+Q-Mail can be downloaded from a couple of sources:
 
-- [Google Play](https://play.google.com/store/apps/details?id=com.fsck.k9)
-- [F-Droid](https://f-droid.org/repository/browse/?fdid=com.fsck.k9)
-- [Github Releases](https://github.com/k9mail/k-9/releases)
-- [Amazon Appstore for Android](http://www.amazon.com/dp/B004JK61K0)
+- [Google Play](https://play.google.com/store/apps/details?id=com.whiuk.philip.qmail)
+- [Github Releases](https://github.com/philipwhiuk/q-mail/releases)
 
-You might also be interested in becoming a [tester](https://play.google.com/apps/testing/com.fsck.k9) to get an early look at new versions.
+You might also be interested in becoming a [tester](https://play.google.com/apps/testing/com.whiuk.philip.qmail) to get an early look at new versions.
 
 
 ## Release Notes
 
 Check out the [Release Notes](https://github.com/k9mail/k-9/wiki/ReleaseNotes) to find out what changed
-in each version of K-9 Mail.
+in each version of Q-Mail.
 
 
 ## Need Help?
 
 If the app is not behaving like it should, you might find these resources helpful:
 
-- [User Manual](https://k9mail.github.io/documentation.html)
-- [Frequently Asked Questions](https://k9mail.github.io/documentation/faq.html)
-- [Support Forum/Mailing List](http://groups.google.com/group/k-9-mail)
-- [Google+ Community](https://plus.google.com/communities/109228641058741937099)
-
+- [User Manual](https://philipwhiuk.github.io/qmail/documentation.html)
+- [Frequently Asked Questions](https://philipwhiuk.github.io/qmail/documentation/faq.html)
 
 ## Translations
 
 Interested in helping to translate K-9 Mail? Contribute here:
 
-https://www.transifex.com/projects/p/k9mail/
+https://www.transifex.com/projects/p/qmail/
 
+## Roadmap
+
+Features required for 1.0.0 Release
+
+* Material Design
+* Target SDK: API 26
+* Microsoft Exchange Support
+* Google Mail labels support
 
 ## Design
 
-A re-design is underway. You can contribute, view updates and access design files here: 
-
-https://github.com/k9mail/k-9-design
-
+A re-design is underway. You can contribute, view updates and access design files in the design folder: 
 
 ## Contributing
 
-Please fork this repository and contribute back using [pull requests](https://github.com/k9mail/k-9/pulls).
+Please fork this repository and contribute back using [pull requests](https://github.com/philipwhiuk/q-mail/pulls).
 
 Any contributions, large or small, major features, bug fixes, unit/integration tests are welcomed and appreciated
-but will be thoroughly reviewed and discussed.
-Please make sure you read the [Code Style Guidelines](https://github.com/k9mail/k-9/wiki/CodeStyle).
+but will be thoroughly reviewed and discussed. Please make sure you read the [Code Style Guidelines](https://github.com/philipwhiuk/q-mail/CODESTYLE.md).
+
+## Ecosystem
+
+As a fork of the K-9 project, we try to upstream features to them. We also look at other forks. When working out what features to adopt our focus is on deployed status and usage as well as forward-thinking, security and reliability.
 
 
 ## Communication
 
-Aside from discussing changes in [pull requests](https://github.com/k9mail/k-9/pulls) and
-[issues](https://github.com/k9mail/k-9/issues) we use the following communication services:
-
-- IRC chat, [#k-9 on the Freenode network](http://webchat.freenode.net/?channels=%23k-9)
-- [Gitter](https://gitter.im/k9mail/k-9)
-- [Developer mailing list](https://groups.google.com/forum/#!forum/k-9-dev)
+All communication is done via GitHub - issues will be flaired appropriately.
 
 
 ## License
@@ -80,10 +77,9 @@ Aside from discussing changes in [pull requests](https://github.com/k9mail/k-9/p
     See the License for the specific language governing permissions and
     limitations under the License.
 
+## Dependencies
 
-## Sponsors
-
-CloudBees' [FOSS program](https://www.cloudbees.com/resources/foss) allows us to use their DEV@cloud service for free.
-
-![built on DEV@cloud](https://www.cloudbees.com/sites/default/files/styles/large/public/Button-Built-on-CB-1.png)
+* ews-android-api (MIT License)
+* ews-java-api (MIT License)
+* biweekly (BSD 2-clause License)
 

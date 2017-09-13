@@ -51,6 +51,9 @@ Features required for 1.0.0 Release
 * Removal of 'errors' folder
 * Log file generation
 * Easy in-app bug reporting (stacktrace to GitHub).
+* Checkstyle Build Failures
+* FindBugs build failures
+* Lint build failures
 
 ## Versioning
 

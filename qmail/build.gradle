@@ -54,8 +54,8 @@ android {
     buildToolsVersion androidBuildToolsVersion
 
     defaultConfig {
-        applicationId "com.fsck.k9"
-        testApplicationId "com.fsck.k9.tests"
+        applicationId "com.whiuk.philip.qmail"
+        testApplicationId "com.whiuk.philip.qmail.tests"
 
         versionCode 1
         versionName '0.1-SNAPSHOT'

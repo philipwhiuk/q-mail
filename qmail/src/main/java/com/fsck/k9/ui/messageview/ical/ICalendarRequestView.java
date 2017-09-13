@@ -160,7 +160,7 @@ public class ICalendarRequestView extends ICalendarView implements View.OnClickL
         if(iCalendar.getRecurrenceRule() == null) {
             mRecurrenceView.setVisibility(GONE);
         } else {
-            mRecurrenceView.setText(buildRule(iCalendar.getRecurrenceRule().getValue(), getResources()));
+            mRecurrenceView.setText(ICalendarUtils.buildRule(iCalendar.getRecurrenceRule().getValue(), getResources()));
         }
         
         if (showSummary) {
@@ -177,54 +177,6 @@ public class ICalendarRequestView extends ICalendarView implements View.OnClickL
         updateField(locationView, iCalendar.getLocation(), locationLabel);
         updateField(dateTimeView, iCalendar.getDateTime(), dateTimeLabel);
 
-    }
-
-    private String buildRule(Recurrence recurrence, Resources resources) {
-        Frequency frequency = recurrence.getFrequency();
-        switch (frequency) {
-            case SECONDLY:
-                if (recurrence.getInterval() == 1) {
-                    return resources.getString(R.string.ical_recurrence_secondly);
-                } else {
-                    return resources.getString(R.string.ical_recurrence_secondly_interval, recurrence.getInterval());
-                }
-            case MINUTELY:
-                if (recurrence.getInterval() == 1) {
-                    return resources.getString(R.string.ical_recurrence_minutely);
-                } else {
-                    return resources.getString(R.string.ical_recurrence_minutely_interval, recurrence.getInterval());
-                }
-            case HOURLY:
-                if (recurrence.getInterval() == 1) { return resources.getString(R.string.ical_recurrence_hourly);
-                } else {
-                    return resources.getString(R.string.ical_recurrence_hourly_interval, recurrence.getInterval());
-                }
-            case DAILY:
-                if (recurrence.getInterval() == 1) {
-                    return resources.getString(R.string.ical_recurrence_daily);
-                } else {
-                    return resources.getString(R.string.ical_recurrence_daily_interval, recurrence.getInterval());
-                }
-            case WEEKLY:
-                if (recurrence.getInterval() == 1) {
-                    return resources.getString(R.string.ical_recurrence_weekly);
-                } else {
-                    return resources.getString(R.string.ical_recurrence_weekly_interval, recurrence.getInterval());
-                }
-            case MONTHLY:
-                if (recurrence.getInterval() == 1) {
-                    return resources.getString(R.string.ical_recurrence_monthly);
-                } else {
-                    return resources.getString(R.string.ical_recurrence_monthly_interval, recurrence.getInterval());
-                }
-            case YEARLY:
-                if (recurrence.getInterval() == 1) {
-                    return resources.getString(R.string.ical_recurrence_yearly);
-                } else {
-                    return resources.getString(R.string.ical_recurrence_yearly_interval, recurrence.getInterval());
-                }
-        }
-        return "";
     }
 
     //TODO: Copied from MessageHeader - consider static method

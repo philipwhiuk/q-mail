@@ -88,7 +88,7 @@ class DeviceNotifications extends BaseNotifications {
     private NotificationCompat.Builder createSimpleSummaryNotification(Account account, int unreadMessageCount) {
         String accountName = controller.getAccountName(account);
         CharSequence newMailText = context.getString(R.string.notification_new_title);
-        String unreadMessageCountText = context.getString(R.string.notification_new_one_account_fmt,
+        String unreadMessageCountText = context.getResources().getQuantityString(R.plurals.notification_new_one_account_fmt,
                 unreadMessageCount, accountName);
 
         int notificationId = NotificationIds.getNewMailSummaryNotificationId(account);
@@ -127,7 +127,7 @@ class DeviceNotifications extends BaseNotifications {
         String title = context.getResources().getQuantityString(R.plurals.notification_new_messages_title,
                 newMessagesCount, newMessagesCount);
         String summary = (notificationData.hasSummaryOverflowMessages()) ?
-                context.getString(R.string.notification_additional_messages,
+                context.getResources().getQuantityString(R.plurals.notification_additional_messages,
                         notificationData.getSummaryOverflowMessagesCount(), accountName) :
                 accountName;
         String groupKey = NotificationGroupKeys.getGroupKey(account);

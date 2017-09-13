@@ -1328,7 +1328,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             handler.remoteSearchFinished();
             extraSearchResults = extraResults;
             if (extraResults != null && extraResults.size() > 0) {
-                handler.updateFooter(String.format(context.getString(R.string.load_more_messages_fmt), maxResults));
+                handler.updateFooter(context.getResources().getQuantityString(R.plurals.load_more_messages_fmt, maxResults));
             } else {
                 handler.updateFooter(null);
             }
@@ -1430,7 +1430,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
                     if (account.getDisplayCount() == 0) {
                         message = context.getString(R.string.message_list_load_more_messages_action);
                     } else {
-                        message = String.format(context.getString(R.string.load_more_messages_fmt),
+                        message = context.getResources().getQuantityString(R.plurals.load_more_messages_fmt,
                                 account.getDisplayCount());
                     }
                 } else {
@@ -1568,7 +1568,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
     }
 
     private void updateActionModeTitle() {
-        actionMode.setTitle(String.format(getString(R.string.actionbar_selected), selectedCount));
+        actionMode.setTitle(context.getResources().getQuantityString(R.plurals.actionbar_selected, selectedCount));
     }
 
     private void computeSelectAllVisibility() {

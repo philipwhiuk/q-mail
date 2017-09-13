@@ -27,7 +27,7 @@
 
             <EditText
                 android:id="@+id/account_server"
-                android:singleLine="true"
+                android:maxLines="1"
                 android:inputType="textUri"
                 android:layout_height="wrap_content"
                 android:layout_width="fill_parent"

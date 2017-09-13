@@ -159,7 +159,7 @@ public class ICalendarPublishView extends ICalendarView implements View.OnClickL
         if(iCalendar.getRecurrenceRule() == null) {
             mRecurrenceView.setVisibility(GONE);
         } else {
-            mRecurrenceView.setText(buildRule(iCalendar.getRecurrenceRule().getValue(), getResources()));
+            mRecurrenceView.setText(ICalendarUtils.buildRule(iCalendar.getRecurrenceRule().getValue(), getResources()));
         }
         
         if (showSummary) {
@@ -176,20 +176,6 @@ public class ICalendarPublishView extends ICalendarView implements View.OnClickL
         updateField(locationView, iCalendar.getLocation(), locationLabel);
         updateField(dateTimeView, iCalendar.getDateTime(), dateTimeLabel);
 
-    }
-
-    private String buildRule(Recurrence recurrence, Resources resources) {
-        Frequency frequency = recurrence.getFrequency();
-        switch (frequency) {
-            case SECONDLY: return resources.getString(R.string.ical_recurrence_secondly);
-            case MINUTELY: return resources.getString(R.string.ical_recurrence_minutely);
-            case HOURLY: return resources.getString(R.string.ical_recurrence_hourly);
-            case DAILY: return resources.getString(R.string.ical_recurrence_daily);
-            case WEEKLY: return resources.getString(R.string.ical_recurrence_weekly);
-            case MONTHLY: return resources.getString(R.string.ical_recurrence_monthly);
-            case YEARLY: return resources.getString(R.string.ical_recurrence_yearly);
-        }
-        return "";
     }
 
     //TODO: Copied from MessageHeader - consider static method

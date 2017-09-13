@@ -1,11 +1,13 @@
 package com.fsck.k9.fragment;
 
+import java.util.Locale;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
@@ -43,8 +45,7 @@ import static com.fsck.k9.fragment.MLFProjectionInfo.THREAD_COUNT_COLUMN;
 import static com.fsck.k9.fragment.MLFProjectionInfo.TO_LIST_COLUMN;
 import static com.fsck.k9.fragment.MLFProjectionInfo.UID_COLUMN;
 
-
-public class MessageListAdapter extends CursorAdapter {
+class MessageListAdapter extends CursorAdapter {
 
     private final MessageListFragment fragment;
     private Drawable mAttachmentIcon;
@@ -56,10 +57,14 @@ public class MessageListAdapter extends CursorAdapter {
     MessageListAdapter(MessageListFragment fragment) {
         super(fragment.getActivity(), null, 0);
         this.fragment = fragment;
-        mAttachmentIcon = fragment.getResources().getDrawable(R.drawable.ic_email_attachment_small);
-        mAnsweredIcon = fragment.getResources().getDrawable(R.drawable.ic_email_answered_small);
-        mForwardedIcon = fragment.getResources().getDrawable(R.drawable.ic_email_forwarded_small);
-        mForwardedAnsweredIcon = fragment.getResources().getDrawable(R.drawable.ic_email_forwarded_answered_small);
+        mAttachmentIcon =
+                ContextCompat.getDrawable(fragment.getActivity(), R.drawable.ic_email_attachment_small);
+        mAnsweredIcon =
+                ContextCompat.getDrawable(fragment.getActivity(), R.drawable.ic_email_answered_small);
+        mForwardedIcon =
+                ContextCompat.getDrawable(fragment.getActivity(), R.drawable.ic_email_forwarded_small);
+        mForwardedAnsweredIcon =
+                ContextCompat.getDrawable(fragment.getActivity(), R.drawable.ic_email_forwarded_answered_small);
     }
 
     private String recipientSigil(boolean toMe, boolean ccMe) {
@@ -341,7 +346,7 @@ public class MessageListAdapter extends CursorAdapter {
 
     private void updateWithThreadCount(MessageViewHolder holder, int threadCount) {
         if (threadCount > 1) {
-            holder.threadCount.setText(String.format("%d", threadCount));
+            holder.threadCount.setText(String.format(Locale.ROOT, "%d", threadCount));
             holder.threadCount.setVisibility(View.VISIBLE);
         } else {
             holder.threadCount.setVisibility(View.GONE);

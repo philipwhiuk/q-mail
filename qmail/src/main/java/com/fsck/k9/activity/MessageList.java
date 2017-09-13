@@ -3,6 +3,7 @@ package com.fsck.k9.activity;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
@@ -1179,7 +1180,7 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
             mActionBarUnread.setVisibility(View.GONE);
         } else {
             mActionBarUnread.setVisibility(View.VISIBLE);
-            mActionBarUnread.setText(String.format("%d", unread));
+            mActionBarUnread.setText(String.format(Locale.ROOT, "%d", unread));
         }
     }
 

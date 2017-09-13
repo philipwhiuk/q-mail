@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1803,10 +1804,10 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
             Integer unreadMessageCount = null;
             if (stats != null) {
                 unreadMessageCount = stats.unreadMessageCount;
-                holder.newMessageCount.setText(String.format("%d", unreadMessageCount));
+                holder.newMessageCount.setText(String.format(Locale.ROOT, "%d", unreadMessageCount));
                 holder.newMessageCountWrapper.setVisibility(unreadMessageCount > 0 ? View.VISIBLE : View.GONE);
 
-                holder.flaggedMessageCount.setText(String.format("%d", stats.flaggedMessageCount));
+                holder.flaggedMessageCount.setText(String.format(Locale.ROOT, "%d", stats.flaggedMessageCount));
                 holder.flaggedMessageCountWrapper.setVisibility(K9.messageListStars() && stats.flaggedMessageCount > 0 ? View.VISIBLE : View.GONE);
 
                 holder.flaggedMessageCountWrapper.setOnClickListener(createFlaggedSearchListener(account));

@@ -1,6 +1,6 @@
 package com.fsck.k9.ical;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,7 +13,6 @@ import biweekly.property.Attendee;
 import biweekly.property.Method;
 import biweekly.property.Organizer;
 import biweekly.property.RecurrenceRule;
-import com.fsck.k9.mail.Part;
 import timber.log.Timber;
 
 
@@ -45,10 +44,12 @@ public class ICalData {
         private Attendee[] accepted;
         private Attendee[] confirmed;
         private Attendee[] declined;
+        private Attendee[] inProcess;
         private Attendee[] needsAction;
         private Attendee[] sent;
         private Attendee[] tentative;
         private Attendee[] delegated;
+        private Attendee[] completed;
         private RecurrenceRule recurrenceRule;
 
         private ICalendarData(ICalendar iCal) {
@@ -131,10 +132,12 @@ public class ICalData {
             accepted = acceptedList.toArray(new Attendee[acceptedList.size()]);
             confirmed = confirmedList.toArray(new Attendee[confirmedList.size()]);
             declined = declinedList.toArray(new Attendee[declinedList.size()]);
+            inProcess = declinedList.toArray(new Attendee[inProcessList.size()]);
             needsAction = needsActionList.toArray(new Attendee[needsActionList.size()]);
             sent = sentList.toArray(new Attendee[sentList.size()]);
             delegated = delegatedList.toArray(new Attendee[delegatedList.size()]);
             tentative = tentativeList.toArray(new Attendee[tentativeList.size()]);
+            completed = tentativeList.toArray(new Attendee[completedList.size()]);
 
         }
 
@@ -159,7 +162,7 @@ public class ICalData {
         }
 
         public String getDateTime() {
-            return new SimpleDateFormat().format(new Date(date));
+            return DateFormat.getDateTimeInstance().format(new Date(date));
         }
 
         public String getLocation() {
@@ -184,6 +187,14 @@ public class ICalData {
 
         public Attendee[] getDeclined() {
             return declined;
+        }
+
+        public Attendee[] getInProcess() {
+            return inProcess;
+        }
+
+        public Attendee[] getCompleted() {
+            return completed;
         }
 
         public Attendee[] getNeedsAction() {

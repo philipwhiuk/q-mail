@@ -4,7 +4,7 @@
 # the project. It has been tested with Debian 8
 
 USERNAME=$USER
-SIGNING_NAME='k-9'
+SIGNING_NAME='q-mail'
 SDK_VERSION='r24.3.3'
 SDK_DIR=$HOME/android-sdk
 
@@ -57,12 +57,12 @@ fi
 #    k9mail-release-unsigned.apk "$SIGNING_NAME"
 
 # cleaning up
-cd $PROJECT_HOME/k9mail/build/outputs/apk
-if [ ! -f k9mail-debug.apk ]; then
-    echo 'k9mail-debug.apk was not found'
+cd $PROJECT_HOME/q-mail/build/outputs/apk
+if [ ! -f q-mail-debug.apk ]; then
+    echo 'q-mail-debug.apk was not found'
     exit -3
 fi
 echo 'Build script ended successfully'
 echo -n 'apk is available at: '
-echo "$PROJECT_HOME/k9mail/build/outputs/apk/k9mail-debug.apk"
+echo "$PROJECT_HOME/k9mail/build/outputs/apk/q-mail-debug.apk"
 exit 0

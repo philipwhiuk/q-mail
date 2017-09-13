@@ -1,8 +1,7 @@
 # Q-Mail
-[![Build Status](https://qmail.ci.cloudbees.com/job/master/badge/icon)](https://qmail.ci.cloudbees.com/job/master/)
+[![Build Status](https://philipwhiuk.ci.cloudbees.com/job/master/badge/icon)](https://philipwhiuk.ci.cloudbees.com/job/master/)
 
 Q-Mail is an open-source email client for Android.
-
 
 ## Download
 
@@ -11,7 +10,9 @@ Q-Mail can be downloaded from a couple of sources:
 - [Google Play](https://play.google.com/store/apps/details?id=com.whiuk.philip.qmail)
 - [Github Releases](https://github.com/philipwhiuk/q-mail/releases)
 
-You might also be interested in becoming a [tester](https://play.google.com/apps/testing/com.whiuk.philip.qmail) to get an early look at new versions.
+You might also be interested in becoming a 
+[tester](https://play.google.com/apps/testing/com.whiuk.philip.qmail) 
+to get an early look at new versions.
 
 
 ## Release Notes
@@ -41,10 +42,21 @@ Features required for 1.0.0 Release
 * Target SDK: API 26
 * Microsoft Exchange Support
 * Google Mail labels support
+* Autocrypt Support
+* Full OpenPGP and PGP/MIME support
+* S/MIME support
+* ICS support (read and reply)
+* Removal of 'errors' folder
+* Log file generation
+* Easy in-app bug reporting (stacktrace to GitHub).
+
+## Versioning
+
+Q-Mail uses semantic versioning (major, minor, patch).
 
 ## Design
 
-A re-design is underway. You can contribute, view updates and access design files in the design folder: 
+A re-design is underway. The aim is to provide a Material interface suitable for modern smartphones.
 
 ## Contributing
 
@@ -55,7 +67,11 @@ but will be thoroughly reviewed and discussed. Please make sure you read the [Co
 
 ## Ecosystem
 
-As a fork of the K-9 project, we try to upstream features to them. We also look at other forks. When working out what features to adopt our focus is on deployed status and usage as well as forward-thinking, security and reliability.
+As a fork of the K-9 project, we try to upstream features to them. We also look at other forks. 
+When working out what features to adopt our focus is on deployed status and usage as well as 
+forward-thinking, security and reliability.
+
+We also try and keep migration between K-9 and Q-Mail as easy as possible.
 
 
 ## Communication
@@ -82,4 +98,5 @@ All communication is done via GitHub - issues will be flaired appropriately.
 * ews-android-api (MIT License)
 * ews-java-api (MIT License)
 * biweekly (BSD 2-clause License)
-
+* openpgp-api-lib (Apache Version 2.0)
+* smime-api-lib (Apache Version 2.0)

@@ -1,7 +1,7 @@
 
 package com.fsck.k9.mail.transport;
 
-import com.fsck.k9.mail.K9HttpClient.K9HttpClientFactory;
+import com.fsck.k9.mail.QMailHttpClient.QMailHttpClientFactory;
 import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
@@ -16,7 +16,7 @@ public class WebDavTransport extends Transport {
     private WebDavStore store;
 
     public WebDavTransport(StoreConfig storeConfig) throws MessagingException {
-        store = new WebDavStore(storeConfig, new K9HttpClientFactory());
+        store = new WebDavStore(storeConfig, new QMailHttpClientFactory());
 
         if (K9MailLib.isDebug())
             Timber.d(">>> New WebDavTransport creation complete");

@@ -25,6 +25,8 @@ dependencies {
     compile "com.jakewharton.timber:timber:${timberVersion}"
     compile files('libs/ews-android-api.jar')
     compile 'joda-time:joda-time:2.8'
+    compile group: 'com.github.rwitzel.streamflyer', name: 'streamflyer-core', version: '1.2.0'
+
     provided 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
 
     androidTestCompile 'com.android.support.test:runner:0.5'

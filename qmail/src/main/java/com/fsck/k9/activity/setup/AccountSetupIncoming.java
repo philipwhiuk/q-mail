@@ -213,6 +213,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                     break;
                 case WebDAV:
                     onCreateWebDAV(settings);
+                    break;
                 case EWS:
                     onCreateEws(settings, savedInstanceState);
                     break;

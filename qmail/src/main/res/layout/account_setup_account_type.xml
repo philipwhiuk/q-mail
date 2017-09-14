@@ -34,6 +34,15 @@
         android:padding="10dip"
         />
     <Button
+        android:id="@+id/ews"
+        android:text="@string/account_setup_account_type_ews_action"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:minWidth="@dimen/button_minWidth"
+        android:layout_gravity="center_horizontal"
+        android:padding="10dip"
+        />
+    <Button
         android:id="@+id/webdav"
         android:text="@string/account_setup_account_type_webdav_action"
         android:layout_height="wrap_content"

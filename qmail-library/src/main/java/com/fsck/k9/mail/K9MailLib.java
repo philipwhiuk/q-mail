@@ -7,6 +7,11 @@ public class K9MailLib {
     private K9MailLib() {
     }
 
+    /**
+     * For use when defining that no folder is selected
+     */
+    public static final String FOLDER_NONE = "-NONE-";
+
     public static final int PUSH_WAKE_LOCK_TIMEOUT = 60000;
     public static final String IDENTITY_HEADER = "X-K9mail-Identity";
 

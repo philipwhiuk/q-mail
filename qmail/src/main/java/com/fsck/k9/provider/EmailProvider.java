@@ -127,6 +127,7 @@ public class EmailProvider extends ContentProvider {
         String THREAD_COUNT = "thread_count";
 
         String FOLDER_NAME = "name";
+        String FOLDER_REMOTE_ID = "remoteId";
         String INTEGRATE = "integrate";
     }
 

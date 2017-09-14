@@ -30,8 +30,8 @@ public final class MLFProjectionInfo {
             ThreadColumns.ROOT,
             SpecialColumns.ACCOUNT_UUID,
             SpecialColumns.FOLDER_NAME,
-
             SpecialColumns.THREAD_COUNT,
+            SpecialColumns.FOLDER_REMOTE_ID
     };
 
     static final int ID_COLUMN = 0;
@@ -54,6 +54,7 @@ public final class MLFProjectionInfo {
     static final int ACCOUNT_UUID_COLUMN = 17;
     static final int FOLDER_NAME_COLUMN = 18;
     static final int THREAD_COUNT_COLUMN = 19;
+    static final int FOLDER_REMOTE_ID_COLUMN = 20;
 
     static final String[] PROJECTION = Arrays.copyOf(THREADED_PROJECTION,
             THREAD_COUNT_COLUMN);

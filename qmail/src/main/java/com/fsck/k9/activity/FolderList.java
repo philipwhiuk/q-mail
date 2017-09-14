@@ -114,6 +114,14 @@ public class FolderList extends K9ListActivity {
      * and notifying the adapter that the folders have been loaded
      */
     private class FolderListHandler extends Handler {
+        //TODO: Rethink this
+        private final Handler handler = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                if(msg.arg1 == 1) {
+                    Toast.makeText(getApplicationContext(), R.string.fetching_folders_failed, Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
 
         void refreshTitle() {
             runOnUiThread(new Runnable() {
@@ -749,7 +757,8 @@ public class FolderList extends K9ListActivity {
             public void listFoldersFailed(Account account, String message) {
                 if (account.equals(mAccount)) {
                     mHandler.progress(false);
-                    Toast.makeText(getApplicationContext(), R.string.fetching_folders_failed, Toast.LENGTH_SHORT).show();
+                    android.os.Message msg = handler.obtainMessage();
+                    handler.sendMessage(msg);
                 }
                 super.listFoldersFailed(account, message);
             }

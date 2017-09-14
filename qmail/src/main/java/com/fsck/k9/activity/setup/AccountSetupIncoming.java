@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.FolderMode;
+import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.account.AccountCreator;
@@ -44,11 +45,15 @@ import com.fsck.k9.mail.ServerSettings.Type;
 import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.TransportUris;
 import com.fsck.k9.mail.store.RemoteStore;
+import com.fsck.k9.mail.store.ews.EwsStore;
+import com.fsck.k9.mail.store.ews.EwsStoreSettings;
 import com.fsck.k9.mail.store.imap.ImapStoreSettings;
 import com.fsck.k9.mail.store.webdav.WebDavStoreSettings;
 import com.fsck.k9.service.MailService;
 import com.fsck.k9.view.ClientCertificateSpinner;
 import com.fsck.k9.view.ClientCertificateSpinner.OnClientCertificateChangedListener;
+import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion;
+import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
 import timber.log.Timber;
 
 public class AccountSetupIncoming extends K9Activity implements OnClickListener {
@@ -56,6 +61,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private static final String EXTRA_MAKE_DEFAULT = "makeDefault";
     private static final String STATE_SECURITY_TYPE_POSITION = "stateSecurityTypePosition";
     private static final String STATE_AUTH_TYPE_POSITION = "authTypePosition";
+    private static final String STATE_EXCHANGE_VERSION_POSITION = "exchangeVersionPosition";
 
     private Type mStoreType;
     private EditText mUsernameView;
@@ -84,6 +90,10 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private CheckBox mSubscribedFoldersOnly;
     private AuthTypeAdapter mAuthTypeAdapter;
     private ConnectionSecurity[] mConnectionSecurityChoices = ConnectionSecurity.values();
+    private TextView serverLabelView;
+    private Spinner mExchangeVersionView;
+    private int mCurrentExchangeVersionViewPosition;
+    private EditText mExchangePathView;
 
     public static void actionIncomingSettings(Activity context, Account account, boolean makeDefault) {
         Intent i = new Intent(context, AccountSetupIncoming.class);
@@ -113,7 +123,7 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
         mClientCertificateSpinner = (ClientCertificateSpinner)findViewById(R.id.account_client_certificate_spinner);
         mClientCertificateLabelView = (TextView)findViewById(R.id.account_client_certificate_label);
         mPasswordLabelView = (TextView)findViewById(R.id.account_password_label);
-        TextView serverLabelView = (TextView) findViewById(R.id.account_server_label);
+        serverLabelView = (TextView) findViewById(R.id.account_server_label);
         mServerView = (EditText)findViewById(R.id.account_server);
         mPortView = (EditText)findViewById(R.id.account_port);
         mSecurityTypeView = (Spinner)findViewById(R.id.account_security_type);
@@ -128,6 +138,8 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
         mCompressionWifi = (CheckBox)findViewById(R.id.compression_wifi);
         mCompressionOther = (CheckBox)findViewById(R.id.compression_other);
         mSubscribedFoldersOnly = (CheckBox)findViewById(R.id.subscribed_folders_only);
+        mExchangeVersionView = (Spinner)findViewById(R.id.account_exchange_version);
+        mExchangePathView = (EditText)findViewById(R.id.exchange_path);
 
         mNextButton.setOnClickListener(this);
 
@@ -191,63 +203,21 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
             }
 
             mStoreType = settings.type;
-            if (Type.POP3 == settings.type) {
-                serverLabelView.setText(R.string.account_setup_incoming_pop_server_label);
-                findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
-                findViewById(R.id.webdav_advanced_header).setVisibility(View.GONE);
-                findViewById(R.id.webdav_mailbox_alias_section).setVisibility(View.GONE);
-                findViewById(R.id.webdav_owa_path_section).setVisibility(View.GONE);
-                findViewById(R.id.webdav_auth_path_section).setVisibility(View.GONE);
-                findViewById(R.id.compression_section).setVisibility(View.GONE);
-                findViewById(R.id.compression_label).setVisibility(View.GONE);
-                mSubscribedFoldersOnly.setVisibility(View.GONE);
-            } else if (Type.IMAP == settings.type) {
-                serverLabelView.setText(R.string.account_setup_incoming_imap_server_label);
 
-                ImapStoreSettings imapSettings = (ImapStoreSettings) settings;
-
-                mImapAutoDetectNamespaceView.setChecked(imapSettings.autoDetectNamespace);
-                if (imapSettings.pathPrefix != null) {
-                    mImapPathPrefixView.setText(imapSettings.pathPrefix);
-                }
-
-                findViewById(R.id.webdav_advanced_header).setVisibility(View.GONE);
-                findViewById(R.id.webdav_mailbox_alias_section).setVisibility(View.GONE);
-                findViewById(R.id.webdav_owa_path_section).setVisibility(View.GONE);
-                findViewById(R.id.webdav_auth_path_section).setVisibility(View.GONE);
-
-                if (!editSettings) {
-                    findViewById(R.id.imap_folder_setup_section).setVisibility(View.GONE);
-                }
-            } else if (Type.WebDAV == settings.type) {
-                serverLabelView.setText(R.string.account_setup_incoming_webdav_server_label);
-                mConnectionSecurityChoices = new ConnectionSecurity[] {
-                        ConnectionSecurity.NONE,
-                        ConnectionSecurity.SSL_TLS_REQUIRED };
-
-                // Hide the unnecessary fields
-                findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
-                findViewById(R.id.account_auth_type_label).setVisibility(View.GONE);
-                findViewById(R.id.account_auth_type).setVisibility(View.GONE);
-                findViewById(R.id.compression_section).setVisibility(View.GONE);
-                findViewById(R.id.compression_label).setVisibility(View.GONE);
-                mSubscribedFoldersOnly.setVisibility(View.GONE);
-
-                WebDavStoreSettings webDavSettings = (WebDavStoreSettings) settings;
-
-                if (webDavSettings.path != null) {
-                    mWebdavPathPrefixView.setText(webDavSettings.path);
-                }
-
-                if (webDavSettings.authPath != null) {
-                    mWebdavAuthPathView.setText(webDavSettings.authPath);
-                }
-
-                if (webDavSettings.mailboxPath != null) {
-                    mWebdavMailboxPathView.setText(webDavSettings.mailboxPath);
-                }
-            } else {
-                throw new Exception("Unknown account type: " + mAccount.getStoreUri());
+            switch (settings.type) {
+                case POP3:
+                    onCreatePop3();
+                    break;
+                case IMAP:
+                    onCreateImap(settings, editSettings);
+                    break;
+                case WebDAV:
+                    onCreateWebDAV(settings);
+                case EWS:
+                    onCreateEws(settings, savedInstanceState);
+                    break;
+                default:
+                    throw new Exception("Unknown account type: " + mAccount.getStoreUri());
             }
 
             if (!editSettings) {
@@ -297,6 +267,116 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
         } catch (Exception e) {
             failure(e);
         }
+    }
+
+    private void onCreatePop3() {
+        serverLabelView.setText(R.string.account_setup_incoming_pop_server_label);
+        findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_advanced_header).setVisibility(View.GONE);
+        findViewById(R.id.webdav_mailbox_alias_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_owa_path_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_auth_path_section).setVisibility(View.GONE);
+        findViewById(R.id.compression_section).setVisibility(View.GONE);
+        findViewById(R.id.compression_label).setVisibility(View.GONE);
+        mSubscribedFoldersOnly.setVisibility(View.GONE);
+
+    }
+
+    private void onCreateImap(ServerSettings settings, boolean editSettings) {
+        serverLabelView.setText(R.string.account_setup_incoming_imap_server_label);
+
+        ImapStoreSettings imapSettings = (ImapStoreSettings) settings;
+
+        mImapAutoDetectNamespaceView.setChecked(imapSettings.autoDetectNamespace);
+        if (imapSettings.pathPrefix != null) {
+            mImapPathPrefixView.setText(imapSettings.pathPrefix);
+        }
+
+        findViewById(R.id.webdav_advanced_header).setVisibility(View.GONE);
+        findViewById(R.id.webdav_mailbox_alias_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_owa_path_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_auth_path_section).setVisibility(View.GONE);
+        findViewById(R.id.exchange_path_section).setVisibility(View.GONE);
+
+        if (!editSettings) {
+            findViewById(R.id.imap_folder_setup_section).setVisibility(View.GONE);
+        }
+
+    }
+
+    private void onCreateWebDAV(ServerSettings settings) {
+        serverLabelView.setText(R.string.account_setup_incoming_webdav_server_label);
+        mConnectionSecurityChoices = new ConnectionSecurity[] {
+                ConnectionSecurity.NONE,
+                ConnectionSecurity.SSL_TLS_REQUIRED };
+
+        // Hide the unnecessary fields
+        findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
+        findViewById(R.id.account_auth_type_label).setVisibility(View.GONE);
+        findViewById(R.id.account_auth_type).setVisibility(View.GONE);
+        findViewById(R.id.compression_section).setVisibility(View.GONE);
+        findViewById(R.id.compression_label).setVisibility(View.GONE);
+        findViewById(R.id.exchange_path_section).setVisibility(View.GONE);
+        mSubscribedFoldersOnly.setVisibility(View.GONE);
+
+        WebDavStoreSettings webDavSettings = (WebDavStoreSettings) settings;
+
+        if (webDavSettings.path != null) {
+            mWebdavPathPrefixView.setText(webDavSettings.path);
+        }
+
+        if (webDavSettings.authPath != null) {
+            mWebdavAuthPathView.setText(webDavSettings.authPath);
+        }
+
+        if (webDavSettings.mailboxPath != null) {
+            mWebdavMailboxPathView.setText(webDavSettings.mailboxPath);
+        }
+    }
+
+    private void onCreateEws(ServerSettings settings, Bundle savedInstanceState) {
+        serverLabelView.setText(R.string.account_setup_incoming_webdav_server_label);
+        mConnectionSecurityChoices = new ConnectionSecurity[] {
+                ConnectionSecurity.NONE,
+                ConnectionSecurity.SSL_TLS_REQUIRED };
+
+        // Hide the unnecessary fields
+        findViewById(R.id.imap_path_prefix_section).setVisibility(View.GONE);
+        findViewById(R.id.account_auth_type_label).setVisibility(View.GONE);
+        findViewById(R.id.account_auth_type).setVisibility(View.GONE);
+        findViewById(R.id.compression_section).setVisibility(View.GONE);
+        findViewById(R.id.compression_label).setVisibility(View.GONE);
+        findViewById(R.id.webdav_advanced_header).setVisibility(View.GONE);
+        findViewById(R.id.webdav_mailbox_alias_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_owa_path_section).setVisibility(View.GONE);
+        findViewById(R.id.webdav_auth_path_section).setVisibility(View.GONE);
+        mSubscribedFoldersOnly.setVisibility(View.GONE);
+
+        EwsStoreSettings storeSettings = (EwsStoreSettings) settings;
+
+        ExchangeVersionAdapter exchangeVersionsAdapter =
+                ExchangeVersionAdapter.get(this);
+        mExchangeVersionView.setAdapter(exchangeVersionsAdapter);
+
+        if (storeSettings.path != null) {
+            mExchangePathView.setText(storeSettings.path);
+        }
+
+        if (savedInstanceState == null) {
+            mCurrentExchangeVersionViewPosition = exchangeVersionsAdapter.getExchangeVersionPosition(storeSettings.exchangeVersion);
+        } else {
+
+                /*
+                 * Restore the spinner state now, before calling
+                 * setOnItemSelectedListener(), thus avoiding a call to
+                 * onItemSelected(). Then, when the system restores the state
+                 * (again) in onRestoreInstanceState(), The system will see that
+                 * the new state is the same as the current state (set here), so
+                 * once again onItemSelected() will not be called.
+                 */
+            mCurrentExchangeVersionViewPosition = savedInstanceState.getInt(STATE_EXCHANGE_VERSION_POSITION);
+        }
+        mExchangeVersionView.setSelection(mCurrentExchangeVersionViewPosition, false);
     }
 
     /**
@@ -580,6 +660,10 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                         mWebdavAuthPathView.getText().toString());
                 extra.put(WebDavStoreSettings.MAILBOX_PATH_KEY,
                         mWebdavMailboxPathView.getText().toString());
+            } else if (Type.EWS == mStoreType) {
+                extra = new HashMap<>();
+                extra.put(EwsStoreSettings.EXCHANGE_VERSION_KEY, getSelectedExchangeVersion().name());
+                extra.put(EwsStoreSettings.PATH_KEY, mExchangePathView.getText().toString());
             }
 
             mAccount.deleteCertificate(host, port, CheckDirection.INCOMING);
@@ -654,5 +738,10 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
     private ConnectionSecurity getSelectedSecurity() {
         ConnectionSecurityHolder holder = (ConnectionSecurityHolder) mSecurityTypeView.getSelectedItem();
         return holder.connectionSecurity;
+    }
+
+    private ExchangeVersion getSelectedExchangeVersion() {
+        ExchangeVersionHolder holder = (ExchangeVersionHolder) mExchangeVersionView.getSelectedItem();
+        return holder.exchangeVersion;
     }
 }

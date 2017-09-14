@@ -27,7 +27,7 @@ class ConnectionSecurityAdapter extends ArrayAdapter<ConnectionSecurityHolder> {
         return securityTypesAdapter;
     }
 
-    public int getConnectionSecurityPosition(ConnectionSecurity connectionSecurity) {
+    int getConnectionSecurityPosition(ConnectionSecurity connectionSecurity) {
         for (int i=0; i<getCount(); i++) {
             if (getItem(i).connectionSecurity == connectionSecurity) {
                 return i;

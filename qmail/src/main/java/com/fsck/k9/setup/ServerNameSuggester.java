@@ -13,6 +13,8 @@ public class ServerNameSuggester {
             case SMTP: {
                 return "smtp." + domainPart;
             }
+            case EWS:
+                return "outlook.office365.com";
             case WebDAV: {
                 return "exchange." + domainPart;
             }

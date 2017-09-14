@@ -275,9 +275,9 @@ public class K9 extends Application {
     private static boolean sDatabasesUpToDate = false;
 
     /**
-     * For use when displaying that no folder is selected
+     * For use when defining that no folder is selected
      */
-    public static final String FOLDER_NONE = "-NONE-";
+    public static final String FOLDER_NONE = K9MailLib.FOLDER_NONE;
 
     public static final String LOCAL_UID_PREFIX = "K9LOCAL:";
 

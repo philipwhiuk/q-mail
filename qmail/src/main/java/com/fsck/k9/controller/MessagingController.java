@@ -897,7 +897,6 @@ public class MessagingController {
                     Timber.d("SYNC: Expunging folder %s:%s", account.getDescription(), folderId);
                     remoteFolder.expunge();
                 }
-
             }
 
             notificationController.clearAuthenticationErrorNotification(account, true);
@@ -2584,14 +2583,14 @@ public class MessagingController {
         }
     }
 
-    public LocalMessage loadMessage(Account account, String folderName, String uid) throws MessagingException {
+    public LocalMessage loadMessage(Account account, String folderId, String uid) throws MessagingException {
         LocalStore localStore = account.getLocalStore();
-        LocalFolder localFolder = localStore.getFolder(folderName);
+        LocalFolder localFolder = localStore.getFolder(folderId);
         localFolder.open(Folder.OPEN_MODE_RW);
 
         LocalMessage message = localFolder.getMessage(uid);
         if (message == null || message.getDatabaseId() == 0) {
-            throw new IllegalArgumentException("Message not found: folder=" + folderName + ", uid=" + uid);
+            throw new IllegalArgumentException("Message not found: folder=" + folderId + ", uid=" + uid);
         }
 
         FetchProfile fp = new FetchProfile();

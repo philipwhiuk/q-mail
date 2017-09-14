@@ -7,8 +7,8 @@ import java.util.Map;
 import android.content.Context;
 import android.net.ConnectivityManager;
 
-import com.fsck.k9.mail.K9HttpClient.K9HttpClientFactory;
 import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.QMailHttpClient.QMailHttpClientFactory;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.ServerSettings.Type;
 import com.fsck.k9.mail.Store;
@@ -61,7 +61,7 @@ public abstract class RemoteStore extends Store {
             } else if (uri.startsWith("pop3")) {
                 store = new Pop3Store(storeConfig, new DefaultTrustedSocketFactory(context));
             } else if (uri.startsWith("webdav")) {
-                store = new WebDavStore(storeConfig, new K9HttpClientFactory());
+                store = new WebDavStore(storeConfig, new QMailHttpClientFactory());
             } else if (uri.startsWith("ews")) {
                 store = new EwsStore(storeConfig,
                         new DefaultTrustedSocketFactory(context));

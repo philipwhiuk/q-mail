@@ -109,19 +109,20 @@ public class FolderList extends K9ListActivity {
     private TextView mActionBarSubTitle;
     private TextView mActionBarUnread;
 
+    //TODO: Rethink this
+    private final Handler handler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+            if(msg.arg1 == 1) {
+                Toast.makeText(getApplicationContext(), R.string.fetching_folders_failed, Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
     /**
      * This class is responsible for reloading the list of folders for the account
      * and notifying the adapter that the folders have been loaded
      */
     private class FolderListHandler extends Handler {
-        //TODO: Rethink this
-        private final Handler handler = new Handler() {
-            public void handleMessage(android.os.Message msg) {
-                if(msg.arg1 == 1) {
-                    Toast.makeText(getApplicationContext(), R.string.fetching_folders_failed, Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
 
         void refreshTitle() {
             runOnUiThread(new Runnable() {

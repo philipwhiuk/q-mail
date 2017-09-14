@@ -39,6 +39,7 @@ import timber.log.Timber;
 
 class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
 
+    private FolderId parentId;
     private FolderId folderId;
     private EwsStore store;
     private String displayName;
@@ -50,6 +51,7 @@ class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
         this.store = store;
         displayName = folder.getDisplayName();
         folderId = folder.getId();
+        parentId = folder.getParentFolderId();
     }
 
     EwsFolder(EwsStore store, String uniqueFolderId) {
@@ -63,11 +65,17 @@ class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
     }
 
     @Override
+    public String getParentId() {
+        return parentId.getUniqueId();
+    }
+
+    @Override
     public void open(int mode) throws MessagingException {
         messageCount = -1;
         try {
             folder = Folder.bind(store.getService(), folderId);
             folder.getUnreadCount();
+            parentId = folder.getParentFolderId();
             messageCount = folder.getTotalCount();
         } catch (Exception e) {
             throw new MessagingException("Unable to open folder", e);
@@ -104,6 +112,11 @@ class EwsFolder extends com.fsck.k9.mail.Folder<Message> {
     @Override
     public boolean exists() throws MessagingException {
         return folderId != null || checkFolderExistsRemotely();
+    }
+
+    @Override
+    public boolean canHaveSubFolders() {
+        return false;
     }
 
     private boolean checkFolderExistsRemotely() throws MessagingException {

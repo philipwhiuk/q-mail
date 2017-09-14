@@ -8,7 +8,6 @@ import com.fsck.k9.mail.ssl.TrustedSocketFactory;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.mail.store.StoreConfig;
 import microsoft.exchange.webservices.data.core.ExchangeService;
-import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion;
 import microsoft.exchange.webservices.data.core.enumeration.property.WellKnownFolderName;
 import microsoft.exchange.webservices.data.core.exception.service.remote.ServiceResponseException;
 import microsoft.exchange.webservices.data.core.service.folder.Folder;
@@ -24,6 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import android.support.annotation.NonNull;
 
 
 public class EwsStore extends RemoteStore {
@@ -92,8 +93,9 @@ public class EwsStore extends RemoteStore {
         return folder;
     }
 
+    @NonNull
     @Override
-    public List<? extends com.fsck.k9.mail.Folder> getPersonalNamespaces(boolean forceListAll) throws MessagingException {
+    public List<EwsFolder> getFolders(boolean forceListAll) throws MessagingException {
         folderCache.clear();
         boolean foundInbox = false;
         try {
@@ -144,9 +146,24 @@ public class EwsStore extends RemoteStore {
     }
 
     @Override
+    @NonNull
+    public List<EwsFolder> getSubFolders(final String parentFolderId, boolean forceListAll) throws MessagingException {
+        List<EwsFolder> folders = getFolders(forceListAll);
+        List<EwsFolder> subFolders = new ArrayList<>();
+
+        for (EwsFolder folder: folders) {
+            if (folder.getId().startsWith(parentFolderId) && folder.getId().length() != parentFolderId.length()) {
+                subFolders.add(folder);
+            }
+        }
+
+        return subFolders;
+    }
+
+    @Override
     public void checkSettings() throws MessagingException {
         try {
-            getPersonalNamespaces(true);
+            getFolders(true);
         } catch (Exception e) {
             Throwable cause = e;
             while (cause.getCause() != null && cause.getCause().getMessage() != null) {

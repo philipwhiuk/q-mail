@@ -21,10 +21,11 @@ import android.support.annotation.NonNull;
 import com.fsck.k9.mail.CertificateValidationException;
 import com.fsck.k9.mail.ConnectionSecurity;
 import com.fsck.k9.mail.Folder;
-import com.fsck.k9.mail.K9HttpClient;
 import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.QMailHttpClient;
+import com.fsck.k9.mail.QMailHttpClient.QMailHttpClientFactory;
 import com.fsck.k9.mail.ServerSettings;
 import com.fsck.k9.mail.filter.Base64;
 import com.fsck.k9.mail.store.RemoteStore;
@@ -83,8 +84,8 @@ public class WebDavStore extends RemoteStore {
     private String formBasedAuthPath;
     private String mailboxPath;
 
-    private final K9HttpClient.K9HttpClientFactory httpClientFactory;
-    private K9HttpClient httpClient = null;
+    private final QMailHttpClient.QMailHttpClientFactory httpClientFactory;
+    private QMailHttpClient httpClient = null;
     private HttpContext httpContext = null;
     private String authString;
     private CookieStore authCookies = null;
@@ -94,7 +95,7 @@ public class WebDavStore extends RemoteStore {
     private Folder sendFolder = null;
     private Map<String, WebDavFolder> folderList = new HashMap<>();
 
-    public WebDavStore(StoreConfig storeConfig, K9HttpClient.K9HttpClientFactory clientFactory)
+    public WebDavStore(StoreConfig storeConfig, QMailHttpClientFactory clientFactory)
             throws MessagingException {
         super(storeConfig, null);
         httpClientFactory = clientFactory;
@@ -267,9 +268,7 @@ public class WebDavStore extends RemoteStore {
         String folderId = getFolderId(folderUrl);
         if (folderId != null) {
             wdFolder = getFolder(folderId);
-            if (wdFolder != null) {
-                wdFolder.setUrl(folderUrl);
-            }
+            wdFolder.setUrl(folderUrl);
         }
         // else: Unknown URL format => NO Folder created
 
@@ -510,7 +509,7 @@ public class WebDavStore extends RemoteStore {
                     request.setMethod("GET");
                     request.setHeader("Authorization", authString);
 
-                    K9HttpClient httpClient = getHttpClient();
+                    QMailHttpClient httpClient = getHttpClient();
                     HttpResponse response = httpClient.executeOverride(request, httpContext);
 
                     int statusCode = response.getStatusLine().getStatusCode();
@@ -554,7 +553,7 @@ public class WebDavStore extends RemoteStore {
         // The latter two indicate form-based authentication.
         ConnectionInfo info = new ConnectionInfo();
 
-        K9HttpClient httpClient = getHttpClient();
+        QMailHttpClient httpClient = getHttpClient();
 
         HttpGeneric request = new HttpGeneric(baseUrl);
         request.setMethod("GET");
@@ -611,7 +610,7 @@ public class WebDavStore extends RemoteStore {
             authCookies.clear();
         }
 
-        K9HttpClient httpClient = getHttpClient();
+        QMailHttpClient httpClient = getHttpClient();
 
         String loginUrl;
         if (info != null) {
@@ -642,7 +641,7 @@ public class WebDavStore extends RemoteStore {
         boolean authenticated = testAuthenticationResponse(response);
         if (!authenticated) {
             // Check the response from the authentication request above for a form action.
-            String formAction = findFormAction(K9HttpClient.getUngzippedContent(response.getEntity()));
+            String formAction = findFormAction(QMailHttpClient.getUngzippedContent(response.getEntity()));
             if (formAction == null) {
                 // If there is no form action, try using our redirect URL from the initial connection.
                 if (info != null && info.redirectUrl != null && !info.redirectUrl.equals("")) {
@@ -652,7 +651,7 @@ public class WebDavStore extends RemoteStore {
                     request.setMethod("GET");
 
                     response = httpClient.executeOverride(request, httpContext);
-                    formAction = findFormAction(K9HttpClient.getUngzippedContent(response.getEntity()));
+                    formAction = findFormAction(QMailHttpClient.getUngzippedContent(response.getEntity()));
                 }
             }
             if (formAction != null) {
@@ -807,7 +806,7 @@ public class WebDavStore extends RemoteStore {
         return baseUrl;
     }
 
-    public K9HttpClient getHttpClient() throws MessagingException {
+    public QMailHttpClient getHttpClient() throws MessagingException {
         if (httpClient == null) {
             httpClient = httpClientFactory.create();
             // Disable automatic redirects on the http client.
@@ -840,7 +839,7 @@ public class WebDavStore extends RemoteStore {
             return null;
         }
 
-        K9HttpClient httpClient = getHttpClient();
+        QMailHttpClient httpClient = getHttpClient();
 
         try {
             int statusCode;
@@ -890,7 +889,7 @@ public class WebDavStore extends RemoteStore {
             }
 
             if (entity != null) {
-                return K9HttpClient.getUngzippedContent(entity);
+                return QMailHttpClient.getUngzippedContent(entity);
             }
         } catch (UnsupportedEncodingException uee) {
             Timber.e(uee, "UnsupportedEncodingException: ");

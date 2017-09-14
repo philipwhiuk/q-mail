@@ -4,7 +4,6 @@ package com.fsck.k9.mail.transport;
 
 import java.util.Collections;
 
-import com.fsck.k9.mail.K9HttpClient.K9HttpClientFactory;
 import com.fsck.k9.mail.K9MailLib;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;

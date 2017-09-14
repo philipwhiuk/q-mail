@@ -1,4 +1,4 @@
-package com.fsck.k9.mail.store.webdav;
+package com.fsck.k9.mail;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -16,7 +16,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * HTTP client for WebDAV communication
  */
-public class WebDavHttpClient extends DefaultHttpClient {
+public class QMailHttpClient extends DefaultHttpClient {
     /*
      * Copyright (C) 2007 The Android Open Source Project
      *
@@ -30,10 +30,10 @@ public class WebDavHttpClient extends DefaultHttpClient {
      * the License for the specific language governing permissions and limitations under the License.
      */
 
-    public static class WebDavHttpClientFactory {
+    public static class QMailHttpClientFactory {
 
-        public WebDavHttpClient create() {
-            return new WebDavHttpClient();
+        public QMailHttpClient create() {
+            return new QMailHttpClient();
         }
     }
 

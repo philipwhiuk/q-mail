@@ -89,7 +89,7 @@ class DeviceNotifications extends BaseNotifications {
         String accountName = controller.getAccountName(account);
         CharSequence newMailText = context.getString(R.string.notification_new_title);
         String unreadMessageCountText = context.getResources().getQuantityString(R.plurals.notification_new_one_account_fmt,
-                unreadMessageCount, accountName);
+                unreadMessageCount, unreadMessageCount, accountName);
 
         int notificationId = NotificationIds.getNewMailSummaryNotificationId(account);
         PendingIntent contentIntent = actionCreator.createViewFolderListPendingIntent(account, notificationId);
@@ -126,10 +126,14 @@ class DeviceNotifications extends BaseNotifications {
         String accountName = controller.getAccountName(account);
         String title = context.getResources().getQuantityString(R.plurals.notification_new_messages_title,
                 newMessagesCount, newMessagesCount);
-        String summary = (notificationData.hasSummaryOverflowMessages()) ?
-                context.getResources().getQuantityString(R.plurals.notification_additional_messages,
-                        notificationData.getSummaryOverflowMessagesCount(), accountName) :
-                accountName;
+        String summary;
+        if (notificationData.hasSummaryOverflowMessages()) {
+            final int overflowCount = notificationData.getSummaryOverflowMessagesCount();
+            summary = context.getResources().getQuantityString(R.plurals.notification_additional_messages,
+                    overflowCount, overflowCount, accountName);
+        } else {
+            summary = accountName;
+        }
         String groupKey = NotificationGroupKeys.getGroupKey(account);
 
         NotificationCompat.Builder builder = createAndInitializeNotificationBuilder(account)

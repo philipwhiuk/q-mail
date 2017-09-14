@@ -1329,7 +1329,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             handler.remoteSearchFinished();
             extraSearchResults = extraResults;
             if (extraResults != null && extraResults.size() > 0) {
-                handler.updateFooter(context.getResources().getQuantityString(R.plurals.load_more_messages_fmt, maxResults));
+                handler.updateFooter(context.getResources().getQuantityString(R.plurals.load_more_messages_fmt, maxResults, maxResults));
             } else {
                 handler.updateFooter(null);
             }
@@ -1428,11 +1428,12 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             } else {
                 String message;
                 if (!currentFolder.lastCheckFailed) {
-                    if (account.getDisplayCount() == 0) {
+                    final int displayCount = account.getDisplayCount();
+                    if (displayCount == 0) {
                         message = context.getString(R.string.message_list_load_more_messages_action);
                     } else {
                         message = context.getResources().getQuantityString(R.plurals.load_more_messages_fmt,
-                                account.getDisplayCount());
+                                displayCount, displayCount);
                     }
                 } else {
                     message = context.getString(R.string.status_loading_more_failed);
@@ -1569,7 +1570,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
     }
 
     private void updateActionModeTitle() {
-        actionMode.setTitle(context.getResources().getQuantityString(R.plurals.actionbar_selected, selectedCount));
+        actionMode.setTitle(context.getResources().getQuantityString(R.plurals.actionbar_selected, selectedCount, selectedCount));
     }
 
     private void computeSelectAllVisibility() {

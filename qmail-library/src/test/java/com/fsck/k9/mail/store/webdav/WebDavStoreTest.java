@@ -10,8 +10,8 @@ import com.fsck.k9.mail.AuthType;
 import com.fsck.k9.mail.CertificateValidationException;
 import com.fsck.k9.mail.ConnectionSecurity;
 import com.fsck.k9.mail.Folder;
-import com.fsck.k9.mail.K9HttpClient;
-import com.fsck.k9.mail.K9HttpClient.K9HttpClientFactory;
+import com.fsck.k9.mail.QMailHttpClient;
+import com.fsck.k9.mail.QMailHttpClient.QMailHttpClientFactory;
 import com.fsck.k9.mail.K9LibRobolectricTestRunner;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.ServerSettings;
@@ -64,9 +64,9 @@ public class WebDavStoreTest {
 
 
     @Mock
-    private K9HttpClientFactory mockHttpClientFactory;
+    private QMailHttpClientFactory mockHttpClientFactory;
     @Mock
-    private K9HttpClient mockHttpClient;
+    private QMailHttpClient mockHttpClient;
     @Mock
     private ClientConnectionManager mockClientConnectionManager;
     @Mock

@@ -1,11 +1,11 @@
 package com.fsck.k9.mail.store.webdav;
 
 import com.fsck.k9.mail.FetchProfile;
-import com.fsck.k9.mail.K9HttpClient;
 import com.fsck.k9.mail.K9LibRobolectricTestRunner;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessageRetrievalListener;
 import com.fsck.k9.mail.MessagingException;
+import com.fsck.k9.mail.QMailHttpClient;
 import com.fsck.k9.mail.internet.BinaryTempFileBody;
 import com.fsck.k9.mail.store.StoreConfig;
 
@@ -68,7 +68,7 @@ public class WebDavFolderTest {
     @Mock
     private DataSet mockDataSet;
     @Mock
-    private K9HttpClient mockHttpClient;
+    private QMailHttpClient mockHttpClient;
     @Mock
     private StoreConfig mockStoreConfig;
     @Mock

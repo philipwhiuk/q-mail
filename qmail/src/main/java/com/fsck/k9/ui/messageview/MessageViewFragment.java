@@ -29,7 +29,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.ChooseFolder;
@@ -176,7 +176,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         Context context = new ContextThemeWrapper(inflater.getContext(),
-                K9.getK9ThemeResourceId(K9.getK9MessageViewTheme()));
+                QMail.getK9ThemeResourceId(QMail.getK9MessageViewTheme()));
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View view = layoutInflater.inflate(R.layout.message, container, false);
 
@@ -250,7 +250,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
                 mMessageView, mAccount, messageViewInfo);
         if (!handledByCryptoPresenter) {
             mMessageView.showMessage(mAccount, messageViewInfo);
-            if (K9.isOpenPgpProviderConfigured()) {
+            if (QMail.isOpenPgpProviderConfigured()) {
                 mMessageView.getMessageHeaderView().setCryptoStatusDisabled();
             } else {
                 mMessageView.getMessageHeaderView().hideCryptoStatus();
@@ -260,7 +260,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
 
     private void displayHeaderForLoadingMessage(LocalMessage message) {
         mMessageView.setHeaders(message, mAccount);
-        if (K9.isOpenPgpProviderConfigured()) {
+        if (QMail.isOpenPgpProviderConfigured()) {
             mMessageView.getMessageHeaderView().setCryptoStatusLoading();
         }
         displayMessageSubject(getSubjectForMessage(message));
@@ -271,7 +271,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
      * Called from UI thread when user select Delete
      */
     public void onDelete() {
-        if (K9.confirmDelete() || (K9.confirmDeleteStarred() && mMessage.isSet(Flag.FLAGGED))) {
+        if (QMail.confirmDelete() || (QMail.confirmDeleteStarred() && mMessage.isSet(Flag.FLAGGED))) {
             showDialog(R.id.dialog_confirm_delete);
         } else {
             delete();
@@ -307,11 +307,11 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
             return;
         }
 
-        if (K9.FOLDER_NONE.equalsIgnoreCase(dstFolder)) {
+        if (QMail.FOLDER_NONE.equalsIgnoreCase(dstFolder)) {
             return;
         }
 
-        if (mAccount.getSpamFolderId().equals(dstFolder) && K9.confirmSpam()) {
+        if (mAccount.getSpamFolderId().equals(dstFolder) && QMail.confirmSpam()) {
             mDstFolder = dstFolder;
             showDialog(R.id.dialog_confirm_spam);
         } else {

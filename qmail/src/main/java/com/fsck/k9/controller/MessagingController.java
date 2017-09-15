@@ -1,9 +1,7 @@
 package com.fsck.k9.controller;
 
 
-import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,17 +24,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.SystemClock;
@@ -48,8 +43,8 @@ import com.fsck.k9.Account.DeletePolicy;
 import com.fsck.k9.Account.Expunge;
 import com.fsck.k9.AccountStats;
 import com.fsck.k9.BuildConfig;
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.Intents;
+import com.fsck.k9.QMail;
+import com.fsck.k9.QMail.Intents;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.ActivityListener;
@@ -86,10 +81,7 @@ import com.fsck.k9.mail.Store;
 import com.fsck.k9.mail.Transport;
 import com.fsck.k9.mail.TransportProvider;
 import com.fsck.k9.mail.internet.MessageExtractor;
-import com.fsck.k9.mail.internet.MimeMessage;
-import com.fsck.k9.mail.internet.MimeMessageHelper;
 import com.fsck.k9.mail.internet.MimeUtility;
-import com.fsck.k9.mail.internet.TextBody;
 import com.fsck.k9.mail.power.TracingPowerManager;
 import com.fsck.k9.mail.power.TracingPowerManager.TracingWakeLock;
 import com.fsck.k9.mail.store.pop3.Pop3Store;
@@ -109,7 +101,7 @@ import com.fsck.k9.search.SearchSpecification;
 import com.fsck.k9.search.SqlQueryBuilder;
 import timber.log.Timber;
 
-import static com.fsck.k9.K9.MAX_SEND_ATTEMPTS;
+import static com.fsck.k9.QMail.MAX_SEND_ATTEMPTS;
 import static com.fsck.k9.mail.Flag.X_REMOTE_COPY_STARTED;
 
 
@@ -415,8 +407,6 @@ public class MessagingController {
                     Timber.w(e, "Failed to list folders");
                     l.listFoldersFailed(account, e.getMessage());
                 }
-
-                addErrorMessage(account, null, e);
                 return;
             } finally {
                 if (localFolders != null) {
@@ -466,7 +456,7 @@ public class MessagingController {
                     l.listFoldersFailed(account, e.getMessage());
                 }
 
-                addErrorMessage(account, null, e);
+                Timber.e(e);
                 return;
             } finally {
                 if (localFolders != null) {
@@ -528,7 +518,7 @@ public class MessagingController {
 
                 // FIXME: This is a hack used to clean up when we accidentally created the
                 //        special placeholder folder "-NONE-".
-                if (K9.FOLDER_NONE.equals(localFolderId)) {
+                if (QMail.FOLDER_NONE.equals(localFolderId)) {
                     localFolder.delete(false);
                 }
 
@@ -560,7 +550,7 @@ public class MessagingController {
                 Timber.w(e, "Unable to list folders");
                 l.listFoldersFailed(account, "");
             }
-            addErrorMessage(account, null, e);
+            Timber.e(e);
         } finally {
             if (localFolders != null) {
                 for (Folder localFolder : localFolders) {
@@ -626,7 +616,7 @@ public class MessagingController {
                 LocalStore localStore = account.getLocalStore();
                 localStore.searchForMessages(retrievalListener, search);
             } catch (Exception e) {
-                addErrorMessage(account, null, e);
+                Timber.e(e);
             }
         }
 
@@ -704,7 +694,7 @@ public class MessagingController {
                 if (listener != null) {
                     listener.remoteSearchFailed(null, null, e.getMessage());
                 }
-                addErrorMessage(acct, null, e);
+                Timber.e(e);
             }
         } finally {
             if (listener != null) {
@@ -739,7 +729,6 @@ public class MessagingController {
                     loadSearchResultsSynchronous(messages, localFolder, remoteFolder, listener);
                 } catch (MessagingException e) {
                     Timber.e(e, "Exception in loadSearchResults");
-                    addErrorMessage(account, null, e);
                 } finally {
                     if (listener != null) {
                         listener.enableProgressIndicator(false);
@@ -782,8 +771,6 @@ public class MessagingController {
             }
             synchronizeMailbox(account, folderId, localFolder.getName(), listener, null);
         } catch (MessagingException me) {
-            addErrorMessage(account, null, me);
-
             throw new RuntimeException("Unable to set visible limit on folder", me);
         }
     }
@@ -819,9 +806,9 @@ public class MessagingController {
             l.synchronizeMailboxStarted(account, folderId, folderName);
         }
         /*
-         * We don't ever sync the Outbox or errors folder
+         * We don't ever sync the Outbox
          */
-        if (folderId.equals(account.getOutboxFolderId()) || folderId.equals(account.getErrorFolderId())) {
+        if (folderId.equals(account.getOutboxFolderId())) {
             for (MessagingListener l : getListeners(listener)) {
                 l.synchronizeMailboxFinished(account, folderId, folderName, 0, 0);
             }
@@ -836,8 +823,6 @@ public class MessagingController {
             try {
                 processPendingCommandsSynchronous(account);
             } catch (Exception e) {
-                addErrorMessage(account, null, e);
-
                 Timber.e(e, "Failure processing command, but allow message sync attempt");
                 commandException = e;
             }
@@ -875,8 +860,8 @@ public class MessagingController {
                 Open the folder
                 Upload any local messages that are marked as PENDING_UPLOAD (Drafts, Sent, Trash)
                 Get the message count
-                Get the list of the newest K9.DEFAULT_VISIBLE_LIMIT messages
-                getMessages(messageCount - K9.DEFAULT_VISIBLE_LIMIT, messageCount)
+                Get the list of the newest QMail.DEFAULT_VISIBLE_LIMIT messages
+                getMessages(messageCount - QMail.DEFAULT_VISIBLE_LIMIT, messageCount)
                 See if we have each message locally, if not fetch it's flags and envelope
                 Get and update the unread count for the folder
                 Update the remote flags of any messages we have locally with an internal date newer than the remote message.
@@ -909,7 +894,7 @@ public class MessagingController {
             int visibleLimit = localFolder.getVisibleLimit();
 
             if (visibleLimit < 0) {
-                visibleLimit = K9.DEFAULT_VISIBLE_LIMIT;
+                visibleLimit = QMail.DEFAULT_VISIBLE_LIMIT;
             }
 
             final List<Message> remoteMessages = new ArrayList<>();
@@ -1061,7 +1046,6 @@ public class MessagingController {
                 l.synchronizeMailboxFailed(account, folderId, folderName, rootMessage);
             }
             notifyUserIfCertificateProblem(account, e, true);
-            addErrorMessage(account, null, e);
             Timber.e("Failed synchronizing folder %s:%s @ %tc", account.getDescription(), folderId,
                     System.currentTimeMillis());
 
@@ -1368,7 +1352,7 @@ public class MessagingController {
                     public void messageFinished(T message, int number, int ofTotal) {
                         try {
                             if (message.isSet(Flag.DELETED) || message.olderThan(earliestDate)) {
-                                if (K9.isDebug()) {
+                                if (QMail.isDebug()) {
                                     if (message.isSet(Flag.DELETED)) {
                                         Timber.v("Newly downloaded message %s:%s:%s was marked deleted on server, " +
                                                 "skipping", account, folderId, message.getUid());
@@ -1393,7 +1377,6 @@ public class MessagingController {
                             }
                         } catch (Exception e) {
                             Timber.e(e, "Error while storing downloaded message.");
-                            addErrorMessage(account, null, e);
                         }
                     }
 
@@ -1477,7 +1460,6 @@ public class MessagingController {
                             }
 
                         } catch (MessagingException me) {
-                            addErrorMessage(account, null, me);
                             Timber.e(me, "SYNC: fetch small messages");
                         }
                     }
@@ -1722,8 +1704,6 @@ public class MessagingController {
             LocalStore localStore = account.getLocalStore();
             localStore.addPendingCommand(command);
         } catch (Exception e) {
-            addErrorMessage(account, null, e);
-
             throw new RuntimeException("Unable to enqueue pending command", e);
         }
     }
@@ -1740,8 +1720,6 @@ public class MessagingController {
                     throw new UnavailableAccountException(e);
                 } catch (MessagingException me) {
                     Timber.e(me, "processPendingCommands");
-
-                    addErrorMessage(account, null, me);
 
                     /*
                      * Ignore any exceptions from the commands. Commands will be processed
@@ -1789,7 +1767,6 @@ public class MessagingController {
                     Timber.d("Done processing pending command '%s'", command);
                 } catch (MessagingException me) {
                     if (me.isPermanentFailure()) {
-                        addErrorMessage(account, null, me);
                         Timber.e("Failure of command '%s' was permanent, removing command from queue", command);
                         localStore.removePendingCommand(processingCommand);
                     } else {
@@ -1805,7 +1782,6 @@ public class MessagingController {
             }
         } catch (MessagingException me) {
             notifyUserIfCertificateProblem(account, me, true);
-            addErrorMessage(account, null, me);
             Timber.e(me, "Could not process command '%s'", processingCommand);
             throw me;
         } finally {
@@ -1831,10 +1807,6 @@ public class MessagingController {
             String folderId = command.folder;
             String uid = command.uid;
 
-            if (account.getErrorFolderId().equals(folderId)) {
-                return;
-            }
-
             LocalStore localStore = account.getLocalStore();
             localFolder = localStore.getFolder(folderId);
             LocalMessage localMessage = localFolder.getMessage(uid);
@@ -1856,7 +1828,7 @@ public class MessagingController {
             }
 
             Message remoteMessage = null;
-            if (!localMessage.getUid().startsWith(K9.LOCAL_UID_PREFIX)) {
+            if (!localMessage.getUid().startsWith(QMail.LOCAL_UID_PREFIX)) {
                 remoteMessage = remoteFolder.getMessage(localMessage.getUid());
             }
 
@@ -1948,9 +1920,6 @@ public class MessagingController {
 
     private void queueMoveOrCopy(Account account, String srcFolder, String destFolder, boolean isCopy,
             List<String> uids) {
-        if (account.getErrorFolderId().equals(srcFolder)) {
-            return;
-        }
         PendingCommand command = PendingMoveOrCopy.create(srcFolder, destFolder, isCopy, uids);
         queuePendingCommand(account, command);
     }
@@ -1960,9 +1929,6 @@ public class MessagingController {
         if (uidMap == null || uidMap.isEmpty()) {
             queueMoveOrCopy(account, srcFolder, destFolder, isCopy, uids);
         } else {
-            if (account.getErrorFolderId().equals(srcFolder)) {
-                return;
-            }
             PendingCommand command = PendingMoveOrCopy.create(srcFolder, destFolder, isCopy, uidMap);
             queuePendingCommand(account, command);
         }
@@ -1974,9 +1940,6 @@ public class MessagingController {
         LocalFolder localDestFolder;
         try {
             String srcFolder = command.srcFolder;
-            if (account.getErrorFolderId().equals(srcFolder)) {
-                return;
-            }
             String destFolderId = command.destFolder;
             boolean isCopy = command.isCopy;
 
@@ -1989,7 +1952,7 @@ public class MessagingController {
 
             Collection<String> uids = command.newUidMap != null ? command.newUidMap.keySet() : command.uids;
             for (String uid : uids) {
-                if (!uid.startsWith(K9.LOCAL_UID_PREFIX)) {
+                if (!uid.startsWith(QMail.LOCAL_UID_PREFIX)) {
                     messages.add(remoteSrcFolder.getMessage(uid));
                 }
             }
@@ -2012,7 +1975,7 @@ public class MessagingController {
             if (!isCopy && destFolderId.equals(account.getTrashFolderId())) {
                 Timber.d("processingPendingMoveOrCopy doing special case for deleting message");
 
-                if (K9.FOLDER_NONE.equals(destFolderId)) {
+                if (QMail.FOLDER_NONE.equals(destFolderId)) {
                     destFolderId = null;
                 }
                 remoteSrcFolder.delete(messages, destFolderId);
@@ -2077,7 +2040,7 @@ public class MessagingController {
     void processPendingSetFlag(PendingSetFlag command, Account account) throws MessagingException {
         String folderId = command.folder;
 
-        if (account.getErrorFolderId().equals(folderId) || account.getOutboxFolderId().equals(folderId)) {
+        if (account.getOutboxFolderId().equals(folderId)) {
             return;
         }
 
@@ -2097,7 +2060,7 @@ public class MessagingController {
             }
             List<Message> messages = new ArrayList<>();
             for (String uid : command.uids) {
-                if (!uid.startsWith(K9.LOCAL_UID_PREFIX)) {
+                if (!uid.startsWith(QMail.LOCAL_UID_PREFIX)) {
                     messages.add(remoteFolder.getMessage(uid));
                 }
             }
@@ -2124,10 +2087,6 @@ public class MessagingController {
 
     void processPendingExpunge(PendingExpunge command, Account account) throws MessagingException {
         String folderId = command.folder;
-
-        if (account.getErrorFolderId().equals(folderId)) {
-            return;
-        }
 
         Timber.d("processPendingExpunge: folder = %s", folderId);
 
@@ -2168,11 +2127,6 @@ public class MessagingController {
                 l.folderStatusChanged(account, folderId, localFolder.getName(), 0);
             }
 
-
-            if (account.getErrorFolderId().equals(folderId)) {
-                return;
-            }
-
             Store remoteStore = account.getRemoteStore();
             remoteFolder = remoteStore.getFolder(folderId);
 
@@ -2193,77 +2147,6 @@ public class MessagingController {
             closeFolder(remoteFolder);
         }
     }
-
-    void addErrorMessage(Account account, String subject, Throwable t) {
-        try {
-            if (t == null) {
-                return;
-            }
-
-            CharArrayWriter baos = new CharArrayWriter(t.getStackTrace().length * 10);
-            PrintWriter ps = new PrintWriter(baos);
-            try {
-                PackageInfo packageInfo = context.getPackageManager().getPackageInfo(
-                        context.getPackageName(), 0);
-                ps.format("K9-Mail version: %s\r\n", packageInfo.versionName);
-            } catch (Exception e) {
-                // ignore
-            }
-            ps.format("Device make: %s\r\n", Build.MANUFACTURER);
-            ps.format("Device model: %s\r\n", Build.MODEL);
-            ps.format("Android version: %s\r\n\r\n", Build.VERSION.RELEASE);
-            t.printStackTrace(ps);
-            ps.close();
-
-            if (subject == null) {
-                subject = getRootCauseMessage(t);
-            }
-
-            addErrorMessage(account, subject, baos.toString());
-        } catch (Throwable it) {
-            Timber.e(it, "Could not save error message to %s", account.getErrorFolderId());
-        }
-    }
-
-    private static AtomicBoolean loopCatch = new AtomicBoolean();
-
-    private void addErrorMessage(Account account, String subject, String body) {
-        if (!K9.isDebug()) {
-            return;
-        }
-        if (!loopCatch.compareAndSet(false, true)) {
-            return;
-        }
-        try {
-            if (body == null || body.length() < 1) {
-                return;
-            }
-
-            Store localStore = account.getLocalStore();
-            LocalFolder localFolder = (LocalFolder) localStore.getFolder(account.getErrorFolderId());
-            MimeMessage message = new MimeMessage();
-
-            MimeMessageHelper.setBody(message, new TextBody(body));
-            message.setFlag(Flag.X_DOWNLOADED_FULL, true);
-            message.setSubject(subject);
-
-            long nowTime = System.currentTimeMillis();
-            Date nowDate = new Date(nowTime);
-            message.setInternalDate(nowDate);
-            message.addSentDate(nowDate, K9.hideTimeZone());
-            message.setFrom(new Address(account.getEmail(), "K9mail internal"));
-
-            localFolder.appendMessages(Collections.singletonList(message));
-
-            localFolder.clearMessagesOlderThan(nowTime - (15 * 60 * 1000));
-
-        } catch (Throwable it) {
-            Timber.e(it, "Could not save error message to %s", account.getErrorFolderId());
-        } finally {
-            loopCatch.set(false);
-        }
-    }
-
 
     public void markAllMessagesRead(final Account account, final String folder) {
         Timber.i("Marking all messages in %s:%s as read", account.getDescription(), folder);
@@ -2348,11 +2231,7 @@ public class MessagingController {
                 Timber.w(e, "Couldn't get unread count for folder: %s", folderId);
             }
 
-            // The error folder is always a local folder
             // TODO: Skip the remote part for all local-only folders
-            if (account.getErrorFolderId().equals(folderId)) {
-                continue;
-            }
 
             // Send flag change to server
             queueSetFlag(account, folderId, newState, flag, entry.getValue());
@@ -2412,17 +2291,12 @@ public class MessagingController {
              * Handle the remote side
              */
 
-            // The error folder is always a local folder
             // TODO: Skip the remote part for all local-only folders
-            if (account.getErrorFolderId().equals(folderId)) {
-                return;
-            }
 
             List<String> uids = getUidsFromMessages(messages);
             queueSetFlag(account, folderId, newState, flag, uids);
             processPendingCommands(account);
         } catch (MessagingException me) {
-            addErrorMessage(account, null, me);
             throw new RuntimeException(me);
         } finally {
             closeFolder(localFolder);
@@ -2456,7 +2330,6 @@ public class MessagingController {
                 setFlag(account, folderName, Collections.singletonList(message), flag, newState);
             }
         } catch (MessagingException me) {
-            addErrorMessage(account, null, me);
             throw new RuntimeException(me);
         } finally {
             closeFolder(localFolder);
@@ -2470,7 +2343,6 @@ public class MessagingController {
             localStore.removePendingCommands();
         } catch (MessagingException me) {
             Timber.e(me, "Unable to clear pending command");
-            addErrorMessage(account, null, me);
         }
     }
 
@@ -2506,7 +2378,7 @@ public class MessagingController {
 
             LocalMessage message = localFolder.getMessage(uid);
 
-            if (uid.startsWith(K9.LOCAL_UID_PREFIX)) {
+            if (uid.startsWith(QMail.LOCAL_UID_PREFIX)) {
                 Timber.w("Message has local UID so cannot download fully.");
                 // ASH move toast
                 android.widget.Toast.makeText(context,
@@ -2519,7 +2391,7 @@ public class MessagingController {
             }
             /* commented out because this was pulled from another unmerged branch:
             } else if (localFolder.isLocalOnly() && !force) {
-                Log.w(K9.LOG_TAG, "Message in local-only folder so cannot download fully.");
+                Log.w(QMail.LOG_TAG, "Message in local-only folder so cannot download fully.");
                 // ASH move toast
                 android.widget.Toast.makeText(mApplication,
                         "Message in local-only folder so cannot download fully",
@@ -2575,7 +2447,7 @@ public class MessagingController {
                 l.loadMessageRemoteFailed(account, folderId, folderId, uid, e);
             }
             notifyUserIfCertificateProblem(account, e, true);
-            addErrorMessage(account, null, e);
+            Timber.e(e, "Error while loading remote message");
             return false;
         } finally {
             closeFolder(remoteFolder);
@@ -2658,8 +2530,6 @@ public class MessagingController {
                         l.loadAttachmentFailed(account, message, part, me.getMessage());
                     }
                     notifyUserIfCertificateProblem(account, me, true);
-                    addErrorMessage(account, null, me);
-
                 } finally {
                     closeFolder(localFolder);
                     closeFolder(remoteFolder);
@@ -2691,7 +2561,7 @@ public class MessagingController {
                 // TODO general failed
             }
             */
-            addErrorMessage(account, null, e);
+            Timber.e(e, "Error sending message");
 
         }
     }
@@ -2805,7 +2675,7 @@ public class MessagingController {
             Timber.i("Scanning folder '%s' (%d) for messages to send",
                     account.getOutboxFolderId(), localOutboxFolder.getDatabaseId());
 
-            Transport transport = transportProvider.getTransport(K9.app, account);
+            Transport transport = transportProvider.getTransport(QMail.app, account);
 
             for (LocalMessage message : localMessages) {
                 if (message.isSet(Flag.DELETED)) {
@@ -2821,7 +2691,7 @@ public class MessagingController {
 
                     Timber.i("Send count for message %s is %d", message.getUid(), count.get());
 
-                    if (count.incrementAndGet() > K9.MAX_SEND_ATTEMPTS) {
+                    if (count.incrementAndGet() > QMail.MAX_SEND_ATTEMPTS) {
                         Timber.e("Send count for message %s can't be delivered after %d attempts. " +
                                 "Giving up until the user restarts the device", message.getUid(), MAX_SEND_ATTEMPTS);
                         notificationController.showSendFailedNotification(account,
@@ -2831,7 +2701,7 @@ public class MessagingController {
 
                     localOutboxFolder.fetch(Collections.singletonList(message), fp, null);
                     try {
-                        if (message.getHeader(K9.IDENTITY_HEADER).length > 0) {
+                        if (message.getHeader(QMail.IDENTITY_HEADER).length > 0) {
                             Timber.v("The user has set the Outbox and Drafts folder to the same thing. " +
                                     "This message appears to be a draft, so K-9 will not send it");
                             continue;
@@ -2876,7 +2746,6 @@ public class MessagingController {
                     lastFailure = e;
                     wasPermanentFailure = false;
                     Timber.e(e, "Failed to fetch message for sending");
-                    addErrorMessage(account, "Failed to fetch message for sending", e);
                     notifySynchronizeMailboxFailed(account, localOutboxFolder, e);
                 }
             }
@@ -2901,8 +2770,6 @@ public class MessagingController {
             for (MessagingListener l : getListeners()) {
                 l.sendPendingMessagesFailed(account);
             }
-            addErrorMessage(account, null, e);
-
         } finally {
             if (lastFailure == null) {
                 notificationController.clearSendFailedNotification(account);
@@ -2939,7 +2806,6 @@ public class MessagingController {
             moveMessageToDraftsFolder(account, localFolder, localStore, message);
         }
 
-        addErrorMessage(account, "Failed to send message", exception);
         message.setFlag(Flag.X_SEND_FAILED, true);
 
         notifySynchronizeMailboxFailed(account, localFolder, exception);
@@ -3080,7 +2946,7 @@ public class MessagingController {
 
 
     public boolean isMoveCapable(MessageReference messageReference) {
-        return !messageReference.getUid().startsWith(K9.LOCAL_UID_PREFIX);
+        return !messageReference.getUid().startsWith(QMail.LOCAL_UID_PREFIX);
     }
 
     public boolean isCopyCapable(MessageReference message) {
@@ -3141,7 +3007,7 @@ public class MessagingController {
                             List<Message> messagesInThreads = collectMessagesInThreads(account, messages);
                             moveOrCopyMessageSynchronous(account, srcFolder, messagesInThreads, destFolder, false);
                         } catch (MessagingException e) {
-                            addErrorMessage(account, "Exception while moving messages", e);
+                            Timber.e(e, "Exception while moving messages");
                         }
                     }
                 });
@@ -3182,7 +3048,7 @@ public class MessagingController {
                             moveOrCopyMessageSynchronous(account, srcFolder, messagesInThreads, destFolder,
                                     true);
                         } catch (MessagingException e) {
-                            addErrorMessage(account, "Exception while copying messages", e);
+                            Timber.e(e, "Exception while copying messages");
                         }
                     }
                 });
@@ -3216,7 +3082,7 @@ public class MessagingController {
             List<String> uids = new LinkedList<>();
             for (Message message : inMessages) {
                 String uid = message.getUid();
-                if (!uid.startsWith(K9.LOCAL_UID_PREFIX)) {
+                if (!uid.startsWith(QMail.LOCAL_UID_PREFIX)) {
                     uids.add(uid);
                 }
 
@@ -3285,8 +3151,6 @@ public class MessagingController {
             Timber.i("Failed to move/copy message because storage is not available - trying again later.");
             throw new UnavailableAccountException(e);
         } catch (MessagingException me) {
-            addErrorMessage(account, null, me);
-
             throw new RuntimeException("Error moving message", me);
         }
     }
@@ -3313,7 +3177,7 @@ public class MessagingController {
                 deleteMessage(messageReference, null);
             }
         } catch (MessagingException me) {
-            addErrorMessage(account, null, me);
+            Timber.e(me, "Error deleting draft");
         } finally {
             closeFolder(localFolder);
         }
@@ -3490,8 +3354,6 @@ public class MessagingController {
             Timber.i("Failed to delete message because storage is not available - trying again later.");
             throw new UnavailableAccountException(e);
         } catch (MessagingException me) {
-            addErrorMessage(account, null, me);
-
             throw new RuntimeException("Error deleting message from local store.", me);
         } finally {
             closeFolder(localFolder);
@@ -3562,7 +3424,6 @@ public class MessagingController {
                     throw new UnavailableAccountException(e);
                 } catch (Exception e) {
                     Timber.e(e, "emptyTrash failed");
-                    addErrorMessage(account, null, e);
                 } finally {
                     closeFolder(localFolder);
                 }
@@ -3591,7 +3452,6 @@ public class MessagingController {
             throw new UnavailableAccountException(e);
         } catch (Exception e) {
             Timber.e(e, "clearFolder failed");
-            addErrorMessage(account, null, e);
         } finally {
             closeFolder(localFolder);
         }
@@ -3675,9 +3535,9 @@ public class MessagingController {
         if (useManualWakeLock) {
             TracingPowerManager pm = TracingPowerManager.getPowerManager(context);
 
-            twakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "K9 MessagingController.checkMail");
+            twakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "QMail MessagingController.checkMail");
             twakeLock.setReferenceCounted(false);
-            twakeLock.acquire(K9.MANUAL_WAKE_LOCK_TIMEOUT);
+            twakeLock.acquire(QMail.MANUAL_WAKE_LOCK_TIMEOUT);
         }
         final TracingWakeLock wakeLock = twakeLock;
 
@@ -3707,7 +3567,6 @@ public class MessagingController {
 
                 } catch (Exception e) {
                     Timber.e(e, "Unable to synchronize mail");
-                    addErrorMessage(account, null, e);
                 }
                 putBackground("finalize sync", null, new Runnable() {
                             @Override
@@ -3763,8 +3622,8 @@ public class MessagingController {
                 if (modeMismatch(aDisplayMode, fDisplayClass)) {
                     // Never sync a folder that isn't displayed
                     /*
-                    if (K9.DEBUG) {
-                        Log.v(K9.LOG_TAG, "Not syncing folder " + folder.getId() +
+                    if (QMail.DEBUG) {
+                        Log.v(QMail.LOG_TAG, "Not syncing folder " + folder.getId() +
                               " which is in display mode " + fDisplayClass + " while account is in display mode " + aDisplayMode);
                     }
                     */
@@ -3775,8 +3634,8 @@ public class MessagingController {
                 if (modeMismatch(aSyncMode, fSyncClass)) {
                     // Do not sync folders in the wrong class
                     /*
-                    if (K9.DEBUG) {
-                        Log.v(K9.LOG_TAG, "Not syncing folder " + folder.getId() +
+                    if (QMail.DEBUG) {
+                        Log.v(QMail.LOG_TAG, "Not syncing folder " + folder.getId() +
                               " which is in sync mode " + fSyncClass + " while account is in sync mode " + aSyncMode);
                     }
                     */
@@ -3787,7 +3646,6 @@ public class MessagingController {
             }
         } catch (MessagingException e) {
             Timber.e(e, "Unable to synchronize account %s", account.getName());
-            addErrorMessage(account, null, e);
         } finally {
             putBackground("clear notification flag for " + account.getDescription(), null, new Runnable() {
                         @Override
@@ -3854,7 +3712,6 @@ public class MessagingController {
                         } catch (Exception e) {
                             Timber.e(e, "Exception while processing folder %s:%s",
                                     account.getDescription(), folder.getId());
-                            addErrorMessage(account, null, e);
                         } finally {
                             closeFolder(tLocalFolder);
                         }
@@ -4073,7 +3930,6 @@ public class MessagingController {
 
         } catch (MessagingException e) {
             Timber.e(e, "Unable to save message as draft.");
-            addErrorMessage(account, null, e);
         }
         return localMessage;
     }
@@ -4159,15 +4015,13 @@ public class MessagingController {
 
             Store localStore = account.getLocalStore();
             for (final Folder folder : localStore.getFolders(false)) {
-                if (folder.getId().equals(account.getErrorFolderId())
-                        || folder.getId().equals(account.getOutboxFolderId())) {
+                if (folder.getId().equals(account.getOutboxFolderId())) {
                     /*
-                    if (K9.DEBUG) {
-                        Log.v(K9.LOG_TAG, "Not pushing folder " + folder.getId() +
+                    if (QMail.DEBUG) {
+                        Log.v(QMail.LOG_TAG, "Not pushing folder " + folder.getId() +
                               " which should never be pushed");
                     }
                     */
-
                     continue;
                 }
                 folder.open(Folder.OPEN_MODE_RW);
@@ -4178,8 +4032,8 @@ public class MessagingController {
                 if (modeMismatch(aDisplayMode, fDisplayClass)) {
                     // Never push a folder that isn't displayed
                     /*
-                    if (K9.DEBUG) {
-                        Log.v(K9.LOG_TAG, "Not pushing folder " + folder.getId() +
+                    if (QMail.DEBUG) {
+                        Log.v(QMail.LOG_TAG, "Not pushing folder " + folder.getId() +
                               " which is in display class " + fDisplayClass + " while account is in display mode " + aDisplayMode);
                     }
                     */
@@ -4190,8 +4044,8 @@ public class MessagingController {
                 if (modeMismatch(aPushMode, fPushClass)) {
                     // Do not push folders in the wrong class
                     /*
-                    if (K9.DEBUG) {
-                        Log.v(K9.LOG_TAG, "Not pushing folder " + folder.getId() +
+                    if (QMail.DEBUG) {
+                        Log.v(QMail.LOG_TAG, "Not pushing folder " + folder.getId() +
                               " which is in push mode " + fPushClass + " while account is in push mode " + aPushMode);
                     }
                     */
@@ -4302,7 +4156,7 @@ public class MessagingController {
                     for (MessagingListener l : getListeners()) {
                         l.synchronizeMailboxFailed(account, remoteFolder.getId(), remoteFolder.getName(), errorMessage);
                     }
-                    addErrorMessage(account, null, e);
+                    Timber.e(e);
                 } finally {
                     closeFolder(localFolder);
                     latch.countDown();

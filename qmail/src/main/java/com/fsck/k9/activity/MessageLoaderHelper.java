@@ -14,12 +14,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 
+import com.fsck.k9.QMail;
 import com.fsck.k9.autocrypt.AutocryptOperations;
 import com.fsck.k9.ui.crypto.OpenPgpApiFactory;
 import timber.log.Timber;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.controller.MessagingListener;
@@ -130,7 +130,7 @@ public class MessageLoaderHelper {
     public void asyncRestartMessageCryptoProcessing() {
         cancelAndClearCryptoOperation();
         cancelAndClearDecodeLoader();
-        if (K9.isOpenPgpProviderConfigured()) {
+        if (QMail.isOpenPgpProviderConfigured()) {
             startOrResumeCryptoOperation();
         } else {
             startOrResumeDecodeMessage();
@@ -210,7 +210,7 @@ public class MessageLoaderHelper {
             return;
         }
 
-        if (K9.isOpenPgpProviderConfigured()) {
+        if (QMail.isOpenPgpProviderConfigured()) {
             startOrResumeCryptoOperation();
             return;
         }

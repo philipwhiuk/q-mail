@@ -10,11 +10,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+
+import com.fsck.k9.QMail;
 import timber.log.Timber;
 
 import com.fsck.k9.Account.QuoteStyle;
 import com.fsck.k9.Identity;
-import com.fsck.k9.K9;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.activity.misc.Attachment;
@@ -107,7 +108,7 @@ public abstract class MessageBuilder {
             message.setHeader("Return-Receipt-To", from.toEncodedString());
         }
 
-        if (!K9.hideUserAgent()) {
+        if (!QMail.hideUserAgent()) {
             message.setHeader("User-Agent", context.getString(R.string.message_header_mua));
         }
 
@@ -188,7 +189,7 @@ public abstract class MessageBuilder {
         // If this is a draft, add metadata for thawing.
         if (isDraft) {
             // Add the identity to the message.
-            message.addHeader(K9.IDENTITY_HEADER, buildIdentityHeader(body, bodyPlain));
+            message.addHeader(QMail.IDENTITY_HEADER, buildIdentityHeader(body, bodyPlain));
         }
     }
 

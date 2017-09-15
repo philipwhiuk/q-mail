@@ -17,7 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.autocrypt.AutocryptOperations;
 import com.fsck.k9.crypto.MessageDecryptVerifier;
 import com.fsck.k9.mail.Address;
@@ -94,17 +94,17 @@ public class MessageCryptoHelper {
             AutocryptOperations autocryptOperations) {
         this.context = context.getApplicationContext();
 
-        if (!K9.isOpenPgpProviderConfigured()) {
+        if (!QMail.isOpenPgpProviderConfigured()) {
             throw new IllegalStateException("MessageCryptoHelper must only be called with a OpenPGP provider!");
         }
 
         this.autocryptOperations = autocryptOperations;
         this.openPgpApiFactory = openPgpApiFactory;
-        openPgpProviderPackage = K9.getOpenPgpProvider();
+        openPgpProviderPackage = QMail.getOpenPgpProvider();
     }
 
     public boolean isConfiguredForOutdatedCryptoProvider() {
-        return !openPgpProviderPackage.equals(K9.getOpenPgpProvider());
+        return !openPgpProviderPackage.equals(QMail.getOpenPgpProvider());
     }
 
     public void asyncStartOrResumeProcessingMessage(Message message, MessageCryptoCallback callback,

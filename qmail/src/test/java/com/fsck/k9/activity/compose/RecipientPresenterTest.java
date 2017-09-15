@@ -10,7 +10,7 @@ import android.content.Intent;
 import android.os.ParcelFileDescriptor;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.K9RobolectricTestRunner;
 import com.fsck.k9.activity.compose.RecipientMvpView.CryptoSpecialModeDisplayType;
 import com.fsck.k9.activity.compose.RecipientMvpView.CryptoStatusDisplayType;
@@ -330,7 +330,7 @@ public class RecipientPresenterTest {
         when(autocryptStatusInteractor.retrieveCryptoProviderRecipientStatus(
                 any(OpenPgpApi.class), any(String[].class))).thenReturn(autocryptStatusResult);
 
-        K9.setOpenPgpProvider(CRYPTO_PROVIDER);
+        QMail.setOpenPgpProvider(CRYPTO_PROVIDER);
         permissionPingIntent.putExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_SUCCESS);
         when(account.getCryptoKey()).thenReturn(CRYPTO_KEY_ID);
         when(openPgpServiceConnection.isBound()).thenReturn(true);

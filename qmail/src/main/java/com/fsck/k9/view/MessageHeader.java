@@ -29,7 +29,7 @@ import android.widget.Toast;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.FontSizes;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.misc.ContactPictureLoader;
 import com.fsck.k9.helper.ClipboardManager;
@@ -68,7 +68,7 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
     private View mForwardedIcon;
     private Message mMessage;
     private Account mAccount;
-    private FontSizes mFontSizes = K9.getFontSizes();
+    private FontSizes mFontSizes = QMail.getFontSizes();
     private Contacts mContacts;
     private SavedState mSavedState;
 
@@ -269,7 +269,7 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
     }
 
     public void populate(final Message message, final Account account) {
-        final Contacts contacts = K9.showContactName() ? mContacts : null;
+        final Contacts contacts = QMail.showContactName() ? mContacts : null;
         final CharSequence from = MessageHelper.toFriendly(message.getFrom(), contacts);
         final CharSequence to = MessageHelper.toFriendly(message.getRecipients(Message.RecipientType.TO), contacts);
         final CharSequence cc = MessageHelper.toFriendly(message.getRecipients(Message.RecipientType.CC), contacts);
@@ -301,7 +301,7 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
         mMessage = message;
         mAccount = account;
 
-        if (K9.showContactPicture()) {
+        if (QMail.showContactPicture()) {
             mContactBadge.setVisibility(View.VISIBLE);
             mContactsPictureLoader = ContactPicture.getContactPictureLoader(mContext);
         }  else {
@@ -333,7 +333,7 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
                 | DateUtils.FORMAT_SHOW_YEAR);
         mDateView.setText(dateTime);
 
-        if (K9.showContactPicture()) {
+        if (QMail.showContactPicture()) {
             if (counterpartyAddress != null) {
                 Utility.setContactForBadge(mContactBadge, counterpartyAddress);
                 mContactsPictureLoader.loadContactPicture(counterpartyAddress, mContactBadge);

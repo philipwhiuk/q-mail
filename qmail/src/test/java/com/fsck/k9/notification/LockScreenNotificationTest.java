@@ -9,8 +9,8 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.LockScreenNotificationVisibility;
+import com.fsck.k9.QMail;
+import com.fsck.k9.QMail.LockScreenNotificationVisibility;
 import com.fsck.k9.K9RobolectricTestRunner;
 import com.fsck.k9.MockHelper;
 import com.fsck.k9.R;
@@ -52,7 +52,7 @@ public class LockScreenNotificationTest {
 
     @Test
     public void configureLockScreenNotification_NOTHING() throws Exception {
-        K9.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.NOTHING);
+        QMail.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.NOTHING);
 
         lockScreenNotification.configureLockScreenNotification(builder, notificationData);
 
@@ -61,7 +61,7 @@ public class LockScreenNotificationTest {
 
     @Test
     public void configureLockScreenNotification_APP_NAME() throws Exception {
-        K9.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.APP_NAME);
+        QMail.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.APP_NAME);
 
         lockScreenNotification.configureLockScreenNotification(builder, notificationData);
 
@@ -70,7 +70,7 @@ public class LockScreenNotificationTest {
 
     @Test
     public void configureLockScreenNotification_EVERYTHING() throws Exception {
-        K9.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.EVERYTHING);
+        QMail.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.EVERYTHING);
 
         lockScreenNotification.configureLockScreenNotification(builder, notificationData);
 
@@ -79,7 +79,7 @@ public class LockScreenNotificationTest {
 
     @Test
     public void configureLockScreenNotification_SENDERS_withSingleMessage() throws Exception {
-        K9.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.SENDERS);
+        QMail.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.SENDERS);
         String senderName = "alice@example.com";
         NotificationContent content = createNotificationContent(senderName);
         NotificationHolder holder = new NotificationHolder(42, content);
@@ -98,7 +98,7 @@ public class LockScreenNotificationTest {
 
     @Test
     public void configureLockScreenNotification_SENDERS_withMultipleMessages() throws Exception {
-        K9.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.SENDERS);
+        QMail.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.SENDERS);
         NotificationContent content1 = createNotificationContent("alice@example.com");
         NotificationContent content2 = createNotificationContent("Bob <bob@example.com>");
         NotificationContent content3 = createNotificationContent("\"Peter Lustig\" <peter@example.com>");
@@ -141,7 +141,7 @@ public class LockScreenNotificationTest {
 
     @Test
     public void configureLockScreenNotification_MESSAGE_COUNT() throws Exception {
-        K9.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.MESSAGE_COUNT);
+        QMail.setLockScreenNotificationVisibility(LockScreenNotificationVisibility.MESSAGE_COUNT);
         when(notificationData.getNewMessagesCount()).thenReturn(NEW_MESSAGE_COUNT);
         when(notificationData.getUnreadMessageCount()).thenReturn(UNREAD_MESSAGE_COUNT);
 

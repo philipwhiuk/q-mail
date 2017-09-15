@@ -1,6 +1,6 @@
 package com.fsck.k9.view;
 
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -49,7 +49,7 @@ public class ViewSwitcher extends ViewAnimator implements AnimationListener {
     }
 
     private void setupAnimations(Animation in, Animation out) {
-        if (K9.showAnimations()) {
+        if (QMail.showAnimations()) {
             setInAnimation(in);
             setOutAnimation(out);
             out.setAnimationListener(this);
@@ -60,7 +60,7 @@ public class ViewSwitcher extends ViewAnimator implements AnimationListener {
     }
 
     private void handleSwitchCompleteCallback() {
-        if (!K9.showAnimations()) {
+        if (!QMail.showAnimations()) {
             onAnimationEnd(null);
         }
     }

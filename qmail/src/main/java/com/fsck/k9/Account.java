@@ -281,7 +281,7 @@ public class Account implements BaseAccount, StoreConfig {
         automaticCheckIntervalMinutes = -1;
         idleRefreshMinutes = 24;
         pushPollOnConnect = true;
-        displayCount = K9.DEFAULT_VISIBLE_LIMIT;
+        displayCount = QMail.DEFAULT_VISIBLE_LIMIT;
         accountNumber = -1;
         notifyNewMail = true;
         folderNotifyNewMailMode = FolderMode.ALL;
@@ -379,16 +379,16 @@ public class Account implements BaseAccount, StoreConfig {
 
         storeUri = Base64.decode(storage.getString(accountUuid + ".storeUri", null));
         localStorageProviderId = storage.getString(
-                accountUuid + ".localStorageProvider", StorageManager.getInstance(K9.app).getDefaultProviderId());
+                accountUuid + ".localStorageProvider", StorageManager.getInstance(QMail.app).getDefaultProviderId());
         transportUri = Base64.decode(storage.getString(accountUuid + ".transportUri", null));
         description = storage.getString(accountUuid + ".description", null);
         alwaysBcc = storage.getString(accountUuid + ".alwaysBcc", alwaysBcc);
         automaticCheckIntervalMinutes = storage.getInt(accountUuid + ".automaticCheckIntervalMinutes", -1);
         idleRefreshMinutes = storage.getInt(accountUuid + ".idleRefreshMinutes", 24);
         pushPollOnConnect = storage.getBoolean(accountUuid + ".pushPollOnConnect", true);
-        displayCount = storage.getInt(accountUuid + ".displayCount", K9.DEFAULT_VISIBLE_LIMIT);
+        displayCount = storage.getInt(accountUuid + ".displayCount", QMail.DEFAULT_VISIBLE_LIMIT);
         if (displayCount < 0) {
-            displayCount = K9.DEFAULT_VISIBLE_LIMIT;
+            displayCount = QMail.DEFAULT_VISIBLE_LIMIT;
         }
         latestOldMessageSeenTime = storage.getLong(accountUuid + ".latestOldMessageSeenTime", 0);
         notifyNewMail = storage.getBoolean(accountUuid + ".notifyNewMail", false);
@@ -814,7 +814,7 @@ public class Account implements BaseAccount, StoreConfig {
         }
 
         LocalStore localStore = getLocalStore();
-        if (K9.measureAccounts()) {
+        if (QMail.measureAccounts()) {
             stats.size = localStore.getSize();
         }
 
@@ -992,7 +992,7 @@ public class Account implements BaseAccount, StoreConfig {
         if (displayCount != -1) {
             this.displayCount = displayCount;
         } else {
-            this.displayCount = K9.DEFAULT_VISIBLE_LIMIT;
+            this.displayCount = QMail.DEFAULT_VISIBLE_LIMIT;
         }
         resetVisibleLimits();
     }
@@ -1036,8 +1036,7 @@ public class Account implements BaseAccount, StoreConfig {
                 folderId.equals(getArchiveFolderId()) ||
                 folderId.equals(getSpamFolderId()) ||
                 folderId.equals(getOutboxFolderId()) ||
-                folderId.equals(getSentFolderId()) ||
-                folderId.equals(getErrorFolderId())));
+                folderId.equals(getSentFolderId())));
     }
 
     public synchronized String getDraftsFolderId() {
@@ -1053,15 +1052,11 @@ public class Account implements BaseAccount, StoreConfig {
      * @return true if account has a drafts folder set.
      */
     public synchronized boolean hasDraftsFolder() {
-        return !K9.FOLDER_NONE.equalsIgnoreCase(draftsFolderId);
+        return !QMail.FOLDER_NONE.equalsIgnoreCase(draftsFolderId);
     }
 
     public synchronized String getSentFolderId() {
         return sentFolderId;
-    }
-
-    public synchronized String getErrorFolderId() {
-        return K9.ERROR_FOLDER_ID;
     }
 
     public synchronized void setSentFolderId(String id) {
@@ -1073,7 +1068,7 @@ public class Account implements BaseAccount, StoreConfig {
      * @return true if account has a sent folder set.
      */
     public synchronized boolean hasSentFolder() {
-        return !K9.FOLDER_NONE.equalsIgnoreCase(sentFolderId);
+        return !QMail.FOLDER_NONE.equalsIgnoreCase(sentFolderId);
     }
 
 
@@ -1090,7 +1085,7 @@ public class Account implements BaseAccount, StoreConfig {
      * @return true if account has a trash folder set.
      */
     public synchronized boolean hasTrashFolder() {
-        return !K9.FOLDER_NONE.equalsIgnoreCase(trashFolderId);
+        return !QMail.FOLDER_NONE.equalsIgnoreCase(trashFolderId);
     }
 
     public synchronized String getArchiveFolderId() {
@@ -1106,7 +1101,7 @@ public class Account implements BaseAccount, StoreConfig {
      * @return true if account has an archive folder set.
      */
     public synchronized boolean hasArchiveFolder() {
-        return !K9.FOLDER_NONE.equalsIgnoreCase(archiveFolderId);
+        return !QMail.FOLDER_NONE.equalsIgnoreCase(archiveFolderId);
     }
 
     public synchronized String getSpamFolderId() {
@@ -1122,7 +1117,7 @@ public class Account implements BaseAccount, StoreConfig {
      * @return true if account has a spam folder set.
      */
     public synchronized boolean hasSpamFolder() {
-        return !K9.FOLDER_NONE.equalsIgnoreCase(spamFolderId);
+        return !QMail.FOLDER_NONE.equalsIgnoreCase(spamFolderId);
     }
 
     public synchronized String getOutboxFolderId() {
@@ -1265,11 +1260,11 @@ public class Account implements BaseAccount, StoreConfig {
     }
 
     public LocalStore getLocalStore() throws MessagingException {
-        return LocalStore.getInstance(this, K9.app);
+        return LocalStore.getInstance(this, QMail.app);
     }
 
     public Store getRemoteStore() throws MessagingException {
-        return RemoteStore.getInstance(K9.app, this);
+        return RemoteStore.getInstance(QMail.app, this);
     }
 
     // It'd be great if this actually went into the store implementation
@@ -1763,7 +1758,6 @@ public class Account implements BaseAccount, StoreConfig {
         excludeSpecialFolder(search, getSpamFolderId());
         excludeSpecialFolder(search, getOutboxFolderId());
         excludeSpecialFolder(search, getSentFolderId());
-        excludeSpecialFolder(search, getErrorFolderId());
         search.or(new SearchCondition(SearchField.FOLDER, Attribute.EQUALS, getInboxFolderId()));
     }
 
@@ -1792,7 +1786,7 @@ public class Account implements BaseAccount, StoreConfig {
     }
 
     private void excludeSpecialFolder(LocalSearch search, String folderName) {
-        if (folderName != null && !K9.FOLDER_NONE.equals(folderName)) {
+        if (folderName != null && !QMail.FOLDER_NONE.equals(folderName)) {
             search.and(SearchField.FOLDER, folderName, Attribute.NOT_EQUALS);
         }
     }

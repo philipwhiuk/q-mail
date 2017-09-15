@@ -17,6 +17,8 @@ import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.text.TextUtils.TruncateAt;
 import android.text.format.DateUtils;
+
+import com.fsck.k9.QMail;
 import timber.log.Timber;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -46,7 +48,6 @@ import com.fsck.k9.Account.FolderMode;
 import com.fsck.k9.AccountStats;
 import com.fsck.k9.BaseAccount;
 import com.fsck.k9.FontSizes;
-import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.compose.MessageActions;
@@ -98,7 +99,7 @@ public class FolderList extends K9ListActivity {
 
     private int mUnreadMessageCount;
 
-    private FontSizes mFontSizes = K9.getFontSizes();
+    private FontSizes mFontSizes = QMail.getFontSizes();
     private Context context;
 
     private MenuItem mRefreshMenuItem;
@@ -234,7 +235,7 @@ public class FolderList extends K9ListActivity {
         TracingPowerManager pm = TracingPowerManager.getPowerManager(this);
         final TracingWakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "FolderList checkMail");
         wakeLock.setReferenceCounted(false);
-        wakeLock.acquire(K9.WAKE_LOCK_TIMEOUT);
+        wakeLock.acquire(QMail.WAKE_LOCK_TIMEOUT);
         MessagingListener listener = new SimpleMessagingListener() {
             @Override
             public void synchronizeMailboxFinished(Account account, String folderId, String folderName, int totalMessagesInMailbox, int numNewMessages) {
@@ -376,7 +377,7 @@ public class FolderList extends K9ListActivity {
         }
 
         if (intent.getBooleanExtra(EXTRA_FROM_SHORTCUT, false) &&
-                   !K9.FOLDER_NONE.equals(mAccount.getAutoExpandFolderId())) {
+                   !QMail.FOLDER_NONE.equals(mAccount.getAutoExpandFolderId())) {
             onOpenFolder(mAccount.getAutoExpandFolderId());
             finish();
         } else {
@@ -1085,7 +1086,7 @@ public class FolderList extends K9ListActivity {
                 }
             }
 
-            if (K9.messageListStars() && folder.flaggedMessageCount > 0) {
+            if (QMail.messageListStars() && folder.flaggedMessageCount > 0) {
                 holder.flaggedMessageCount.setText(String.format(Locale.getDefault(), "%d", folder.flaggedMessageCount));
                 holder.flaggedMessageCountWrapper.setOnClickListener(
                         createFlaggedSearch(mAccount, folder));
@@ -1128,7 +1129,7 @@ public class FolderList extends K9ListActivity {
 
             mFontSizes.setViewTextSize(holder.folderName, mFontSizes.getFolderName());
 
-            if (K9.wrapFolderNames()) {
+            if (QMail.wrapFolderNames()) {
                 holder.folderName.setEllipsize(null);
                 holder.folderName.setSingleLine(false);
             }

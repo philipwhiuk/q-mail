@@ -7,7 +7,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.mail.Address;
 
 import biweekly.property.Attendee;
@@ -44,17 +44,17 @@ public class ICalendarHelper {
     //TODO: Should this use separate settings for name vs email?
     public static CharSequence toFriendly(Attendee attendee, Contacts contacts) {
         return toFriendly(attendee,contacts,
-                K9.showCorrespondentNames(),
-                K9.changeContactNameColor(),
-                K9.getContactNameColor());
+                QMail.showCorrespondentNames(),
+                QMail.changeContactNameColor(),
+                QMail.getContactNameColor());
     }
 
     //TODO: Should this use separate settings for name vs email?
     public static CharSequence toFriendly(Organizer organizer, Contacts contacts) {
         return toFriendly(organizer,contacts,
-                K9.showCorrespondentNames(),
-                K9.changeContactNameColor(),
-                K9.getContactNameColor());
+                QMail.showCorrespondentNames(),
+                QMail.changeContactNameColor(),
+                QMail.getContactNameColor());
     }
 
     public static CharSequence toFriendly(Attendee[] attendees, Contacts contacts) {

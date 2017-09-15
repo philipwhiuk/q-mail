@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.FontSizes;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.Address;
@@ -52,7 +52,7 @@ class MessageListAdapter extends CursorAdapter {
     private Drawable mForwardedIcon;
     private Drawable mAnsweredIcon;
     private Drawable mForwardedAnsweredIcon;
-    private FontSizes fontSizes = K9.getFontSizes();
+    private FontSizes fontSizes = QMail.getFontSizes();
 
     MessageListAdapter(MessageListFragment fragment) {
         super(fragment.getActivity(), null, 0);
@@ -309,7 +309,7 @@ class MessageListAdapter extends CursorAdapter {
 
     private int buildPreviewSpanColor() {
         //TODO: make this part of the theme
-        return (K9.getK9Theme() == K9.Theme.LIGHT) ?
+        return (QMail.getK9Theme() == QMail.Theme.LIGHT) ?
                 Color.rgb(105, 105, 105) :
                 Color.rgb(160, 160, 160);
     }
@@ -326,7 +326,7 @@ class MessageListAdapter extends CursorAdapter {
     }
 
     private void setBackgroundColor(View view, boolean selected, boolean read) {
-        if (selected || K9.useBackgroundAsUnreadIndicator()) {
+        if (selected || QMail.useBackgroundAsUnreadIndicator()) {
             int res;
             if (selected) {
                 res = R.attr.messageListSelectedBackgroundColor;

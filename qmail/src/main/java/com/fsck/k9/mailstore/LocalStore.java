@@ -29,10 +29,11 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+
+import com.fsck.k9.QMail;
 import timber.log.Timber;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.controller.PendingCommandSerializer;
 import com.fsck.k9.controller.MessagingControllerCommands.PendingCommand;
@@ -180,7 +181,7 @@ public class LocalStore extends Store {
      */
     private static final int THREAD_FLAG_UPDATE_BATCH_SIZE = 500;
 
-    public static final int DB_VERSION = 62;
+    public static final int DB_VERSION = 63;
 
     private final Context context;
     private final ContentResolver contentResolver;
@@ -305,7 +306,7 @@ public class LocalStore extends Store {
     }
 
     public void compact() throws MessagingException {
-        if (K9.isDebug()) {
+        if (QMail.isDebug()) {
             Timber.i("Before compaction size = %d", getSize());
         }
 
@@ -317,20 +318,20 @@ public class LocalStore extends Store {
             }
         });
 
-        if (K9.isDebug()) {
+        if (QMail.isDebug()) {
             Timber.i("After compaction size = %d", getSize());
         }
     }
 
 
     public void clear() throws MessagingException {
-        if (K9.isDebug()) {
+        if (QMail.isDebug()) {
             Timber.i("Before prune size = %d", getSize());
         }
 
         deleteAllMessageDataFromDisk();
 
-        if (K9.isDebug()) {
+        if (QMail.isDebug()) {
             Timber.i("After prune / before compaction size = %d", getSize());
             Timber.i("Before clear folder count = %d", getFolderCount());
             Timber.i("Before clear message count = %d", getMessageCount());
@@ -356,7 +357,7 @@ public class LocalStore extends Store {
 
         compact();
 
-        if (K9.isDebug()) {
+        if (QMail.isDebug()) {
             Timber.i("After clear message count = %d", getMessageCount());
             Timber.i("After clear size = %d", getSize());
         }

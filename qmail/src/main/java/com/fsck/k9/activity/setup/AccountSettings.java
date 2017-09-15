@@ -32,7 +32,7 @@ import com.fsck.k9.Account.MessageFormat;
 import com.fsck.k9.Account.QuoteStyle;
 import com.fsck.k9.Account.Searchable;
 import com.fsck.k9.Account.ShowPictures;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.NotificationSetting;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
@@ -693,13 +693,13 @@ public class AccountSettings extends K9PreferenceActivity {
             }
         });
 
-        hasPgpCrypto = K9.isOpenPgpProviderConfigured();
+        hasPgpCrypto = QMail.isOpenPgpProviderConfigured();
         PreferenceScreen cryptoMenu = (PreferenceScreen) findPreference(PREFERENCE_CRYPTO);
         if (hasPgpCrypto) {
             pgpCryptoKey = (OpenPgpKeyPreference) findPreference(PREFERENCE_CRYPTO_KEY);
 
             pgpCryptoKey.setValue(account.getCryptoKey());
-            pgpCryptoKey.setOpenPgpProvider(K9.getOpenPgpProvider());
+            pgpCryptoKey.setOpenPgpProvider(QMail.getOpenPgpProvider());
             // TODO: other identities?
             pgpCryptoKey.setDefaultUserId(OpenPgpApiHelper.buildUserId(account.getIdentity(0)));
             pgpCryptoKey.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -1027,8 +1027,8 @@ public class AccountSettings extends K9PreferenceActivity {
             allFolderValues = new String[folders.size() + 1];
             allFolderLabels = new String[folders.size() + 1];
 
-            allFolderValues[0] = K9.FOLDER_NONE;
-            allFolderLabels[0] = K9.FOLDER_NONE;
+            allFolderValues[0] = QMail.FOLDER_NONE;
+            allFolderLabels[0] = QMail.FOLDER_NONE;
 
             int i = 1;
             for (Folder folder : folders) {

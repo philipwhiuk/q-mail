@@ -12,7 +12,7 @@ import android.support.v4.app.NotificationCompat.Builder;
 import android.text.TextUtils;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 
 
@@ -38,7 +38,7 @@ class LockScreenNotification {
             return;
         }
 
-        switch (K9.getLockScreenNotificationVisibility()) {
+        switch (QMail.getLockScreenNotificationVisibility()) {
             case NOTHING: {
                 builder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
                 break;

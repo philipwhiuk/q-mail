@@ -7,7 +7,7 @@ import android.test.ProviderTestCase2;
 import android.test.mock.MockContentResolver;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 
 import org.junit.After;
@@ -33,7 +33,7 @@ public class MessageProviderTest extends ProviderTestCase2 {
     public void setUp() throws Exception {
         super.setUp();
         mMockResolver = getMockContentResolver();
-        mContext = K9.app;
+        mContext = QMail.app;
         Preferences preferences = Preferences.getPreferences(getMockContext());
         List<Account> accountList = preferences.getAccounts();
         for (Account account: accountList) {

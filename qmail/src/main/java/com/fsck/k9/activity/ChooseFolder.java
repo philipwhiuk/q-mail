@@ -5,13 +5,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -30,7 +28,7 @@ import android.widget.TextView;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.FolderMode;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.controller.MessagingController;
@@ -377,7 +375,7 @@ public class ChooseFolder extends K9ListActivity {
                     topFolders.size() + ((mShowOptionNone) ? 1 : 0));
 
             if (mShowOptionNone) {
-                localFolders.add(new FolderIdNamePair(K9.FOLDER_NONE, K9.FOLDER_NONE, 0));
+                localFolders.add(new FolderIdNamePair(QMail.FOLDER_NONE, QMail.FOLDER_NONE, 0));
             }
 
             localFolders.addAll(topFolders);
@@ -397,8 +395,7 @@ public class ChooseFolder extends K9ListActivity {
                         folderTuple.setName(getString(R.string.special_mailbox_name_inbox));
                         folderList.add(folderTuple);
                         mHeldInbox = folderTuple.id;
-                    } else if (!K9.ERROR_FOLDER_ID.equals(folderTuple.id) &&
-                            !account.getOutboxFolderId().equals(folderTuple.id)) {
+                    } else if (!account.getOutboxFolderId().equals(folderTuple.id)) {
                         folderList.add(folderTuple);
                     }
 

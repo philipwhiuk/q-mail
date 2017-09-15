@@ -18,7 +18,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.provider.MessageProvider;
 
@@ -50,7 +50,7 @@ public class MessageListRemoteViewFactory implements RemoteViewsService.RemoteVi
 
     @Override
     public void onCreate() {
-        senderAboveSubject = K9.messageListSenderAboveSubject();
+        senderAboveSubject = QMail.messageListSenderAboveSubject();
         readTextColor = ContextCompat.getColor(context, R.color.message_list_widget_text_read);
         unreadTextColor = ContextCompat.getColor(context, R.color.message_list_widget_text_unread);
     }

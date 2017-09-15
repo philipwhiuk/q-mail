@@ -22,7 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.preferences.StorageEditor;
@@ -54,7 +54,7 @@ public class OpenPgpAppSelectDialog extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setTheme(K9.getK9Theme() == K9.Theme.LIGHT ?
+        setTheme(QMail.getK9Theme() == QMail.Theme.LIGHT ?
                 R.style.Theme_K9_Dialog_Translucent_Light : R.style.Theme_K9_Dialog_Translucent_Dark);
 
         if (savedInstanceState == null) {
@@ -133,7 +133,7 @@ public class OpenPgpAppSelectDialog extends Activity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            selectedPackage = K9.getOpenPgpProvider();
+            selectedPackage = QMail.getOpenPgpProvider();
         }
 
         @NonNull
@@ -240,10 +240,10 @@ public class OpenPgpAppSelectDialog extends Activity {
     }
 
     private void persistOpenPgpProviderSetting(String selectedPackage) {
-        K9.setOpenPgpProvider(selectedPackage);
+        QMail.setOpenPgpProvider(selectedPackage);
 
         StorageEditor editor = Preferences.getPreferences(this).getStorage().edit();
-        K9.save(editor);
+        QMail.save(editor);
         editor.commit();
     }
 

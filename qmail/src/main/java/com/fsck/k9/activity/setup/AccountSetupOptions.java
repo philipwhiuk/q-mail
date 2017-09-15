@@ -148,7 +148,7 @@ public class AccountSetupOptions extends K9Activity implements OnClickListener {
                 getIntent().getBooleanExtra(EXTRA_MAKE_DEFAULT, false)) {
             Preferences.getPreferences(this).setDefaultAccount(mAccount);
         }
-        K9.setServicesEnabled(this);
+        QMail.setServicesEnabled(this);
         AccountSetupNames.actionSetNames(this, mAccount);
         finish();
     }

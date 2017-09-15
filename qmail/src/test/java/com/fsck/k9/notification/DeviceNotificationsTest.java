@@ -12,9 +12,9 @@ import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationCompat.InboxStyle;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.NotificationHideSubject;
-import com.fsck.k9.K9.NotificationQuickDelete;
+import com.fsck.k9.QMail;
+import com.fsck.k9.QMail.NotificationHideSubject;
+import com.fsck.k9.QMail.NotificationQuickDelete;
 import com.fsck.k9.K9RobolectricTestRunner;
 import com.fsck.k9.NotificationSetting;
 import com.fsck.k9.R;
@@ -73,7 +73,7 @@ public class DeviceNotificationsTest {
 
     @Test
     public void buildSummaryNotification_withPrivacyModeActive() throws Exception {
-        K9.setNotificationHideSubject(NotificationHideSubject.ALWAYS);
+        QMail.setNotificationHideSubject(NotificationHideSubject.ALWAYS);
 
         Notification result = notifications.buildSummaryNotification(account, notificationData, false);
 
@@ -90,8 +90,8 @@ public class DeviceNotificationsTest {
 
     @Test
     public void buildSummaryNotification_withSingleMessageNotification() throws Exception {
-        K9.setNotificationHideSubject(NotificationHideSubject.NEVER);
-        K9.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.ALWAYS);
+        QMail.setNotificationHideSubject(NotificationHideSubject.NEVER);
+        QMail.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.ALWAYS);
         when(notificationData.isSingleMessageNotification()).thenReturn(true);
 
         Notification result = notifications.buildSummaryNotification(account, notificationData, false);
@@ -113,8 +113,8 @@ public class DeviceNotificationsTest {
 
     @Test
     public void buildSummaryNotification_withMultiMessageNotification() throws Exception {
-        K9.setNotificationHideSubject(NotificationHideSubject.NEVER);
-        K9.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.ALWAYS);
+        QMail.setNotificationHideSubject(NotificationHideSubject.NEVER);
+        QMail.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.ALWAYS);
         when(notificationData.isSingleMessageNotification()).thenReturn(false);
         when(notificationData.containsStarredMessages()).thenReturn(true);
 
@@ -142,8 +142,8 @@ public class DeviceNotificationsTest {
 
     @Test
     public void buildSummaryNotification_withAdditionalMessages() throws Exception {
-        K9.setNotificationHideSubject(NotificationHideSubject.NEVER);
-        K9.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.ALWAYS);
+        QMail.setNotificationHideSubject(NotificationHideSubject.NEVER);
+        QMail.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.ALWAYS);
         when(notificationData.isSingleMessageNotification()).thenReturn(false);
         when(notificationData.hasSummaryOverflowMessages()).thenReturn(true);
         when(notificationData.getSummaryOverflowMessagesCount()).thenReturn(23);
@@ -155,8 +155,8 @@ public class DeviceNotificationsTest {
 
     @Test
     public void buildSummaryNotification_withoutDeleteAllAction() throws Exception {
-        K9.setNotificationHideSubject(NotificationHideSubject.NEVER);
-        K9.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.NEVER);
+        QMail.setNotificationHideSubject(NotificationHideSubject.NEVER);
+        QMail.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.NEVER);
         when(notificationData.isSingleMessageNotification()).thenReturn(false);
 
         notifications.buildSummaryNotification(account, notificationData, false);
@@ -166,8 +166,8 @@ public class DeviceNotificationsTest {
 
     @Test
     public void buildSummaryNotification_withoutDeleteAction() throws Exception {
-        K9.setNotificationHideSubject(NotificationHideSubject.NEVER);
-        K9.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.NEVER);
+        QMail.setNotificationHideSubject(NotificationHideSubject.NEVER);
+        QMail.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.NEVER);
         when(notificationData.isSingleMessageNotification()).thenReturn(true);
 
         notifications.buildSummaryNotification(account, notificationData, false);

@@ -8,9 +8,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
+
+import com.fsck.k9.QMail;
 import timber.log.Timber;
 
-import com.fsck.k9.K9;
 import com.fsck.k9.mail.power.TracingPowerManager;
 import com.fsck.k9.mail.power.TracingPowerManager.TracingWakeLock;
 
@@ -27,7 +28,7 @@ public class CoreReceiver extends BroadcastReceiver {
         TracingPowerManager pm = TracingPowerManager.getPowerManager(context);
         TracingWakeLock wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CoreReceiver getWakeLock");
         wakeLock.setReferenceCounted(false);
-        wakeLock.acquire(K9.BOOT_RECEIVER_WAKE_LOCK_TIMEOUT);
+        wakeLock.acquire(QMail.BOOT_RECEIVER_WAKE_LOCK_TIMEOUT);
         Integer tmpWakeLockId = wakeLockSeq.getAndIncrement();
         wakeLocks.put(tmpWakeLockId, wakeLock);
         Timber.v("CoreReceiver Created wakeLock %d", tmpWakeLockId);

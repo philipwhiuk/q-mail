@@ -10,7 +10,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.text.TextUtils;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.activity.Accounts;
 import com.fsck.k9.activity.FolderList;
@@ -124,7 +124,7 @@ class NotificationActionCreator {
     }
 
     public PendingIntent createDeleteMessagePendingIntent(MessageReference messageReference, int notificationId) {
-        if (K9.confirmDeleteFromNotification()) {
+        if (QMail.confirmDeleteFromNotification()) {
             return createDeleteConfirmationPendingIntent(messageReference, notificationId);
         } else {
             return createDeleteServicePendingIntent(messageReference, notificationId);
@@ -146,7 +146,7 @@ class NotificationActionCreator {
 
     public PendingIntent createDeleteAllPendingIntent(Account account, List<MessageReference> messageReferences,
             int notificationId) {
-        if (K9.confirmDeleteFromNotification()) {
+        if (QMail.confirmDeleteFromNotification()) {
             return getDeleteAllConfirmationPendingIntent(messageReferences, notificationId,
                     PendingIntent.FLAG_CANCEL_CURRENT);
         } else {
@@ -157,7 +157,7 @@ class NotificationActionCreator {
 
     public PendingIntent getDeleteAllPendingIntent(Account account, List<MessageReference> messageReferences,
             int notificationId) {
-        if (K9.confirmDeleteFromNotification()) {
+        if (QMail.confirmDeleteFromNotification()) {
             return getDeleteAllConfirmationPendingIntent(messageReferences, notificationId,
                     PendingIntent.FLAG_NO_CREATE);
         } else {

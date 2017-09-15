@@ -9,7 +9,7 @@ import android.text.format.DateUtils;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.AccountStats;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.controller.SimpleMessagingListener;
 import com.fsck.k9.service.MailService;
@@ -54,7 +54,7 @@ public class ActivityListener extends SimpleMessagingListener {
             CharSequence relativeTimeSpanString = DateUtils.getRelativeTimeSpanString(
                     nextPollTime, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, 0);
             return context.getString(R.string.status_next_poll, relativeTimeSpanString);
-        } else if (K9.isDebug() && MailService.isSyncDisabled()) {
+        } else if (QMail.isDebug() && MailService.isSyncDisabled()) {
             if (MailService.hasNoConnectivity()) {
                 return context.getString(R.string.status_no_network);
             } else if (MailService.isSyncNoBackground()) {

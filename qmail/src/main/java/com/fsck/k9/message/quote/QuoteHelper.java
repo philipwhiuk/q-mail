@@ -8,7 +8,7 @@ import java.util.TimeZone;
 
 import android.content.res.Resources;
 
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.mail.Message;
 
 
@@ -30,7 +30,7 @@ class QuoteHelper {
             Date date = message.getSentDate();
 
             DateFormat dateFormat;
-            if (K9.hideTimeZone()) {
+            if (QMail.hideTimeZone()) {
                 dateFormat = DateFormat.getDateTimeInstance(dateStyle, timeStyle, Locale.ROOT);
                 dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             } else {

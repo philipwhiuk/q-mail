@@ -46,7 +46,7 @@ import android.widget.Toast;
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.MessageFormat;
 import com.fsck.k9.Identity;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.MessageLoaderHelper.MessageLoaderCallbacks;
@@ -227,10 +227,10 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         }
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
-        if (K9.getK9ComposerThemeSetting() != K9.Theme.USE_GLOBAL) {
+        if (QMail.getK9ComposerThemeSetting() != QMail.Theme.USE_GLOBAL) {
             // theme the whole content according to the theme (except the action bar)
             ContextThemeWrapper themeContext = new ContextThemeWrapper(this,
-                    K9.getK9ThemeResourceId(K9.getK9ComposerTheme()));
+                    QMail.getK9ThemeResourceId(QMail.getK9ComposerTheme()));
             @SuppressLint("InflateParams") // this is the top level activity element, it has no root
             View v = LayoutInflater.from(themeContext).inflate(R.layout.message_compose, null);
             TypedValue outValue = new TypedValue();
@@ -425,12 +425,12 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         updateMessageFormat();
 
         // Set font size of input controls
-        int fontSize = K9.getFontSizes().getMessageComposeInput();
-        recipientMvpView.setFontSizes(K9.getFontSizes(), fontSize);
-        quotedMessageMvpView.setFontSizes(K9.getFontSizes(), fontSize);
-        K9.getFontSizes().setViewTextSize(subjectView, fontSize);
-        K9.getFontSizes().setViewTextSize(messageContentView, fontSize);
-        K9.getFontSizes().setViewTextSize(signatureView, fontSize);
+        int fontSize = QMail.getFontSizes().getMessageComposeInput();
+        recipientMvpView.setFontSizes(QMail.getFontSizes(), fontSize);
+        quotedMessageMvpView.setFontSizes(QMail.getFontSizes(), fontSize);
+        QMail.getFontSizes().setViewTextSize(subjectView, fontSize);
+        QMail.getFontSizes().setViewTextSize(messageContentView, fontSize);
+        QMail.getFontSizes().setViewTextSize(signatureView, fontSize);
 
 
         updateMessageFormat();
@@ -665,7 +665,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
 
         builder.setSubject(Utility.stripNewLines(subjectView.getText().toString()))
                 .setSentDate(new Date())
-                .setHideTimeZone(K9.hideTimeZone())
+                .setHideTimeZone(QMail.hideTimeZone())
                 .setInReplyTo(repliedToMessageId)
                 .setReferences(referencedMessageIds)
                 .setRequestReadReceipt(requestReadReceipt)
@@ -937,7 +937,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
     }
 
     private void askBeforeDiscard() {
-        if (K9.confirmDiscardMessage()) {
+        if (QMail.confirmDiscardMessage()) {
             showDialog(DIALOG_CONFIRM_DISCARD);
         } else {
             onDiscard();
@@ -1132,7 +1132,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
                         .create();
             case DIALOG_CHOOSE_IDENTITY:
                 Context context = new ContextThemeWrapper(this,
-                        (K9.getK9Theme() == K9.Theme.LIGHT) ?
+                        (QMail.getK9Theme() == QMail.Theme.LIGHT) ?
                                 R.style.Theme_K9_Dialog_Light :
                                 R.style.Theme_K9_Dialog_Dark);
                 Builder builder = new AlertDialog.Builder(context);
@@ -1323,7 +1323,7 @@ public class MessageCompose extends K9Activity implements OnClickListener,
         // Decode the identity header when loading a draft.
         // See buildIdentityHeader(TextBody) for a detailed description of the composition of this blob.
         Map<IdentityField, String> k9identity = new HashMap<>();
-        String[] identityHeaders = message.getHeader(K9.IDENTITY_HEADER);
+        String[] identityHeaders = message.getHeader(QMail.IDENTITY_HEADER);
 
         if (identityHeaders.length > 0 && identityHeaders[0] != null) {
             k9identity = IdentityHeaderParser.parse(identityHeaders[0]);

@@ -15,11 +15,11 @@ import android.os.Environment;
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.SortType;
 import com.fsck.k9.FontSizes;
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.NotificationHideSubject;
-import com.fsck.k9.K9.NotificationQuickDelete;
-import com.fsck.k9.K9.SplitViewMode;
-import com.fsck.k9.K9.Theme;
+import com.fsck.k9.QMail;
+import com.fsck.k9.QMail.NotificationHideSubject;
+import com.fsck.k9.QMail.NotificationQuickDelete;
+import com.fsck.k9.QMail.SplitViewMode;
+import com.fsck.k9.QMail.Theme;
 import com.fsck.k9.R;
 import com.fsck.k9.preferences.Settings.BooleanSetting;
 import com.fsck.k9.preferences.Settings.ColorSetting;
@@ -34,7 +34,7 @@ import com.fsck.k9.preferences.Settings.StringSetting;
 import com.fsck.k9.preferences.Settings.V;
 import com.fsck.k9.preferences.Settings.WebFontSizeSetting;
 
-import static com.fsck.k9.K9.LockScreenNotificationVisibility;
+import static com.fsck.k9.QMail.LockScreenNotificationVisibility;
 
 
 public class GlobalSettings {
@@ -58,7 +58,7 @@ public class GlobalSettings {
                         Environment.DIRECTORY_DOWNLOADS)))
         ));
         s.put("backgroundOperations", Settings.versions(
-                new V(1, new EnumSetting<>(K9.BACKGROUND_OPS.class, K9.BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC))
+                new V(1, new EnumSetting<>(QMail.BACKGROUND_OPS.class, QMail.BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC))
         ));
         s.put("changeRegisteredNameColor", Settings.versions(
                 new V(1, new BooleanSetting(false))
@@ -199,11 +199,11 @@ public class GlobalSettings {
                 new V(1, new BooleanSetting(false))
         ));
         s.put("theme", Settings.versions(
-                new V(1, new ThemeSetting(K9.Theme.LIGHT))
+                new V(1, new ThemeSetting(QMail.Theme.LIGHT))
         ));
         s.put("messageViewTheme", Settings.versions(
-                new V(16, new ThemeSetting(K9.Theme.LIGHT)),
-                new V(24, new SubThemeSetting(K9.Theme.USE_GLOBAL))
+                new V(16, new ThemeSetting(QMail.Theme.LIGHT)),
+                new V(24, new SubThemeSetting(QMail.Theme.USE_GLOBAL))
         ));
         s.put("useVolumeKeysForListNavigation", Settings.versions(
                 new V(1, new BooleanSetting(false))
@@ -227,7 +227,7 @@ public class GlobalSettings {
                 new V(23, new EnumSetting<>(SplitViewMode.class, SplitViewMode.NEVER))
         ));
         s.put("messageComposeTheme", Settings.versions(
-                new V(24, new SubThemeSetting(K9.Theme.USE_GLOBAL))
+                new V(24, new SubThemeSetting(QMail.Theme.USE_GLOBAL))
         ));
         s.put("fixedMessageViewTheme", Settings.versions(
                 new V(24, new BooleanSetting(true))
@@ -291,7 +291,7 @@ public class GlobalSettings {
                 new V(45, new IntegerRangeSetting(0, Integer.MAX_VALUE, 0))
         ));
         s.put("openPgpProvider", Settings.versions(
-                new V(46, new StringSetting(K9.NO_OPENPGP_PROVIDER))
+                new V(46, new StringSetting(QMail.NO_OPENPGP_PROVIDER))
         ));
         s.put("openPgpSupportSignOnly", Settings.versions(
                 new V(47, new BooleanSetting(false))
@@ -358,7 +358,7 @@ public class GlobalSettings {
      * Upgrades the settings from version 23 to 24.
      *
      * <p>
-     * Set <em>messageViewTheme</em> to {@link K9.Theme#USE_GLOBAL} if <em>messageViewTheme</em> has
+     * Set <em>messageViewTheme</em> to {@link QMail.Theme#USE_GLOBAL} if <em>messageViewTheme</em> has
      * the same value as <em>theme</em>.
      * </p>
      */
@@ -366,10 +366,10 @@ public class GlobalSettings {
 
         @Override
         public Set<String> upgrade(Map<String, Object> settings) {
-            K9.Theme messageViewTheme = (K9.Theme) settings.get("messageViewTheme");
-            K9.Theme theme = (K9.Theme) settings.get("theme");
+            QMail.Theme messageViewTheme = (QMail.Theme) settings.get("messageViewTheme");
+            QMail.Theme theme = (QMail.Theme) settings.get("theme");
             if (theme != null && messageViewTheme != null && theme == messageViewTheme) {
-                settings.put("messageViewTheme", K9.Theme.USE_GLOBAL);
+                settings.put("messageViewTheme", QMail.Theme.USE_GLOBAL);
             }
 
             return null;
@@ -426,7 +426,7 @@ public class GlobalSettings {
             super("");
 
             Map<String, String> mapping = new HashMap<>();
-            String[] values = K9.app.getResources().getStringArray(R.array.settings_language_values);
+            String[] values = QMail.app.getResources().getStringArray(R.array.settings_language_values);
             for (String value : values) {
                 if (value.length() == 0) {
                     mapping.put("", "default");
@@ -452,26 +452,26 @@ public class GlobalSettings {
         }
     }
 
-    static class ThemeSetting extends SettingsDescription<K9.Theme> {
+    static class ThemeSetting extends SettingsDescription<QMail.Theme> {
         private static final String THEME_LIGHT = "light";
         private static final String THEME_DARK = "dark";
 
-        ThemeSetting(K9.Theme defaultValue) {
+        ThemeSetting(QMail.Theme defaultValue) {
             super(defaultValue);
         }
 
         @Override
-        public K9.Theme fromString(String value) throws InvalidSettingValueException {
+        public QMail.Theme fromString(String value) throws InvalidSettingValueException {
             try {
                 Integer theme = Integer.parseInt(value);
-                if (theme == K9.Theme.LIGHT.ordinal() ||
+                if (theme == QMail.Theme.LIGHT.ordinal() ||
                         // We used to store the resource ID of the theme in the preference storage,
                         // but don't use the database upgrade mechanism to update the values. So
                         // we have to deal with the old format here.
                         theme == android.R.style.Theme_Light) {
-                    return K9.Theme.LIGHT;
-                } else if (theme == K9.Theme.DARK.ordinal() || theme == android.R.style.Theme) {
-                    return K9.Theme.DARK;
+                    return QMail.Theme.LIGHT;
+                } else if (theme == QMail.Theme.DARK.ordinal() || theme == android.R.style.Theme) {
+                    return QMail.Theme.DARK;
                 }
             } catch (NumberFormatException e) { /* do nothing */ }
 
@@ -479,18 +479,18 @@ public class GlobalSettings {
         }
 
         @Override
-        public K9.Theme fromPrettyString(String value) throws InvalidSettingValueException {
+        public QMail.Theme fromPrettyString(String value) throws InvalidSettingValueException {
             if (THEME_LIGHT.equals(value)) {
-                return K9.Theme.LIGHT;
+                return QMail.Theme.LIGHT;
             } else if (THEME_DARK.equals(value)) {
-                return K9.Theme.DARK;
+                return QMail.Theme.DARK;
             }
 
             throw new InvalidSettingValueException();
         }
 
         @Override
-        public String toPrettyString(K9.Theme value) {
+        public String toPrettyString(QMail.Theme value) {
             switch (value) {
                 case DARK: {
                     return THEME_DARK;
@@ -502,7 +502,7 @@ public class GlobalSettings {
         }
 
         @Override
-        public String toString(K9.Theme value) {
+        public String toString(QMail.Theme value) {
             return Integer.toString(value.ordinal());
         }
     }
@@ -515,11 +515,11 @@ public class GlobalSettings {
         }
 
         @Override
-        public K9.Theme fromString(String value) throws InvalidSettingValueException {
+        public QMail.Theme fromString(String value) throws InvalidSettingValueException {
             try {
                 Integer theme = Integer.parseInt(value);
-                if (theme == K9.Theme.USE_GLOBAL.ordinal()) {
-                    return K9.Theme.USE_GLOBAL;
+                if (theme == QMail.Theme.USE_GLOBAL.ordinal()) {
+                    return QMail.Theme.USE_GLOBAL;
                 }
 
                 return super.fromString(value);
@@ -529,17 +529,17 @@ public class GlobalSettings {
         }
 
         @Override
-        public K9.Theme fromPrettyString(String value) throws InvalidSettingValueException {
+        public QMail.Theme fromPrettyString(String value) throws InvalidSettingValueException {
             if (THEME_USE_GLOBAL.equals(value)) {
-                return K9.Theme.USE_GLOBAL;
+                return QMail.Theme.USE_GLOBAL;
             }
 
             return super.fromPrettyString(value);
         }
 
         @Override
-        public String toPrettyString(K9.Theme value) {
-            if (value == K9.Theme.USE_GLOBAL) {
+        public String toPrettyString(QMail.Theme value) {
+            if (value == QMail.Theme.USE_GLOBAL) {
                 return THEME_USE_GLOBAL;
             }
 

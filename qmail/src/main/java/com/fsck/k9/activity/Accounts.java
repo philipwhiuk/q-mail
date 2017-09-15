@@ -66,7 +66,7 @@ import com.fsck.k9.Account;
 import com.fsck.k9.AccountStats;
 import com.fsck.k9.BaseAccount;
 import com.fsck.k9.FontSizes;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.compose.MessageActions;
@@ -131,7 +131,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     private AccountsAdapter mAdapter;
     private SearchAccount mAllMessagesAccount = null;
     private SearchAccount mUnifiedInboxAccount = null;
-    private FontSizes mFontSizes = K9.getFontSizes();
+    private FontSizes mFontSizes = QMail.getFontSizes();
 
     private MenuItem mRefreshMenuItem;
     private ActionBar mActionBar;
@@ -210,7 +210,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
             runOnUiThread(new Runnable() {
                 public void run() {
                     AccountStats stats = accountStats.get(account.getUuid());
-                    if (newSize != -1 && stats != null && K9.measureAccounts()) {
+                    if (newSize != -1 && stats != null && QMail.measureAccounts()) {
                         stats.size = newSize;
                     }
                     String toastText = getString(R.string.account_size_changed, account.getDescription(),
@@ -388,7 +388,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        if (!K9.isHideSpecialAccounts()) {
+        if (!QMail.isHideSpecialAccounts()) {
             createSpecialAccounts();
         }
 
@@ -411,7 +411,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
         }
 
         boolean startup = intent.getBooleanExtra(EXTRA_STARTUP, true);
-        if (startup && K9.startIntegratedInbox() && !K9.isHideSpecialAccounts()) {
+        if (startup && QMail.startIntegratedInbox() && !QMail.isHideSpecialAccounts()) {
             onOpenAccount(mUnifiedInboxAccount);
             finish();
             return;
@@ -577,7 +577,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
 //        }
 
         List<BaseAccount> newAccounts;
-        if (!K9.isHideSpecialAccounts() && accounts.size() > 0) {
+        if (!QMail.isHideSpecialAccounts() && accounts.size() > 0) {
             if (mUnifiedInboxAccount == null || mAllMessagesAccount == null) {
                 createSpecialAccounts();
             }
@@ -608,7 +608,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
             if (account instanceof Account) {
                 Account realAccount = (Account) account;
                 controller.getAccountStats(this, realAccount, mListener);
-            } else if (K9.countSearchMessages() && account instanceof SearchAccount) {
+            } else if (QMail.countSearchMessages() && account instanceof SearchAccount) {
                 final SearchAccount searchAccount = (SearchAccount) account;
                 controller.getSearchAccountStats(searchAccount, mListener);
             }
@@ -680,7 +680,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 Timber.i("refusing to open account that is not available");
                 return false;
             }
-            if (K9.FOLDER_NONE.equals(realAccount.getAutoExpandFolderId())) {
+            if (QMail.FOLDER_NONE.equals(realAccount.getAutoExpandFolderId())) {
                 FolderList.actionHandleAccount(this, realAccount);
             } else {
                 LocalSearch search = new LocalSearch(realAccount.getAutoExpandFolderId());
@@ -1016,7 +1016,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 mAccount.save(Preferences.getPreferences(mContext));
 
                 // Start services if necessary
-                K9.setServicesEnabled(mContext);
+                QMail.setServicesEnabled(mContext);
 
                 // Get list of folders from remote server
                 MessagingController.getInstance(mApplication).listFolders(mAccount, true, null);
@@ -1082,7 +1082,7 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                         .deleteAccount(realAccount);
                         Preferences.getPreferences(Accounts.this)
                         .deleteAccount(realAccount);
-                        K9.setServicesEnabled(Accounts.this);
+                        QMail.setServicesEnabled(Accounts.this);
                         refresh();
                     }
                 }
@@ -1811,7 +1811,8 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
                 holder.newMessageCountWrapper.setVisibility(unreadMessageCount > 0 ? View.VISIBLE : View.GONE);
 
                 holder.flaggedMessageCount.setText(String.format(Locale.ROOT, "%d", stats.flaggedMessageCount));
-                holder.flaggedMessageCountWrapper.setVisibility(K9.messageListStars() && stats.flaggedMessageCount > 0 ? View.VISIBLE : View.GONE);
+                holder.flaggedMessageCountWrapper.setVisibility(
+                        QMail.messageListStars() && stats.flaggedMessageCount > 0 ? View.VISIBLE : View.GONE);
 
                 holder.flaggedMessageCountWrapper.setOnClickListener(createFlaggedSearchListener(account));
                 holder.newMessageCountWrapper.setOnClickListener(createUnreadSearchListener(account));

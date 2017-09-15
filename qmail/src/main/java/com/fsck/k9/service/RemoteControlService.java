@@ -1,14 +1,14 @@
 package com.fsck.k9.service;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.preferences.Storage;
 import com.fsck.k9.preferences.StorageEditor;
 import com.fsck.k9.remotecontrol.K9RemoteControl;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.Account.FolderMode;
-import com.fsck.k9.K9.BACKGROUND_OPS;
+import com.fsck.k9.QMail.BACKGROUND_OPS;
 
 import static com.fsck.k9.remotecontrol.K9RemoteControl.*;
 
@@ -113,20 +113,20 @@ public class RemoteControlService extends CoreService {
                                 || K9RemoteControl.K9_BACKGROUND_OPERATIONS_NEVER.equals(backgroundOps)
                                 || K9RemoteControl.K9_BACKGROUND_OPERATIONS_WHEN_CHECKED_AUTO_SYNC.equals(backgroundOps)) {
                             BACKGROUND_OPS newBackgroundOps = BACKGROUND_OPS.valueOf(backgroundOps);
-                            boolean needsReset = K9.setBackgroundOps(newBackgroundOps);
+                            boolean needsReset = QMail.setBackgroundOps(newBackgroundOps);
                             needsPushRestart |= needsReset;
                             needsReschedule |= needsReset;
                         }
 
                         String theme = intent.getStringExtra(K9_THEME);
                         if (theme != null) {
-                            K9.setK9Theme(K9RemoteControl.K9_THEME_DARK.equals(theme) ? K9.Theme.DARK : K9.Theme.LIGHT);
+                            QMail.setK9Theme(K9RemoteControl.K9_THEME_DARK.equals(theme) ? QMail.Theme.DARK : QMail.Theme.LIGHT);
                         }
 
                         Storage storage = preferences.getStorage();
 
                         StorageEditor editor = storage.edit();
-                        K9.save(editor);
+                        QMail.save(editor);
                         editor.commit();
 
                         if (needsReschedule) {

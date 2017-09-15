@@ -12,7 +12,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.widget.TextView;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.controller.MessagingController;
@@ -29,9 +29,9 @@ import com.fsck.k9.service.DatabaseUpgradeService;
  * <li>Activities that access an account's database call
  *     {@link #actionUpgradeDatabases(Context, Intent)} in their {@link Activity#onCreate(Bundle)}
  *     method.</li>
- * <li>{@link #actionUpgradeDatabases(Context, Intent)} will call {@link K9#areDatabasesUpToDate()}
+ * <li>{@link #actionUpgradeDatabases(Context, Intent)} will call {@link QMail#areDatabasesUpToDate()}
  *     to check if we already know whether the databases have been upgraded.</li>
- * <li>{@link K9#areDatabasesUpToDate()} will compare the last known database version stored in a
+ * <li>{@link QMail#areDatabasesUpToDate()} will compare the last known database version stored in a
  *     {@link SharedPreferences} file to {@link com.fsck.k9.mailstore.LocalStore#DB_VERSION}. This
  *     is done as an optimization because it's faster than opening all of the accounts' databases
  *     one by one.</li>
@@ -76,7 +76,7 @@ public class UpgradeDatabases extends K9Activity {
      *         {@code false}, if the account databases don't need upgrading.
      */
     public static boolean actionUpgradeDatabases(Context context, Intent startIntent) {
-        if (K9.areDatabasesUpToDate()) {
+        if (QMail.areDatabasesUpToDate()) {
             return false;
         }
 
@@ -109,7 +109,7 @@ public class UpgradeDatabases extends K9Activity {
         decodeExtras();
 
         // If the databases have already been upgraded there's no point in displaying this activity.
-        if (K9.areDatabasesUpToDate()) {
+        if (QMail.areDatabasesUpToDate()) {
             launchOriginalActivity();
             return;
         }
@@ -155,7 +155,7 @@ public class UpgradeDatabases extends K9Activity {
         super.onResume();
 
         // Check if the upgrade was completed while the activity was paused.
-        if (K9.areDatabasesUpToDate()) {
+        if (QMail.areDatabasesUpToDate()) {
             launchOriginalActivity();
             return;
         }

@@ -13,9 +13,9 @@ import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationCompat.InboxStyle;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.NotificationHideSubject;
-import com.fsck.k9.K9.NotificationQuickDelete;
+import com.fsck.k9.QMail;
+import com.fsck.k9.QMail.NotificationHideSubject;
+import com.fsck.k9.QMail.NotificationQuickDelete;
 import com.fsck.k9.NotificationSetting;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.MessageReference;
@@ -193,7 +193,7 @@ class DeviceNotifications extends BaseNotifications {
     }
 
     private void addDeleteAllAction(Builder builder, NotificationData notificationData) {
-        if (K9.getNotificationQuickDeleteBehaviour() != NotificationQuickDelete.ALWAYS) {
+        if (QMail.getNotificationQuickDeleteBehaviour() != NotificationQuickDelete.ALWAYS) {
             return;
         }
 
@@ -236,8 +236,8 @@ class DeviceNotifications extends BaseNotifications {
     private boolean isPrivacyModeActive() {
         KeyguardManager keyguardService = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
 
-        boolean privacyModeAlwaysEnabled = K9.getNotificationHideSubject() == NotificationHideSubject.ALWAYS;
-        boolean privacyModeEnabledWhenLocked = K9.getNotificationHideSubject() == NotificationHideSubject.WHEN_LOCKED;
+        boolean privacyModeAlwaysEnabled = QMail.getNotificationHideSubject() == NotificationHideSubject.ALWAYS;
+        boolean privacyModeEnabledWhenLocked = QMail.getNotificationHideSubject() == NotificationHideSubject.WHEN_LOCKED;
         boolean screenLocked = keyguardService.inKeyguardRestrictedInputMode();
 
         return privacyModeAlwaysEnabled || (privacyModeEnabledWhenLocked && screenLocked);

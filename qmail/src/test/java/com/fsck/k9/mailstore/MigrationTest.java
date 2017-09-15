@@ -13,7 +13,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.K9RobolectricTestRunner;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.mail.BodyPart;
@@ -42,7 +42,7 @@ public class MigrationTest {
 
     @Before
     public void setUp() throws Exception {
-        K9.setDebug(true);
+        QMail.setDebug(true);
         ShadowLog.stream = System.out;
         ShadowSQLiteConnection.reset();
 

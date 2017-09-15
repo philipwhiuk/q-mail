@@ -16,17 +16,16 @@ import android.content.SharedPreferences;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
+import com.fsck.k9.QMail;
 import com.fsck.k9.mail.TransportUris;
 import timber.log.Timber;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.Identity;
-import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.mail.AuthType;
 import com.fsck.k9.mail.ConnectionSecurity;
 import com.fsck.k9.mail.ServerSettings;
-import com.fsck.k9.mail.Transport;
 import com.fsck.k9.mail.filter.Base64;
 import com.fsck.k9.mail.store.RemoteStore;
 import com.fsck.k9.preferences.Settings.InvalidSettingValueException;
@@ -268,8 +267,8 @@ public class SettingsImporter {
             }
 
             preferences.loadAccounts();
-            K9.loadPrefs(preferences);
-            K9.setServicesEnabled(context);
+            QMail.loadPrefs(preferences);
+            QMail.setServicesEnabled(context);
 
             return new ImportResults(globalSettingsImported, importedAccounts, erroneousAccounts);
 
@@ -611,9 +610,9 @@ public class SettingsImporter {
      *         The new value for the preference.
      */
     private static void putString(StorageEditor editor, String key, String value) {
-        if (K9.isDebug()) {
+        if (QMail.isDebug()) {
             String outputValue = value;
-            if (!K9.DEBUG_SENSITIVE && (key.endsWith(".transportUri") || key.endsWith(".storeUri"))) {
+            if (!QMail.DEBUG_SENSITIVE && (key.endsWith(".transportUri") || key.endsWith(".storeUri"))) {
                 outputValue = "*sensitive*";
             }
             Timber.v("Setting %s=%s", key, outputValue);

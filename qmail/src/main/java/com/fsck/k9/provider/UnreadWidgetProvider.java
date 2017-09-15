@@ -3,7 +3,7 @@ package com.fsck.k9.provider;
 import com.fsck.k9.Account;
 import com.fsck.k9.AccountStats;
 import com.fsck.k9.BaseAccount;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.UnreadWidgetConfiguration;
@@ -78,7 +78,7 @@ public class UnreadWidgetProvider extends AppWidgetProvider {
                     account = realAccount;
                     stats = realAccount.getStats(context);
 
-                    if (K9.FOLDER_NONE.equals(realAccount.getAutoExpandFolderId())) {
+                    if (QMail.FOLDER_NONE.equals(realAccount.getAutoExpandFolderId())) {
                         clickIntent = FolderList.actionHandleAccountIntent(context, realAccount, false);
                     } else {
                         LocalSearch search = new LocalSearch(realAccount.getAutoExpandFolderId());

@@ -20,6 +20,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+
+import com.fsck.k9.QMail;
 import timber.log.Timber;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -35,8 +37,7 @@ import android.widget.Toast;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.SortType;
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.SplitViewMode;
+import com.fsck.k9.QMail.SplitViewMode;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.compose.MessageActions;
@@ -179,7 +180,7 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
     private ProgressBar mActionBarProgress;
     private MenuItem mMenuButtonCheckMail;
     private View mActionButtonIndeterminateProgress;
-    private int mLastDirection = (K9.messageViewShowNext()) ? NEXT : PREVIOUS;
+    private int mLastDirection = (QMail.messageViewShowNext()) ? NEXT : PREVIOUS;
 
     /**
      * {@code true} if the message list should be displayed as flat list (i.e. no threading)
@@ -298,7 +299,7 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
         if (!hasMessageListFragment) {
             FragmentTransaction ft = fragmentManager.beginTransaction();
             mMessageListFragment = MessageListFragment.newInstance(mSearch, false,
-                    (K9.isThreadedViewEnabled() && !mNoThreading));
+                    (QMail.isThreadedViewEnabled() && !mNoThreading));
             ft.add(R.id.message_list_container, mMessageListFragment);
             ft.commit();
         }
@@ -346,7 +347,7 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
     }
 
     private boolean useSplitView() {
-        SplitViewMode splitViewMode = K9.getSplitViewMode();
+        SplitViewMode splitViewMode = QMail.getSplitViewMode();
         int orientation = getResources().getConfiguration().orientation;
 
         return (splitViewMode == SplitViewMode.ALWAYS ||
@@ -605,11 +606,11 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP: {
                 if (mMessageViewFragment != null && mDisplayMode != DisplayMode.MESSAGE_LIST &&
-                        K9.useVolumeKeysForNavigationEnabled()) {
+                        QMail.useVolumeKeysForNavigationEnabled()) {
                     showPreviousMessage();
                     return true;
                 } else if (mDisplayMode != DisplayMode.MESSAGE_VIEW &&
-                        K9.useVolumeKeysForListNavigationEnabled()) {
+                        QMail.useVolumeKeysForListNavigationEnabled()) {
                     mMessageListFragment.onMoveUp();
                     return true;
                 }
@@ -618,11 +619,11 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
             }
             case KeyEvent.KEYCODE_VOLUME_DOWN: {
                 if (mMessageViewFragment != null && mDisplayMode != DisplayMode.MESSAGE_LIST &&
-                        K9.useVolumeKeysForNavigationEnabled()) {
+                        QMail.useVolumeKeysForNavigationEnabled()) {
                     showNextMessage();
                     return true;
                 } else if (mDisplayMode != DisplayMode.MESSAGE_VIEW &&
-                        K9.useVolumeKeysForListNavigationEnabled()) {
+                        QMail.useVolumeKeysForListNavigationEnabled()) {
                     mMessageListFragment.onMoveDown();
                     return true;
                 }
@@ -763,7 +764,7 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         // Swallow these events too to avoid the audible notification of a volume change
-        if (K9.useVolumeKeysForListNavigationEnabled()) {
+        if (QMail.useVolumeKeysForListNavigationEnabled()) {
             if ((keyCode == KeyEvent.KEYCODE_VOLUME_UP) || (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
                 Timber.v("Swallowed key up.");
                 return true;
@@ -1051,11 +1052,11 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
             }
 
             MenuItem toggleTheme = menu.findItem(R.id.toggle_message_view_theme);
-            if (K9.useFixedMessageViewTheme()) {
+            if (QMail.useFixedMessageViewTheme()) {
                 toggleTheme.setVisible(false);
             } else {
                 // Set title of menu item to switch to dark/light theme
-                if (K9.getK9MessageViewTheme() == K9.Theme.DARK) {
+                if (QMail.getK9MessageViewTheme() == QMail.Theme.DARK) {
                     toggleTheme.setTitle(R.string.message_view_theme_action_light);
                 } else {
                     toggleTheme.setTitle(R.string.message_view_theme_action_dark);
@@ -1073,13 +1074,13 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
             // Jellybean has built-in long press selection support
             menu.findItem(R.id.select_text).setVisible(Build.VERSION.SDK_INT < 16);
 
-            menu.findItem(R.id.delete).setVisible(K9.isMessageViewDeleteActionVisible());
+            menu.findItem(R.id.delete).setVisible(QMail.isMessageViewDeleteActionVisible());
 
             /*
              * Set visibility of copy, move, archive, spam in action bar and refile submenu
              */
             if (mMessageViewFragment.isCopyCapable()) {
-                menu.findItem(R.id.copy).setVisible(K9.isMessageViewCopyActionVisible());
+                menu.findItem(R.id.copy).setVisible(QMail.isMessageViewCopyActionVisible());
                 menu.findItem(R.id.refile_copy).setVisible(true);
             } else {
                 menu.findItem(R.id.copy).setVisible(false);
@@ -1090,11 +1091,11 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
                 boolean canMessageBeArchived = mMessageViewFragment.canMessageBeArchived();
                 boolean canMessageBeMovedToSpam = mMessageViewFragment.canMessageBeMovedToSpam();
 
-                menu.findItem(R.id.move).setVisible(K9.isMessageViewMoveActionVisible());
+                menu.findItem(R.id.move).setVisible(QMail.isMessageViewMoveActionVisible());
                 menu.findItem(R.id.archive).setVisible(canMessageBeArchived &&
-                        K9.isMessageViewArchiveActionVisible());
+                        QMail.isMessageViewArchiveActionVisible());
                 menu.findItem(R.id.spam).setVisible(canMessageBeMovedToSpam &&
-                        K9.isMessageViewSpamActionVisible());
+                        QMail.isMessageViewSpamActionVisible());
 
                 menu.findItem(R.id.refile_move).setVisible(true);
                 menu.findItem(R.id.refile_archive).setVisible(canMessageBeArchived);
@@ -1460,7 +1461,7 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
 
     @Override
     public void showNextMessageOrReturn() {
-        if (K9.messageViewReturnToList() || !showLogicalNextMessage()) {
+        if (QMail.messageViewReturnToList() || !showLogicalNextMessage()) {
             if (mDisplayMode == DisplayMode.SPLIT_VIEW) {
                 showMessageViewPlaceHolder();
             } else {
@@ -1555,10 +1556,10 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
     }
 
     private void onToggleTheme() {
-        if (K9.getK9MessageViewTheme() == K9.Theme.DARK) {
-            K9.setK9MessageViewThemeSetting(K9.Theme.LIGHT);
+        if (QMail.getK9MessageViewTheme() == QMail.Theme.DARK) {
+            QMail.setK9MessageViewThemeSetting(QMail.Theme.LIGHT);
         } else {
-            K9.setK9MessageViewThemeSetting(K9.Theme.DARK);
+            QMail.setK9MessageViewThemeSetting(QMail.Theme.DARK);
         }
 
         new Thread(new Runnable() {
@@ -1567,7 +1568,7 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
                 Context appContext = getApplicationContext();
                 Preferences prefs = Preferences.getPreferences(appContext);
                 StorageEditor editor = prefs.getStorage().edit();
-                K9.save(editor);
+                QMail.save(editor);
                 editor.commit();
             }
         }).start();

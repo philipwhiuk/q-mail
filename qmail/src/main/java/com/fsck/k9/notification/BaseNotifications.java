@@ -8,8 +8,8 @@ import android.support.v4.app.NotificationCompat.BigTextStyle;
 import android.support.v4.app.NotificationCompat.Builder;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.NotificationQuickDelete;
+import com.fsck.k9.QMail;
+import com.fsck.k9.QMail.NotificationQuickDelete;
 import com.fsck.k9.R;
 
 
@@ -60,7 +60,7 @@ abstract class BaseNotifications {
     }
 
     protected boolean isDeleteActionEnabled() {
-        NotificationQuickDelete deleteOption = K9.getNotificationQuickDeleteBehaviour();
+        NotificationQuickDelete deleteOption = QMail.getNotificationQuickDeleteBehaviour();
         return deleteOption == NotificationQuickDelete.ALWAYS || deleteOption == NotificationQuickDelete.FOR_SINGLE_MSG;
     }
 

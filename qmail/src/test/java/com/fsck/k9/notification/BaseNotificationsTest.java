@@ -5,8 +5,8 @@ import android.support.v4.app.NotificationCompat.BigTextStyle;
 import android.support.v4.app.NotificationCompat.Builder;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.NotificationQuickDelete;
+import com.fsck.k9.QMail;
+import com.fsck.k9.QMail.NotificationQuickDelete;
 import com.fsck.k9.K9RobolectricTestRunner;
 import com.fsck.k9.MockHelper;
 import com.fsck.k9.R;
@@ -56,7 +56,7 @@ public class BaseNotificationsTest {
 
     @Test
     public void testIsDeleteActionEnabled_NotificationQuickDelete_ALWAYS() throws Exception {
-        K9.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.ALWAYS);
+        QMail.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.ALWAYS);
 
         boolean result = notifications.isDeleteActionEnabled();
 
@@ -65,7 +65,7 @@ public class BaseNotificationsTest {
 
     @Test
     public void testIsDeleteActionEnabled_NotificationQuickDelete_FOR_SINGLE_MSG() throws Exception {
-        K9.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.FOR_SINGLE_MSG);
+        QMail.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.FOR_SINGLE_MSG);
 
         boolean result = notifications.isDeleteActionEnabled();
 
@@ -74,7 +74,7 @@ public class BaseNotificationsTest {
 
     @Test
     public void testIsDeleteActionEnabled_NotificationQuickDelete_NEVER() throws Exception {
-        K9.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.NEVER);
+        QMail.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.NEVER);
 
         boolean result = notifications.isDeleteActionEnabled();
 

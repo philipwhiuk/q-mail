@@ -53,7 +53,7 @@ import android.widget.Toast;
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.SortType;
 import com.fsck.k9.BuildConfig;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.ActivityListener;
@@ -436,11 +436,11 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         preferences = Preferences.getPreferences(appContext);
         messagingController = MessagingController.getInstance(getActivity().getApplication());
 
-        previewLines = K9.messageListPreviewLines();
-        checkboxes = K9.messageListCheckboxes();
-        stars = K9.messageListStars();
+        previewLines = QMail.messageListPreviewLines();
+        checkboxes = QMail.messageListCheckboxes();
+        stars = QMail.messageListStars();
 
-        if (K9.showContactPicture()) {
+        if (QMail.showContactPicture()) {
             contactsPictureLoader = ContactPicture.getContactPictureLoader(getActivity());
         }
 
@@ -566,9 +566,9 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             sortAscending = account.isSortAscending(sortType);
             sortDateAscending = account.isSortAscending(SortType.SORT_DATE);
         } else {
-            sortType = K9.getSortType();
-            sortAscending = K9.isSortAscending(sortType);
-            sortDateAscending = K9.isSortAscending(SortType.SORT_DATE);
+            sortType = QMail.getSortType();
+            sortAscending = QMail.isSortAscending(sortType);
+            sortDateAscending = QMail.isSortAscending(SortType.SORT_DATE);
         }
     }
 
@@ -675,7 +675,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
     public void onResume() {
         super.onResume();
 
-        senderAboveSubject = K9.messageListSenderAboveSubject();
+        senderAboveSubject = QMail.messageListSenderAboveSubject();
 
         if (!loaderJustInitialized) {
             restartLoader();
@@ -847,18 +847,18 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
 
             account.save(preferences);
         } else {
-            K9.setSortType(this.sortType);
+            QMail.setSortType(this.sortType);
 
             if (sortAscending == null) {
-                this.sortAscending = K9.isSortAscending(this.sortType);
+                this.sortAscending = QMail.isSortAscending(this.sortType);
             } else {
                 this.sortAscending = sortAscending;
             }
-            K9.setSortAscending(this.sortType, this.sortAscending);
-            sortDateAscending = K9.isSortAscending(SortType.SORT_DATE);
+            QMail.setSortAscending(this.sortType, this.sortAscending);
+            sortDateAscending = QMail.isSortAscending(SortType.SORT_DATE);
 
             StorageEditor editor = preferences.getStorage().edit();
-            K9.save(editor);
+            QMail.save(editor);
             editor.commit();
         }
 
@@ -902,7 +902,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
     }
 
     private void onDelete(List<MessageReference> messages) {
-        if (K9.confirmDelete()) {
+        if (QMail.confirmDelete()) {
             // remember the message selection for #onCreateDialog(int)
             activeMessages = messages;
             showDialog(R.id.dialog_confirm_delete);
@@ -1784,7 +1784,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             Account account = entry.getKey();
             String archiveFolder = account.getArchiveFolderId();
 
-            if (!K9.FOLDER_NONE.equals(archiveFolder)) {
+            if (!QMail.FOLDER_NONE.equals(archiveFolder)) {
                 move(entry.getValue(), archiveFolder);
             }
         }
@@ -1817,7 +1817,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
      *         The messages to move to the spam folder. Never {@code null}.
      */
     private void onSpam(List<MessageReference> messages) {
-        if (K9.confirmSpam()) {
+        if (QMail.confirmSpam()) {
             // remember the message selection for #onCreateDialog(int)
             activeMessages = messages;
             showDialog(R.id.dialog_confirm_spam);
@@ -1833,7 +1833,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
             Account account = entry.getKey();
             String spamFolder = account.getSpamFolderId();
 
-            if (!K9.FOLDER_NONE.equals(spamFolder)) {
+            if (!QMail.FOLDER_NONE.equals(spamFolder)) {
                 move(entry.getValue(), spamFolder);
             }
         }
@@ -1914,7 +1914,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
      * @param messages
      *         The list of messages to copy or move. Never {@code null}.
      * @param destination
-     *         The id of the destination folder. Never {@code null} or {@link K9#FOLDER_NONE}.
+     *         The id of the destination folder. Never {@code null} or {@link QMail#FOLDER_NONE}.
      * @param operation
      *         Specifies what operation to perform. Never {@code null}.
      */
@@ -2495,12 +2495,15 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         return (folderId != null && folderId.equals(account.getOutboxFolderId()));
     }
 
+<<<<<<< HEAD:qmail/src/main/java/com/fsck/k9/fragment/MessageListFragment.java
     private boolean isErrorFolder() {
-        return K9.ERROR_FOLDER_ID.equals(folderId);
+        return QMail.ERROR_FOLDER_ID.equals(folderId);
     }
 
+=======
+>>>>>>> upstream-master:k9mail/src/main/java/com/fsck/k9/fragment/MessageListFragment.java
     public boolean isRemoteFolder() {
-        if (search.isManualSearch() || isOutbox() || isErrorFolder()) {
+        if (search.isManualSearch() || isOutbox()) {
             return false;
         }
 
@@ -2889,7 +2892,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
     }
 
     public void confirmMarkAllAsRead() {
-        if (K9.confirmMarkAllRead()) {
+        if (QMail.confirmMarkAllRead()) {
             showDialog(R.id.dialog_confirm_mark_all_as_read);
         } else {
             markAllAsRead();

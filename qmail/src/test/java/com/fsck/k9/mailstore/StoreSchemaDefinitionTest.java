@@ -16,7 +16,7 @@ import android.text.TextUtils;
 import com.fsck.k9.Account;
 import com.fsck.k9.BuildConfig;
 import com.fsck.k9.GlobalsHelper;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.K9RobolectricTestRunner;
 import com.fsck.k9.R;
 import com.fsck.k9.mail.MessagingException;
@@ -48,7 +48,7 @@ public class StoreSchemaDefinitionTest {
         ShadowLog.stream = System.out;
 
         Application application = RuntimeEnvironment.application;
-        K9.app = application;
+        QMail.app = application;
         GlobalsHelper.setContext(application);
         StorageManager.getInstance(application);
 

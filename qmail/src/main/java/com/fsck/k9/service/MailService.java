@@ -12,7 +12,7 @@ import android.os.SystemClock;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.FolderMode;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.helper.Utility;
@@ -94,7 +94,7 @@ public class MailService extends CoreService {
         final boolean hasConnectivity = Utility.hasConnectivity(getApplication());
         boolean autoSync = ContentResolver.getMasterSyncAutomatically();
 
-        K9.BACKGROUND_OPS bOps = K9.getBackgroundOps();
+        QMail.BACKGROUND_OPS bOps = QMail.getBackgroundOps();
 
         switch (bOps) {
             case NEVER:
@@ -189,7 +189,7 @@ public class MailService extends CoreService {
                 reschedulePoll(hasConnectivity, doBackground, true);
                 reschedulePushers(hasConnectivity, doBackground);
             }
-        }, K9.MAIL_SERVICE_WAKE_LOCK_TIMEOUT, startId);
+        }, QMail.MAIL_SERVICE_WAKE_LOCK_TIMEOUT, startId);
     }
 
     private void reschedulePollInBackground(final boolean hasConnectivity,
@@ -199,7 +199,7 @@ public class MailService extends CoreService {
             public void run() {
                 reschedulePoll(hasConnectivity, doBackground, considerLastCheckEnd);
             }
-        }, K9.MAIL_SERVICE_WAKE_LOCK_TIMEOUT, startId);
+        }, QMail.MAIL_SERVICE_WAKE_LOCK_TIMEOUT, startId);
     }
 
     private void reschedulePushersInBackground(final boolean hasConnectivity,
@@ -209,7 +209,7 @@ public class MailService extends CoreService {
             public void run() {
                 reschedulePushers(hasConnectivity, doBackground);
             }
-        }, K9.MAIL_SERVICE_WAKE_LOCK_TIMEOUT, startId);
+        }, QMail.MAIL_SERVICE_WAKE_LOCK_TIMEOUT, startId);
     }
 
     private void refreshPushersInBackground(boolean hasConnectivity, boolean doBackground,
@@ -221,7 +221,7 @@ public class MailService extends CoreService {
                     refreshPushers();
                     schedulePushers();
                 }
-            }, K9.MAIL_SERVICE_WAKE_LOCK_TIMEOUT, startId);
+            }, QMail.MAIL_SERVICE_WAKE_LOCK_TIMEOUT, startId);
         }
     }
 

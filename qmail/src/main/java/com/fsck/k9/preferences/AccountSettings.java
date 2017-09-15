@@ -18,8 +18,7 @@ import com.fsck.k9.Account.QuoteStyle;
 import com.fsck.k9.Account.Searchable;
 import com.fsck.k9.Account.ShowPictures;
 import com.fsck.k9.Account.SortType;
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.NotificationHideSubject;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.mailstore.StorageManager;
 import com.fsck.k9.preferences.Settings.BooleanSetting;
@@ -68,7 +67,7 @@ public class AccountSettings {
                 new V(1, new DeletePolicySetting(DeletePolicy.NEVER))
         ));
         s.put("displayCount", Settings.versions(
-                new V(1, new IntegerResourceSetting(K9.DEFAULT_VISIBLE_LIMIT,
+                new V(1, new IntegerResourceSetting(QMail.DEFAULT_VISIBLE_LIMIT,
                         R.array.account_settings_display_count_values))
         ));
         s.put("expungePolicy", Settings.versions(
@@ -276,7 +275,7 @@ public class AccountSettings {
             super(defaultValue);
 
             Map<Integer, String> mapping = new HashMap<>();
-            String[] values = K9.app.getResources().getStringArray(resId);
+            String[] values = QMail.app.getResources().getStringArray(resId);
             for (String value : values) {
                 int intValue = Integer.parseInt(value);
                 mapping.put(intValue, value);
@@ -306,7 +305,7 @@ public class AccountSettings {
             super(defaultValue);
 
             Map<String, String> mapping = new HashMap<>();
-            String[] values = K9.app.getResources().getStringArray(resId);
+            String[] values = QMail.app.getResources().getStringArray(resId);
             for (String value : values) {
                 mapping.put(value, value);
             }
@@ -346,12 +345,12 @@ public class AccountSettings {
 
         @Override
         public String getDefaultValue() {
-            return StorageManager.getInstance(K9.app).getDefaultProviderId();
+            return StorageManager.getInstance(QMail.app).getDefaultProviderId();
         }
 
         @Override
         public String fromString(String value) {
-            StorageManager storageManager = StorageManager.getInstance(K9.app);
+            StorageManager storageManager = StorageManager.getInstance(QMail.app);
             Map<String, String> providers = storageManager.getAvailableProviders();
             if (providers.containsKey(value)) {
                 return value;

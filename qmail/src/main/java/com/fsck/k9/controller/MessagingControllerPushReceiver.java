@@ -1,10 +1,11 @@
 package com.fsck.k9.controller;
 
 import android.content.Context;
+
+import com.fsck.k9.QMail;
 import timber.log.Timber;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
 import com.fsck.k9.mail.power.TracingPowerManager.TracingWakeLock;
 import com.fsck.k9.mail.Folder;
 
@@ -69,7 +70,7 @@ public class MessagingControllerPushReceiver implements PushReceiver {
 
     @Override
     public void sleep(TracingWakeLock wakeLock, long millis) {
-        SleepService.sleep(context, millis, wakeLock, K9.PUSH_WAKE_LOCK_TIMEOUT);
+        SleepService.sleep(context, millis, wakeLock, QMail.PUSH_WAKE_LOCK_TIMEOUT);
     }
 
     public void pushError(String errorMessage, Exception e) {
@@ -79,7 +80,7 @@ public class MessagingControllerPushReceiver implements PushReceiver {
         if (errMess == null && e != null) {
             errMess = e.getMessage();
         }
-        controller.addErrorMessage(account, errMess, e);
+        Timber.e(e, errMess);
     }
 
     @Override

@@ -86,7 +86,7 @@ public class PollService extends CoreService {
             TracingPowerManager pm = TracingPowerManager.getPowerManager(PollService.this);
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PollService wakeLockAcquire");
             wakeLock.setReferenceCounted(false);
-            wakeLock.acquire(K9.WAKE_LOCK_TIMEOUT);
+            wakeLock.acquire(QMail.WAKE_LOCK_TIMEOUT);
 
             if (oldWakeLock != null) {
                 oldWakeLock.release();

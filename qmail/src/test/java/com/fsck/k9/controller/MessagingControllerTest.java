@@ -13,7 +13,7 @@ import android.content.Context;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.AccountStats;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.K9RobolectricTestRunner;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.helper.Contacts;
@@ -93,8 +93,6 @@ public class MessagingControllerTest {
     private LocalSearch search;
     @Mock
     private LocalFolder localFolder;
-    @Mock
-    private LocalFolder errorFolder;
     @Mock
     private LocalFolder sentFolder;
     @Mock
@@ -181,17 +179,6 @@ public class MessagingControllerTest {
         doThrow(new UnavailableStorageException("Test")).when(localFolder).open(Folder.OPEN_MODE_RW);
 
         controller.clearFolderSynchronous(account, FOLDER_ID, listener);
-    }
-
-    @Test()
-    public void clearFolderSynchronous_whenExceptionThrown_shouldAddErrorMessageInDebug() throws MessagingException {
-        if (K9.isDebug()) {
-            doThrow(new RuntimeException("Test")).when(localFolder).open(Folder.OPEN_MODE_RW);
-
-            controller.clearFolderSynchronous(account, FOLDER_ID, listener);
-
-            verify(errorFolder).appendMessages(any(List.class));
-        }
     }
 
     @Test()
@@ -864,7 +851,7 @@ public class MessagingControllerTest {
         when(transportProvider.getTransport(appContext, account)).thenReturn(transport);
         when(localFolder.getMessages(null)).thenReturn(Collections.singletonList(localMessageToSend1));
         when(localMessageToSend1.getUid()).thenReturn("localMessageToSend1");
-        when(localMessageToSend1.getHeader(K9.IDENTITY_HEADER)).thenReturn(new String[]{});
+        when(localMessageToSend1.getHeader(QMail.IDENTITY_HEADER)).thenReturn(new String[]{});
         controller.addListener(listener);
     }
 
@@ -929,14 +916,12 @@ public class MessagingControllerTest {
         when(account.getLocalStore()).thenReturn(localStore);
         when(account.getStats(any(Context.class))).thenReturn(accountStats);
         when(account.getMaximumAutoDownloadMessageSize()).thenReturn(MAXIMUM_SMALL_MESSAGE_SIZE);
-        when(account.getErrorFolderId()).thenReturn(K9.ERROR_FOLDER_ID);
         when(account.getEmail()).thenReturn("user@host.com");
     }
 
     private void configureLocalStore() throws MessagingException {
         when(localStore.getFolder(FOLDER_ID)).thenReturn(localFolder);
         when(localFolder.getId()).thenReturn(FOLDER_ID);
-        when(localStore.getFolder(K9.ERROR_FOLDER_ID)).thenReturn(errorFolder);
         when(localStore.getFolders(false)).thenReturn(Collections.singletonList(localFolder));
     }
 

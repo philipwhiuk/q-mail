@@ -12,8 +12,8 @@ import android.support.v4.app.NotificationCompat.Extender;
 import android.support.v4.app.NotificationCompat.WearableExtender;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.NotificationQuickDelete;
+import com.fsck.k9.QMail;
+import com.fsck.k9.QMail.NotificationQuickDelete;
 import com.fsck.k9.K9RobolectricTestRunner;
 import com.fsck.k9.MockHelper;
 import com.fsck.k9.R;
@@ -193,20 +193,20 @@ public class WearNotificationsTest {
     }
 
     private void disableDeleteAction() {
-        K9.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.NEVER);
+        QMail.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.NEVER);
     }
 
     private void disableArchiveAction() {
-        when(account.getArchiveFolderId()).thenReturn(K9.FOLDER_NONE);
+        when(account.getArchiveFolderId()).thenReturn(QMail.FOLDER_NONE);
     }
 
     private void disableSpamAction() {
-        when(account.getSpamFolderId()).thenReturn(K9.FOLDER_NONE);
+        when(account.getSpamFolderId()).thenReturn(QMail.FOLDER_NONE);
     }
 
     private void enableDeleteAction() {
-        K9.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.ALWAYS);
-        K9.setConfirmDeleteFromNotification(false);
+        QMail.setNotificationQuickDeleteBehaviour(NotificationQuickDelete.ALWAYS);
+        QMail.setConfirmDeleteFromNotification(false);
     }
 
     private void enableArchiveAction() {

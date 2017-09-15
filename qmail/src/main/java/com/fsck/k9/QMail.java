@@ -51,12 +51,12 @@ import timber.log.Timber;
 import timber.log.Timber.DebugTree;
 
 
-public class K9 extends Application {
+public class QMail extends Application {
     /**
-     * Components that are interested in knowing when the K9 instance is
+     * Components that are interested in knowing when the QMail instance is
      * available and ready (Android invokes Application.onCreate() after other
      * components') should implement this interface and register using
-     * {@link K9#registerApplicationAware(ApplicationAware)}.
+     * {@link QMail#registerApplicationAware(ApplicationAware)}.
      */
     public static interface ApplicationAware {
         /**
@@ -91,7 +91,7 @@ public class K9 extends Application {
     private static final String KEY_LAST_ACCOUNT_DATABASE_VERSION = "last_account_database_version";
 
     /**
-     * Components that are interested in knowing when the K9 instance is
+     * Components that are interested in knowing when the QMail instance is
      * available and ready.
      *
      * @see ApplicationAware
@@ -101,8 +101,8 @@ public class K9 extends Application {
     /**
      * This will be {@code true} once the initialization is complete and {@link #notifyObservers()}
      * was called.
-     * Afterwards calls to {@link #registerApplicationAware(com.fsck.k9.K9.ApplicationAware)} will
-     * immediately call {@link com.fsck.k9.K9.ApplicationAware#initializeComponent(K9)} for the
+     * Afterwards calls to {@link #registerApplicationAware(QMail.ApplicationAware)} will
+     * immediately call {@link QMail.ApplicationAware#initializeComponent(Application)} for the
      * supplied argument.
      */
     private static boolean sInitialized = false;
@@ -148,14 +148,6 @@ public class K9 extends Application {
      * like passwords will show that information.
      */
     public static boolean DEBUG_SENSITIVE = false;
-
-    /**
-     * Can create messages containing stack traces that can be forwarded
-     * to the development team.
-     *
-     * Feature is enabled when DEBUG == true
-     */
-    public static final String ERROR_FOLDER_ID = "K9mail-errors";
 
     /**
      * A reference to the {@link SharedPreferences} used for caching the last known database
@@ -455,9 +447,9 @@ public class K9 extends Application {
     }
 
     public static void save(StorageEditor editor) {
-        editor.putBoolean("enableDebugLogging", K9.DEBUG);
-        editor.putBoolean("enableSensitiveLogging", K9.DEBUG_SENSITIVE);
-        editor.putString("backgroundOperations", K9.backgroundOps.name());
+        editor.putBoolean("enableDebugLogging", QMail.DEBUG);
+        editor.putBoolean("enableSensitiveLogging", QMail.DEBUG_SENSITIVE);
+        editor.putString("backgroundOperations", QMail.backgroundOps.name());
         editor.putBoolean("animations", mAnimations);
         editor.putBoolean("gesturesEnabled", mGesturesEnabled);
         editor.putBoolean("useVolumeKeysForNavigation", mUseVolumeKeysForNavigation);
@@ -531,7 +523,7 @@ public class K9 extends Application {
 
     @Override
     public void onCreate() {
-        if (K9.DEVELOPER_MODE) {
+        if (QMail.DEVELOPER_MODE) {
             StrictMode.enableDefaults();
         }
 
@@ -575,17 +567,17 @@ public class K9 extends Application {
             private void broadcastIntent(String action, Account account, String folderId, String folderName, Message message) {
                 Uri uri = Uri.parse("email://messages/" + account.getAccountNumber() + "/" + Uri.encode(folderId) + "/" + Uri.encode(message.getUid()));
                 Intent intent = new Intent(action, uri);
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_ACCOUNT, account.getDescription());
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_FOLDER, folderId);
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_FOLDER_NAME, folderName);
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_SENT_DATE, message.getSentDate());
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_FROM, Address.toString(message.getFrom()));
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_TO, Address.toString(message.getRecipients(Message.RecipientType.TO)));
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_CC, Address.toString(message.getRecipients(Message.RecipientType.CC)));
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_BCC, Address.toString(message.getRecipients(Message.RecipientType.BCC)));
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_SUBJECT, message.getSubject());
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_FROM_SELF, account.isAnIdentity(message.getFrom()));
-                K9.this.sendBroadcast(intent);
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_ACCOUNT, account.getDescription());
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_FOLDER, folderId);
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_FOLDER_NAME, folderName);
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_SENT_DATE, message.getSentDate());
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_FROM, Address.toString(message.getFrom()));
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_TO, Address.toString(message.getRecipients(Message.RecipientType.TO)));
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_CC, Address.toString(message.getRecipients(Message.RecipientType.CC)));
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_BCC, Address.toString(message.getRecipients(Message.RecipientType.BCC)));
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_SUBJECT, message.getSubject());
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_FROM_SELF, account.isAnIdentity(message.getFrom()));
+                QMail.this.sendBroadcast(intent);
 
                 Timber.d("Broadcasted: action=%s account=%s folder=%s message uid=%s",
                         action,
@@ -596,7 +588,7 @@ public class K9 extends Application {
 
             private void updateUnreadWidget() {
                 try {
-                    UnreadWidgetProvider.updateUnreadCount(K9.this);
+                    UnreadWidgetProvider.updateUnreadCount(QMail.this);
                 } catch (Exception e) {
                     Timber.e(e, "Error while updating unread widget(s)");
                 }
@@ -604,7 +596,7 @@ public class K9 extends Application {
 
             private void updateMailListWidget() {
                 try {
-                    MessageListWidgetProvider.triggerMessageListWidgetUpdate(K9.this);
+                    MessageListWidgetProvider.triggerMessageListWidgetUpdate(QMail.this);
                 } catch (RuntimeException e) {
                     if (BuildConfig.DEBUG) {
                         throw e;
@@ -616,21 +608,21 @@ public class K9 extends Application {
 
             @Override
             public void synchronizeMailboxRemovedMessage(Account account, String folderId, String folderName, Message message) {
-                broadcastIntent(K9.Intents.EmailReceived.ACTION_EMAIL_DELETED, account, folderId, folderName, message);
+                broadcastIntent(QMail.Intents.EmailReceived.ACTION_EMAIL_DELETED, account, folderId, folderName, message);
                 updateUnreadWidget();
                 updateMailListWidget();
             }
 
             @Override
             public void messageDeleted(Account account, String folderId, String folderName, Message message) {
-                broadcastIntent(K9.Intents.EmailReceived.ACTION_EMAIL_DELETED, account, folderId, folderName, message);
+                broadcastIntent(QMail.Intents.EmailReceived.ACTION_EMAIL_DELETED, account, folderId, folderName, message);
                 updateUnreadWidget();
                 updateMailListWidget();
             }
 
             @Override
             public void synchronizeMailboxNewMessage(Account account, String folderId, String folderName, Message message) {
-                broadcastIntent(K9.Intents.EmailReceived.ACTION_EMAIL_RECEIVED, account, folderId, folderName, message);
+                broadcastIntent(QMail.Intents.EmailReceived.ACTION_EMAIL_RECEIVED, account, folderId, folderName, message);
                 updateUnreadWidget();
                 updateMailListWidget();
             }
@@ -643,10 +635,10 @@ public class K9 extends Application {
                 updateMailListWidget();
 
                 // let observers know a change occurred
-                Intent intent = new Intent(K9.Intents.EmailReceived.ACTION_REFRESH_OBSERVER, null);
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_ACCOUNT, account.getDescription());
-                intent.putExtra(K9.Intents.EmailReceived.EXTRA_FOLDER, folderName);
-                K9.this.sendBroadcast(intent);
+                Intent intent = new Intent(QMail.Intents.EmailReceived.ACTION_REFRESH_OBSERVER, null);
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_ACCOUNT, account.getDescription());
+                intent.putExtra(QMail.Intents.EmailReceived.EXTRA_FOLDER, folderName);
+                QMail.this.sendBroadcast(intent);
 
             }
 
@@ -676,7 +668,7 @@ public class K9 extends Application {
         int cachedVersion = sDatabaseVersionCache.getInt(KEY_LAST_ACCOUNT_DATABASE_VERSION, 0);
 
         if (cachedVersion >= LocalStore.DB_VERSION) {
-            K9.setDatabasesUpToDate(false);
+            QMail.setDatabasesUpToDate(false);
         }
     }
 
@@ -794,22 +786,22 @@ public class K9 extends Application {
         sPgpInlineDialogCounter = storage.getInt("pgpInlineDialogCounter", 0);
         sPgpSignOnlyDialogCounter = storage.getInt("pgpSignOnlyDialogCounter", 0);
 
-        K9.setK9Language(storage.getString("language", ""));
+        QMail.setK9Language(storage.getString("language", ""));
 
         int themeValue = storage.getInt("theme", Theme.LIGHT.ordinal());
         // We used to save the resource ID of the theme. So convert that to the new format if
         // necessary.
         if (themeValue == Theme.DARK.ordinal() || themeValue == android.R.style.Theme) {
-            K9.setK9Theme(Theme.DARK);
+            QMail.setK9Theme(Theme.DARK);
         } else {
-            K9.setK9Theme(Theme.LIGHT);
+            QMail.setK9Theme(Theme.LIGHT);
         }
 
         themeValue = storage.getInt("messageViewTheme", Theme.USE_GLOBAL.ordinal());
-        K9.setK9MessageViewThemeSetting(Theme.values()[themeValue]);
+        QMail.setK9MessageViewThemeSetting(Theme.values()[themeValue]);
         themeValue = storage.getInt("messageComposeTheme", Theme.USE_GLOBAL.ordinal());
-        K9.setK9ComposerThemeSetting(Theme.values()[themeValue]);
-        K9.setUseFixedMessageViewTheme(storage.getBoolean("fixedMessageViewTheme", true));
+        QMail.setK9ComposerThemeSetting(Theme.values()[themeValue]);
+        QMail.setUseFixedMessageViewTheme(storage.getBoolean("fixedMessageViewTheme", true));
     }
 
     /**
@@ -835,7 +827,7 @@ public class K9 extends Application {
     }
 
     /**
-     * Register a component to be notified when the {@link K9} instance is ready.
+     * Register a component to be notified when the {@link QMail} instance is ready.
      *
      * @param component
      *            Never <code>null</code>.
@@ -843,7 +835,7 @@ public class K9 extends Application {
     public static void registerApplicationAware(final ApplicationAware component) {
         synchronized (observers) {
             if (sInitialized) {
-                component.initializeComponent(K9.app);
+                component.initializeComponent(QMail.app);
             } else if (!observers.contains(component)) {
                 observers.add(component);
             }
@@ -929,8 +921,8 @@ public class K9 extends Application {
     }
 
     public static boolean setBackgroundOps(BACKGROUND_OPS backgroundOps) {
-        BACKGROUND_OPS oldBackgroundOps = K9.backgroundOps;
-        K9.backgroundOps = backgroundOps;
+        BACKGROUND_OPS oldBackgroundOps = QMail.backgroundOps;
+        QMail.backgroundOps = backgroundOps;
         return backgroundOps != oldBackgroundOps;
     }
 
@@ -1046,7 +1038,7 @@ public class K9 extends Application {
     }
 
     public static void setDebug(boolean debug) {
-        K9.DEBUG = debug;
+        QMail.DEBUG = debug;
         updateLoggingStatus();
     }
 
@@ -1303,7 +1295,7 @@ public class K9 extends Application {
     }
 
     public static void setAttachmentDefaultPath(String attachmentDefaultPath) {
-        K9.mAttachmentDefaultPath = attachmentDefaultPath;
+        QMail.mAttachmentDefaultPath = attachmentDefaultPath;
     }
 
     public static synchronized SortType getSortType() {
@@ -1410,7 +1402,7 @@ public class K9 extends Application {
     }
 
     public static void setPgpInlineDialogCounter(int pgpInlineDialogCounter) {
-        K9.sPgpInlineDialogCounter = pgpInlineDialogCounter;
+        QMail.sPgpInlineDialogCounter = pgpInlineDialogCounter;
     }
 
     public static int getPgpSignOnlyDialogCounter() {
@@ -1418,7 +1410,7 @@ public class K9 extends Application {
     }
 
     public static void setPgpSignOnlyDialogCounter(int pgpSignOnlyDialogCounter) {
-        K9.sPgpSignOnlyDialogCounter = pgpSignOnlyDialogCounter;
+        QMail.sPgpSignOnlyDialogCounter = pgpSignOnlyDialogCounter;
     }
 
     /**

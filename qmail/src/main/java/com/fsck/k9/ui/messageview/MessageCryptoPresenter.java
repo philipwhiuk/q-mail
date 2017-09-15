@@ -14,7 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.mailstore.CryptoResultAnnotation;
 import com.fsck.k9.mailstore.MessageViewInfo;
@@ -68,7 +68,7 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
             return false;
         }
 
-        boolean suppressSignOnlyMessages = !K9.getOpenPgpSupportSignOnly();
+        boolean suppressSignOnlyMessages = !QMail.getOpenPgpSupportSignOnly();
         if (suppressSignOnlyMessages && displayStatus.isUnencryptedSigned()) {
             return false;
         }
@@ -266,8 +266,8 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
     @Nullable
     private static Drawable getOpenPgpApiProviderIcon(Context context) {
         try {
-            String openPgpProvider = K9.getOpenPgpProvider();
-            if (K9.NO_OPENPGP_PROVIDER.equals(openPgpProvider)) {
+            String openPgpProvider = QMail.getOpenPgpProvider();
+            if (QMail.NO_OPENPGP_PROVIDER.equals(openPgpProvider)) {
                 return null;
             }
             return context.getPackageManager().getApplicationIcon(openPgpProvider);

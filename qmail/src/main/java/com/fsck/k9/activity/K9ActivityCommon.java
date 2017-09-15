@@ -11,7 +11,7 @@ import android.text.TextUtils;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.activity.misc.SwipeGestureDetector;
 import com.fsck.k9.activity.misc.SwipeGestureDetector.OnSwipeGestureListener;
 
@@ -30,7 +30,7 @@ public class K9ActivityCommon {
      *         The {@link Activity} the returned {@code K9ActivityCommon} instance will be bound to.
      *
      * @return The {@link K9ActivityCommon} instance that will provide the base functionality of the
-     *         "K9" activities.
+     *         "QMail" activities.
      */
     public static K9ActivityCommon newInstance(Activity activity) {
         return new K9ActivityCommon(activity);
@@ -71,8 +71,8 @@ public class K9ActivityCommon {
 
     private K9ActivityCommon(Activity activity) {
         mActivity = activity;
-        setLanguage(mActivity, K9.getK9Language());
-        mActivity.setTheme(K9.getK9ThemeResourceId());
+        setLanguage(mActivity, QMail.getK9Language());
+        mActivity.setTheme(QMail.getK9ThemeResourceId());
     }
 
     /**

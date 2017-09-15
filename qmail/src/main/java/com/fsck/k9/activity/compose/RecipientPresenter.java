@@ -23,7 +23,7 @@ import android.view.Menu;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.Identity;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus.AttachErrorState;
 import com.fsck.k9.activity.compose.ComposeCryptoStatus.ComposeCryptoStatusBuilder;
@@ -281,7 +281,7 @@ public class RecipientPresenter implements PermissionPingCallback {
             menu.findItem(R.id.openpgp_encrypt_enable).setVisible(!isEncrypting);
             menu.findItem(R.id.openpgp_encrypt_disable).setVisible(isEncrypting);
 
-            boolean showSignOnly = K9.getOpenPgpSupportSignOnly();
+            boolean showSignOnly = QMail.getOpenPgpSupportSignOnly();
             boolean isSignOnly = currentCryptoStatus.isSignOnly();
             menu.findItem(R.id.openpgp_sign_only).setVisible(showSignOnly && !isSignOnly);
             menu.findItem(R.id.openpgp_sign_only_disable).setVisible(showSignOnly && isSignOnly);
@@ -704,7 +704,7 @@ public class RecipientPresenter implements PermissionPingCallback {
     }
 
     private void setupCryptoProvider() {
-        String openPgpProvider = K9.getOpenPgpProvider();
+        String openPgpProvider = QMail.getOpenPgpProvider();
         if (TextUtils.isEmpty(openPgpProvider)) {
             openPgpProvider = null;
         }
@@ -813,7 +813,7 @@ public class RecipientPresenter implements PermissionPingCallback {
         if (error.getErrorId() == OpenPgpError.INCOMPATIBLE_API_VERSIONS) {
             // nothing we can do here, this is irrecoverable!
             openPgpProvider = null;
-            K9.setOpenPgpProvider(null);
+            QMail.setOpenPgpProvider(null);
             recipientMvpView.showErrorOpenPgpIncompatible();
             setCryptoProviderState(CryptoProviderState.UNCONFIGURED);
         } else {
@@ -922,20 +922,20 @@ public class RecipientPresenter implements PermissionPingCallback {
     }
 
     private boolean checkAndIncrementPgpInlineDialogCounter() {
-        int pgpInlineDialogCounter = K9.getPgpInlineDialogCounter();
+        int pgpInlineDialogCounter = QMail.getPgpInlineDialogCounter();
         if (pgpInlineDialogCounter < PGP_DIALOG_DISPLAY_THRESHOLD) {
-            K9.setPgpInlineDialogCounter(pgpInlineDialogCounter + 1);
-            K9.saveSettingsAsync();
+            QMail.setPgpInlineDialogCounter(pgpInlineDialogCounter + 1);
+            QMail.saveSettingsAsync();
             return true;
         }
         return false;
     }
 
     private boolean checkAndIncrementPgpSignOnlyDialogCounter() {
-        int pgpSignOnlyDialogCounter = K9.getPgpSignOnlyDialogCounter();
+        int pgpSignOnlyDialogCounter = QMail.getPgpSignOnlyDialogCounter();
         if (pgpSignOnlyDialogCounter < PGP_DIALOG_DISPLAY_THRESHOLD) {
-            K9.setPgpSignOnlyDialogCounter(pgpSignOnlyDialogCounter + 1);
-            K9.saveSettingsAsync();
+            QMail.setPgpSignOnlyDialogCounter(pgpSignOnlyDialogCounter + 1);
+            QMail.saveSettingsAsync();
             return true;
         }
         return false;

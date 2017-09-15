@@ -79,6 +79,8 @@ public class Migrations {
                 MigrationTo61.addFolderRemoteId(db);
             case 61:
                 MigrationTo62.addFolderParentRemoteId(db);
+            case 63:
+                MigrationTo63.removeErrorsFolder(db);
         }
     }
 }

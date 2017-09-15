@@ -1,17 +1,16 @@
 
 package com.fsck.k9.service;
 
-import java.util.Date;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+
+import com.fsck.k9.QMail;
 import timber.log.Timber;
 
-import com.fsck.k9.K9;
 import com.fsck.k9.helper.K9AlarmManager;
 
 public class BootReceiver extends CoreReceiver {
@@ -29,7 +28,7 @@ public class BootReceiver extends CoreReceiver {
 
         final String action = intent.getAction();
         if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-            //K9.setServicesEnabled(context, tmpWakeLockId);
+            //QMail.setServicesEnabled(context, tmpWakeLockId);
             //tmpWakeLockId = null;
         } else if (Intent.ACTION_DEVICE_STORAGE_LOW.equals(action)) {
             MailService.actionCancel(context, tmpWakeLockId);
@@ -41,8 +40,8 @@ public class BootReceiver extends CoreReceiver {
             MailService.connectivityChange(context, tmpWakeLockId);
             tmpWakeLockId = null;
         } else if ("com.android.sync.SYNC_CONN_STATUS_CHANGED".equals(action)) {
-            K9.BACKGROUND_OPS bOps = K9.getBackgroundOps();
-            if (bOps == K9.BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC) {
+            QMail.BACKGROUND_OPS bOps = QMail.getBackgroundOps();
+            if (bOps == QMail.BACKGROUND_OPS.WHEN_CHECKED_AUTO_SYNC) {
                 MailService.actionReset(context, tmpWakeLockId);
                 tmpWakeLockId = null;
             }

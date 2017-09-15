@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.Locale;
 
 import android.content.BroadcastReceiver;
@@ -23,7 +22,7 @@ import android.text.TextUtils;
 import timber.log.Timber;
 
 import com.fsck.k9.BuildConfig;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.mailstore.util.FileFactory;
 import org.apache.james.mime4j.codec.Base64InputStream;
 import org.apache.james.mime4j.codec.QuotedPrintableInputStream;
@@ -85,7 +84,7 @@ public class DecryptedFileProvider extends FileProvider {
                     allFilesDeleted = false;
                 }
             } else {
-                if (K9.isDebug()) {
+                if (QMail.isDebug()) {
                     String timeLeftStr = String.format(
                             Locale.ENGLISH, "%.2f", (lastModified - deletionThreshold) / 1000 / 60.0);
                     Timber.e("Not deleting temp file (for another %s minutes)", timeLeftStr);

@@ -6,6 +6,8 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+
+import com.fsck.k9.QMail;
 import timber.log.Timber;
 import android.view.KeyEvent;
 import android.webkit.WebSettings;
@@ -14,8 +16,7 @@ import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.Theme;
+import com.fsck.k9.QMail.Theme;
 import com.fsck.k9.R;
 import com.fsck.k9.mailstore.AttachmentResolver;
 
@@ -62,7 +63,7 @@ public class MessageWebView extends RigidWebView {
         this.setScrollBarStyle(SCROLLBARS_INSIDE_OVERLAY);
         this.setLongClickable(true);
 
-        if (K9.getK9MessageViewTheme() == Theme.DARK) {
+        if (QMail.getK9MessageViewTheme() == Theme.DARK) {
             // Black theme should get a black webview background
             // we'll set the background of the messages on load
             this.setBackgroundColor(0xff000000);
@@ -81,7 +82,7 @@ public class MessageWebView extends RigidWebView {
         webSettings.setSupportZoom(true);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setUseWideViewPort(true);
-        if (K9.autofitWidth()) {
+        if (QMail.autofitWidth()) {
             webSettings.setLoadWithOverviewMode(true);
         }
 
@@ -96,7 +97,7 @@ public class MessageWebView extends RigidWebView {
 
         setOverScrollMode(OVER_SCROLL_NEVER);
 
-        webSettings.setTextZoom(K9.getFontSizes().getMessageViewContentAsPercent());
+        webSettings.setTextZoom(QMail.getFontSizes().getMessageViewContentAsPercent());
 
         // Disable network images by default.  This is overridden by preferences.
         blockNetworkData(true);

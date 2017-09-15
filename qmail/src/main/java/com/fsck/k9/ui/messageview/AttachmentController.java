@@ -22,7 +22,7 @@ import timber.log.Timber;
 import android.widget.Toast;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.cache.TemporaryAttachmentStore;
@@ -65,7 +65,7 @@ public class AttachmentController {
     }
 
     public void saveAttachment() {
-        saveAttachmentTo(K9.getAttachmentDefaultPath());
+        saveAttachmentTo(QMail.getAttachmentDefaultPath());
     }
 
     public void saveAttachmentTo(String directory) {

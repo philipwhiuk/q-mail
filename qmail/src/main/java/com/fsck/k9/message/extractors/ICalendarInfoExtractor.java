@@ -6,16 +6,13 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.annotation.WorkerThread;
-import android.util.Log;
 
 import com.fsck.k9.Globals;
-import com.fsck.k9.K9;
 import com.fsck.k9.ical.ICalParser;
 import com.fsck.k9.ical.ICalPart;
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
-import com.fsck.k9.mail.internet.MimeHeader;
 import com.fsck.k9.mail.internet.MimeUtility;
 import com.fsck.k9.mailstore.AttachmentViewInfo;
 import com.fsck.k9.mailstore.DeferredFileBody;
@@ -106,7 +103,7 @@ public class ICalendarInfoExtractor {
             uri = DecryptedFileProvider.getUriForProvidedFile(
                     context, file, decryptedTempFileBody.getEncoding(), mimeType);
         } catch (IOException e) {
-            Log.e(K9.LOG_TAG, "Decrypted temp file (no longer?) exists!", e);
+            Log.e(QMail.LOG_TAG, "Decrypted temp file (no longer?) exists!", e);
             uri = null;
         }
         return uri;

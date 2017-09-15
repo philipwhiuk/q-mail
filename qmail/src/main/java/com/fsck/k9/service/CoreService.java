@@ -11,8 +11,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
+
+import com.fsck.k9.QMail;
 import timber.log.Timber;
-import com.fsck.k9.K9;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.mail.power.TracingPowerManager;
 import com.fsck.k9.mail.power.TracingPowerManager.TracingWakeLock;
@@ -32,7 +33,7 @@ import com.fsck.k9.mail.power.TracingPowerManager.TracingWakeLock;
  * should thus not be used to run the tasks.
  * </p><p>
  * CoreService is providing the execution plumbing for background tasks including the required
- * thread and task queuing for all K9 services to use.
+ * thread and task queuing for all QMail services to use.
  * </p><p>
  * A service is supposed to run only as long as it has some work to do whether that work is active
  * processing or some just some monitoring, like listening on a network port for incoming connections
@@ -144,7 +145,7 @@ public abstract class CoreService extends Service {
      */
     protected static void addWakeLock(Context context, Intent intent) {
         TracingWakeLock wakeLock = acquireWakeLock(context, "CoreService addWakeLock",
-                K9.MAIL_SERVICE_WAKE_LOCK_TIMEOUT);
+                QMail.MAIL_SERVICE_WAKE_LOCK_TIMEOUT);
         Integer tmpWakeLockId = registerWakeLock(wakeLock);
         intent.putExtra(WAKE_LOCK_ID, tmpWakeLockId);
     }
@@ -202,7 +203,7 @@ public abstract class CoreService extends Service {
          * started with START_STICKY are started with the intent being null.
          *
          * For now we just ignore these restart events. This should be fine because all necessary
-         * services are started from K9.onCreate() when the Application object is initialized.
+         * services are started from QMail.onCreate() when the Application object is initialized.
          *
          * See issue 3750
          */
@@ -213,7 +214,7 @@ public abstract class CoreService extends Service {
 
         // Acquire new wake lock
         TracingWakeLock wakeLock = acquireWakeLock(this, "CoreService onStart",
-                K9.MAIL_SERVICE_WAKE_LOCK_TIMEOUT);
+                QMail.MAIL_SERVICE_WAKE_LOCK_TIMEOUT);
 
         Timber.i("CoreService: %s.onStart(%s, %d)", className, intent, startId);
 

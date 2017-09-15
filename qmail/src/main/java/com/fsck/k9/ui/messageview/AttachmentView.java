@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.helper.SizeFormatter;
 import com.fsck.k9.mailstore.AttachmentViewInfo;
@@ -61,7 +61,7 @@ public class AttachmentView extends FrameLayout implements OnClickListener, OnLo
         viewButton = (Button) findViewById(R.id.view);
         downloadButton = (Button) findViewById(R.id.download);
 
-        if (attachment.size > K9.MAX_ATTACHMENT_DOWNLOAD_SIZE) {
+        if (attachment.size > QMail.MAX_ATTACHMENT_DOWNLOAD_SIZE) {
             viewButton.setVisibility(View.GONE);
             downloadButton.setVisibility(View.GONE);
         }

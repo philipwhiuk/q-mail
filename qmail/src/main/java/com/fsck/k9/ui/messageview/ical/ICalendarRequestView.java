@@ -2,17 +2,14 @@ package com.fsck.k9.ui.messageview.ical;
 
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import biweekly.util.Frequency;
-import biweekly.util.Recurrence;
 import com.fsck.k9.FontSizes;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.helper.Contacts;
 import com.fsck.k9.helper.ICalendarHelper;
@@ -41,7 +38,7 @@ public class ICalendarRequestView extends ICalendarView implements View.OnClickL
     private TextView dateTimeLabel;
     private TextView mRecurrenceView;
 
-    private FontSizes mFontSizes = K9.getFontSizes();
+    private FontSizes mFontSizes = QMail.getFontSizes();
     private Contacts mContacts;
 
     private ICalendarViewInfo viewInfo;
@@ -150,7 +147,7 @@ public class ICalendarRequestView extends ICalendarView implements View.OnClickL
     }
 
     private void displayICalendarInformation() {
-        final Contacts contacts = K9.showContactName() ? mContacts : null;
+        final Contacts contacts = QMail.showContactName() ? mContacts : null;
 
         final CharSequence organizer = ICalendarHelper.toFriendly(iCalendar.getOrganizer(), contacts);
         final CharSequence required = ICalendarHelper.toFriendly(iCalendar.getRequired(), contacts);

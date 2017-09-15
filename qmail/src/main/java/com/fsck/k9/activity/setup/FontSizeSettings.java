@@ -73,7 +73,7 @@ public class FontSizeSettings extends K9PreferenceActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        FontSizes fontSizes = K9.getFontSizes();
+        FontSizes fontSizes = QMail.getFontSizes();
         addPreferencesFromResource(R.xml.font_preferences);
 
         mAccountName = setupListPreference(
@@ -161,7 +161,7 @@ public class FontSizeSettings extends K9PreferenceActivity {
      * changed) font size settings.
      */
     private void saveSettings() {
-        FontSizes fontSizes = K9.getFontSizes();
+        FontSizes fontSizes = QMail.getFontSizes();
 
         fontSizes.setAccountName(Integer.parseInt(mAccountName.getValue()));
         fontSizes.setAccountDescription(Integer.parseInt(mAccountDescription.getValue()));

@@ -23,10 +23,10 @@ import android.preference.PreferenceScreen;
 import android.text.TextUtils;
 import android.widget.Toast;
 
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.NotificationHideSubject;
-import com.fsck.k9.K9.NotificationQuickDelete;
-import com.fsck.k9.K9.SplitViewMode;
+import com.fsck.k9.QMail;
+import com.fsck.k9.QMail.NotificationHideSubject;
+import com.fsck.k9.QMail.NotificationQuickDelete;
+import com.fsck.k9.QMail.SplitViewMode;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.ColorPickerDialog;
@@ -193,17 +193,17 @@ public class Prefs extends K9PreferenceActivity {
                 entryValueVector.remove(i);
             }
         }
-        initListPreference(mLanguage, K9.getK9Language(),
+        initListPreference(mLanguage, QMail.getK9Language(),
                            entryVector.toArray(EMPTY_CHAR_SEQUENCE_ARRAY),
                            entryValueVector.toArray(EMPTY_CHAR_SEQUENCE_ARRAY));
 
-        mTheme = setupListPreference(PREFERENCE_THEME, themeIdToName(K9.getK9Theme()));
+        mTheme = setupListPreference(PREFERENCE_THEME, themeIdToName(QMail.getK9Theme()));
         mFixedMessageTheme = (CheckBoxPreference) findPreference(PREFERENCE_FIXED_MESSAGE_THEME);
-        mFixedMessageTheme.setChecked(K9.useFixedMessageViewTheme());
+        mFixedMessageTheme.setChecked(QMail.useFixedMessageViewTheme());
         mMessageTheme = setupListPreference(PREFERENCE_MESSAGE_VIEW_THEME,
-                themeIdToName(K9.getK9MessageViewThemeSetting()));
+                themeIdToName(QMail.getK9MessageViewThemeSetting()));
         mComposerTheme = setupListPreference(PREFERENCE_COMPOSER_THEME,
-                themeIdToName(K9.getK9ComposerThemeSetting()));
+                themeIdToName(QMail.getK9ComposerThemeSetting()));
 
         findPreference(PREFERENCE_FONT_SIZE).setOnPreferenceClickListener(
         new Preference.OnPreferenceClickListener() {
@@ -214,17 +214,17 @@ public class Prefs extends K9PreferenceActivity {
         });
 
         mAnimations = (CheckBoxPreference)findPreference(PREFERENCE_ANIMATIONS);
-        mAnimations.setChecked(K9.showAnimations());
+        mAnimations.setChecked(QMail.showAnimations());
 
         mGestures = (CheckBoxPreference)findPreference(PREFERENCE_GESTURES);
-        mGestures.setChecked(K9.gesturesEnabled());
+        mGestures.setChecked(QMail.gesturesEnabled());
 
         mVolumeNavigation = (CheckBoxListPreference)findPreference(PREFERENCE_VOLUME_NAVIGATION);
         mVolumeNavigation.setItems(new CharSequence[] {getString(R.string.volume_navigation_message), getString(R.string.volume_navigation_list)});
-        mVolumeNavigation.setCheckedItems(new boolean[] {K9.useVolumeKeysForNavigationEnabled(), K9.useVolumeKeysForListNavigationEnabled()});
+        mVolumeNavigation.setCheckedItems(new boolean[] { QMail.useVolumeKeysForNavigationEnabled(), QMail.useVolumeKeysForListNavigationEnabled()});
 
         mStartIntegratedInbox = (CheckBoxPreference)findPreference(PREFERENCE_START_INTEGRATED_INBOX);
-        mStartIntegratedInbox.setChecked(K9.startIntegratedInbox());
+        mStartIntegratedInbox.setChecked(QMail.startIntegratedInbox());
 
         mConfirmActions = (CheckBoxListPreference) findPreference(PREFERENCE_CONFIRM_ACTIONS);
 
@@ -234,70 +234,70 @@ public class Prefs extends K9PreferenceActivity {
         int index = 0;
 
         confirmActionEntries[index] = getString(R.string.global_settings_confirm_action_delete);
-        confirmActionValues[index++] = K9.confirmDelete();
+        confirmActionValues[index++] = QMail.confirmDelete();
         confirmActionEntries[index] = getString(R.string.global_settings_confirm_action_delete_starred);
-        confirmActionValues[index++] = K9.confirmDeleteStarred();
+        confirmActionValues[index++] = QMail.confirmDeleteStarred();
         if (canDeleteFromNotification) {
             confirmActionEntries[index] = getString(R.string.global_settings_confirm_action_delete_notif);
-            confirmActionValues[index++] = K9.confirmDeleteFromNotification();
+            confirmActionValues[index++] = QMail.confirmDeleteFromNotification();
         }
         confirmActionEntries[index] = getString(R.string.global_settings_confirm_action_spam);
-        confirmActionValues[index++] = K9.confirmSpam();
+        confirmActionValues[index++] = QMail.confirmSpam();
         confirmActionEntries[index] = getString(R.string.global_settings_confirm_menu_discard);
-        confirmActionValues[index++] = K9.confirmDiscardMessage();
+        confirmActionValues[index++] = QMail.confirmDiscardMessage();
         confirmActionEntries[index] = getString(R.string.global_settings_confirm_menu_mark_all_read);
-        confirmActionValues[index++] = K9.confirmMarkAllRead();
+        confirmActionValues[index++] = QMail.confirmMarkAllRead();
 
         mConfirmActions.setItems(confirmActionEntries);
         mConfirmActions.setCheckedItems(confirmActionValues);
 
         mNotificationHideSubject = setupListPreference(PREFERENCE_NOTIFICATION_HIDE_SUBJECT,
-                K9.getNotificationHideSubject().toString());
+                QMail.getNotificationHideSubject().toString());
 
         mMeasureAccounts = (CheckBoxPreference)findPreference(PREFERENCE_MEASURE_ACCOUNTS);
-        mMeasureAccounts.setChecked(K9.measureAccounts());
+        mMeasureAccounts.setChecked(QMail.measureAccounts());
 
         mCountSearch = (CheckBoxPreference)findPreference(PREFERENCE_COUNT_SEARCH);
-        mCountSearch.setChecked(K9.countSearchMessages());
+        mCountSearch.setChecked(QMail.countSearchMessages());
 
         mHideSpecialAccounts = (CheckBoxPreference)findPreference(PREFERENCE_HIDE_SPECIAL_ACCOUNTS);
-        mHideSpecialAccounts.setChecked(K9.isHideSpecialAccounts());
+        mHideSpecialAccounts.setChecked(QMail.isHideSpecialAccounts());
 
 
         mPreviewLines = setupListPreference(PREFERENCE_MESSAGELIST_PREVIEW_LINES,
-                                            Integer.toString(K9.messageListPreviewLines()));
+                                            Integer.toString(QMail.messageListPreviewLines()));
 
         mSenderAboveSubject = (CheckBoxPreference)findPreference(PREFERENCE_MESSAGELIST_SENDER_ABOVE_SUBJECT);
-        mSenderAboveSubject.setChecked(K9.messageListSenderAboveSubject());
+        mSenderAboveSubject.setChecked(QMail.messageListSenderAboveSubject());
         mCheckboxes = (CheckBoxPreference)findPreference(PREFERENCE_MESSAGELIST_CHECKBOXES);
-        mCheckboxes.setChecked(K9.messageListCheckboxes());
+        mCheckboxes.setChecked(QMail.messageListCheckboxes());
 
         mStars = (CheckBoxPreference)findPreference(PREFERENCE_MESSAGELIST_STARS);
-        mStars.setChecked(K9.messageListStars());
+        mStars.setChecked(QMail.messageListStars());
 
         mShowCorrespondentNames = (CheckBoxPreference)findPreference(PREFERENCE_MESSAGELIST_SHOW_CORRESPONDENT_NAMES);
-        mShowCorrespondentNames.setChecked(K9.showCorrespondentNames());
+        mShowCorrespondentNames.setChecked(QMail.showCorrespondentNames());
 
         mShowContactName = (CheckBoxPreference)findPreference(PREFERENCE_MESSAGELIST_SHOW_CONTACT_NAME);
-        mShowContactName.setChecked(K9.showContactName());
+        mShowContactName.setChecked(QMail.showContactName());
 
         mShowContactPicture = (CheckBoxPreference)findPreference(PREFERENCE_MESSAGELIST_SHOW_CONTACT_PICTURE);
-        mShowContactPicture.setChecked(K9.showContactPicture());
+        mShowContactPicture.setChecked(QMail.showContactPicture());
 
         mColorizeMissingContactPictures = (CheckBoxPreference)findPreference(
                 PREFERENCE_MESSAGELIST_COLORIZE_MISSING_CONTACT_PICTURES);
-        mColorizeMissingContactPictures.setChecked(K9.isColorizeMissingContactPictures());
+        mColorizeMissingContactPictures.setChecked(QMail.isColorizeMissingContactPictures());
 
         mBackgroundAsUnreadIndicator = (CheckBoxPreference)findPreference(PREFERENCE_BACKGROUND_AS_UNREAD_INDICATOR);
-        mBackgroundAsUnreadIndicator.setChecked(K9.useBackgroundAsUnreadIndicator());
+        mBackgroundAsUnreadIndicator.setChecked(QMail.useBackgroundAsUnreadIndicator());
 
         mChangeContactNameColor = (CheckBoxPreference)findPreference(PREFERENCE_MESSAGELIST_CONTACT_NAME_COLOR);
-        mChangeContactNameColor.setChecked(K9.changeContactNameColor());
+        mChangeContactNameColor.setChecked(QMail.changeContactNameColor());
 
         mThreadedView = (CheckBoxPreference) findPreference(PREFERENCE_THREADED_VIEW);
-        mThreadedView.setChecked(K9.isThreadedViewEnabled());
+        mThreadedView.setChecked(QMail.isThreadedViewEnabled());
 
-        if (K9.changeContactNameColor()) {
+        if (QMail.changeContactNameColor()) {
             mChangeContactNameColor.setSummary(R.string.global_settings_registered_name_color_changed);
         } else {
             mChangeContactNameColor.setSummary(R.string.global_settings_registered_name_color_default);
@@ -317,26 +317,26 @@ public class Prefs extends K9PreferenceActivity {
         });
 
         mFixedWidth = (CheckBoxPreference)findPreference(PREFERENCE_MESSAGEVIEW_FIXEDWIDTH);
-        mFixedWidth.setChecked(K9.messageViewFixedWidthFont());
+        mFixedWidth.setChecked(QMail.messageViewFixedWidthFont());
 
         mReturnToList = (CheckBoxPreference) findPreference(PREFERENCE_MESSAGEVIEW_RETURN_TO_LIST);
-        mReturnToList.setChecked(K9.messageViewReturnToList());
+        mReturnToList.setChecked(QMail.messageViewReturnToList());
 
         mShowNext = (CheckBoxPreference) findPreference(PREFERENCE_MESSAGEVIEW_SHOW_NEXT);
-        mShowNext.setChecked(K9.messageViewShowNext());
+        mShowNext.setChecked(QMail.messageViewShowNext());
 
         mAutofitWidth = (CheckBoxPreference) findPreference(PREFERENCE_AUTOFIT_WIDTH);
-        mAutofitWidth.setChecked(K9.autofitWidth());
+        mAutofitWidth.setChecked(QMail.autofitWidth());
 
         mQuietTimeEnabled = (CheckBoxPreference) findPreference(PREFERENCE_QUIET_TIME_ENABLED);
-        mQuietTimeEnabled.setChecked(K9.getQuietTimeEnabled());
+        mQuietTimeEnabled.setChecked(QMail.getQuietTimeEnabled());
 
         mDisableNotificationDuringQuietTime = (CheckBoxPreference) findPreference(
                 PREFERENCE_DISABLE_NOTIFICATION_DURING_QUIET_TIME);
-        mDisableNotificationDuringQuietTime.setChecked(!K9.isNotificationDuringQuietTimeEnabled());
+        mDisableNotificationDuringQuietTime.setChecked(!QMail.isNotificationDuringQuietTimeEnabled());
         mQuietTimeStarts = (TimePickerPreference) findPreference(PREFERENCE_QUIET_TIME_STARTS);
-        mQuietTimeStarts.setDefaultValue(K9.getQuietTimeStarts());
-        mQuietTimeStarts.setSummary(K9.getQuietTimeStarts());
+        mQuietTimeStarts.setDefaultValue(QMail.getQuietTimeStarts());
+        mQuietTimeStarts.setSummary(QMail.getQuietTimeStarts());
         mQuietTimeStarts.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 final String time = (String) newValue;
@@ -346,8 +346,8 @@ public class Prefs extends K9PreferenceActivity {
         });
 
         mQuietTimeEnds = (TimePickerPreference) findPreference(PREFERENCE_QUIET_TIME_ENDS);
-        mQuietTimeEnds.setSummary(K9.getQuietTimeEnds());
-        mQuietTimeEnds.setDefaultValue(K9.getQuietTimeEnds());
+        mQuietTimeEnds.setSummary(QMail.getQuietTimeEnds());
+        mQuietTimeEnds.setDefaultValue(QMail.getQuietTimeEnds());
         mQuietTimeEnds.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 final String time = (String) newValue;
@@ -357,7 +357,7 @@ public class Prefs extends K9PreferenceActivity {
         });
 
         mNotificationQuickDelete = setupListPreference(PREFERENCE_NOTIF_QUICK_DELETE,
-                K9.getNotificationQuickDeleteBehaviour().toString());
+                QMail.getNotificationQuickDeleteBehaviour().toString());
         if (!NotificationController.platformSupportsExtendedNotifications()) {
             PreferenceScreen prefs = (PreferenceScreen) findPreference("notification_preferences");
             prefs.removePreference(mNotificationQuickDelete);
@@ -365,27 +365,27 @@ public class Prefs extends K9PreferenceActivity {
         }
 
         mLockScreenNotificationVisibility = setupListPreference(PREFERENCE_LOCK_SCREEN_NOTIFICATION_VISIBILITY,
-            K9.getLockScreenNotificationVisibility().toString());
+            QMail.getLockScreenNotificationVisibility().toString());
         if (!NotificationController.platformSupportsLockScreenNotifications()) {
             ((PreferenceScreen) findPreference("notification_preferences"))
                 .removePreference(mLockScreenNotificationVisibility);
             mLockScreenNotificationVisibility = null;
         }
 
-        mBackgroundOps = setupListPreference(PREFERENCE_BACKGROUND_OPS, K9.getBackgroundOps().name());
+        mBackgroundOps = setupListPreference(PREFERENCE_BACKGROUND_OPS, QMail.getBackgroundOps().name());
 
         mDebugLogging = (CheckBoxPreference)findPreference(PREFERENCE_DEBUG_LOGGING);
         mSensitiveLogging = (CheckBoxPreference)findPreference(PREFERENCE_SENSITIVE_LOGGING);
         mHideUserAgent = (CheckBoxPreference)findPreference(PREFERENCE_HIDE_USERAGENT);
         mHideTimeZone = (CheckBoxPreference)findPreference(PREFERENCE_HIDE_TIMEZONE);
 
-        mDebugLogging.setChecked(K9.isDebug());
-        mSensitiveLogging.setChecked(K9.DEBUG_SENSITIVE);
-        mHideUserAgent.setChecked(K9.hideUserAgent());
-        mHideTimeZone.setChecked(K9.hideTimeZone());
+        mDebugLogging.setChecked(QMail.isDebug());
+        mSensitiveLogging.setChecked(QMail.DEBUG_SENSITIVE);
+        mHideUserAgent.setChecked(QMail.hideUserAgent());
+        mHideTimeZone.setChecked(QMail.hideTimeZone());
 
         mOpenPgpProvider = (OpenPgpAppPreference) findPreference(PREFERENCE_OPENPGP_PROVIDER);
-        mOpenPgpProvider.setValue(K9.getOpenPgpProvider());
+        mOpenPgpProvider.setValue(QMail.getOpenPgpProvider());
         if (OpenPgpAppPreference.isApgInstalled(getApplicationContext())) {
             mOpenPgpProvider.addLegacyProvider(
                     APG_PROVIDER_PLACEHOLDER, getString(R.string.apg), R.drawable.ic_apg_small);
@@ -404,10 +404,10 @@ public class Prefs extends K9PreferenceActivity {
         });
 
         mOpenPgpSupportSignOnly = (CheckBoxPreference) findPreference(PREFERENCE_OPENPGP_SUPPORT_SIGN_ONLY);
-        mOpenPgpSupportSignOnly.setChecked(K9.getOpenPgpSupportSignOnly());
+        mOpenPgpSupportSignOnly.setChecked(QMail.getOpenPgpSupportSignOnly());
 
         mAttachmentPathPreference = findPreference(PREFERENCE_ATTACHMENT_DEF_PATH);
-        mAttachmentPathPreference.setSummary(K9.getAttachmentDefaultPath());
+        mAttachmentPathPreference.setSummary(QMail.getAttachmentDefaultPath());
         mAttachmentPathPreference
         .setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
@@ -415,7 +415,7 @@ public class Prefs extends K9PreferenceActivity {
                 FileBrowserHelper
                 .getInstance()
                 .showFileBrowserActivity(Prefs.this,
-                                         new File(K9.getAttachmentDefaultPath()),
+                                         new File(QMail.getAttachmentDefaultPath()),
                                          ACTIVITY_CHOOSE_FOLDER, callback);
 
                 return true;
@@ -426,7 +426,7 @@ public class Prefs extends K9PreferenceActivity {
                 @Override
                 public void onPathEntered(String path) {
                     mAttachmentPathPreference.setSummary(path);
-                    K9.setAttachmentDefaultPath(path);
+                    QMail.setAttachmentDefaultPath(path);
                 }
 
                 @Override
@@ -437,7 +437,7 @@ public class Prefs extends K9PreferenceActivity {
         });
 
         mWrapFolderNames = (CheckBoxPreference)findPreference(PREFERENCE_FOLDERLIST_WRAP_NAME);
-        mWrapFolderNames.setChecked(K9.wrapFolderNames());
+        mWrapFolderNames.setChecked(QMail.wrapFolderNames());
 
         mVisibleRefileActions = (CheckBoxListPreference) findPreference(PREFERENCE_MESSAGEVIEW_VISIBLE_REFILE_ACTIONS);
         CharSequence[] visibleRefileActionsEntries = new CharSequence[5];
@@ -448,21 +448,21 @@ public class Prefs extends K9PreferenceActivity {
         visibleRefileActionsEntries[VISIBLE_REFILE_ACTIONS_SPAM] = getString(R.string.spam_action);
 
         boolean[] visibleRefileActionsValues = new boolean[5];
-        visibleRefileActionsValues[VISIBLE_REFILE_ACTIONS_DELETE] = K9.isMessageViewDeleteActionVisible();
-        visibleRefileActionsValues[VISIBLE_REFILE_ACTIONS_ARCHIVE] = K9.isMessageViewArchiveActionVisible();
-        visibleRefileActionsValues[VISIBLE_REFILE_ACTIONS_MOVE] = K9.isMessageViewMoveActionVisible();
-        visibleRefileActionsValues[VISIBLE_REFILE_ACTIONS_COPY] = K9.isMessageViewCopyActionVisible();
-        visibleRefileActionsValues[VISIBLE_REFILE_ACTIONS_SPAM] = K9.isMessageViewSpamActionVisible();
+        visibleRefileActionsValues[VISIBLE_REFILE_ACTIONS_DELETE] = QMail.isMessageViewDeleteActionVisible();
+        visibleRefileActionsValues[VISIBLE_REFILE_ACTIONS_ARCHIVE] = QMail.isMessageViewArchiveActionVisible();
+        visibleRefileActionsValues[VISIBLE_REFILE_ACTIONS_MOVE] = QMail.isMessageViewMoveActionVisible();
+        visibleRefileActionsValues[VISIBLE_REFILE_ACTIONS_COPY] = QMail.isMessageViewCopyActionVisible();
+        visibleRefileActionsValues[VISIBLE_REFILE_ACTIONS_SPAM] = QMail.isMessageViewSpamActionVisible();
 
         mVisibleRefileActions.setItems(visibleRefileActionsEntries);
         mVisibleRefileActions.setCheckedItems(visibleRefileActionsValues);
 
         mSplitViewMode = (ListPreference) findPreference(PREFERENCE_SPLITVIEW_MODE);
-        initListPreference(mSplitViewMode, K9.getSplitViewMode().name(),
+        initListPreference(mSplitViewMode, QMail.getSplitViewMode().name(),
                 mSplitViewMode.getEntries(), mSplitViewMode.getEntryValues());
     }
 
-    private static String themeIdToName(K9.Theme theme) {
+    private static String themeIdToName(QMail.Theme theme) {
         switch (theme) {
             case DARK: return "dark";
             case USE_GLOBAL: return "global";
@@ -470,102 +470,102 @@ public class Prefs extends K9PreferenceActivity {
         }
     }
 
-    private static K9.Theme themeNameToId(String theme) {
+    private static QMail.Theme themeNameToId(String theme) {
         if (TextUtils.equals(theme, "dark")) {
-            return K9.Theme.DARK;
+            return QMail.Theme.DARK;
         } else if (TextUtils.equals(theme, "global")) {
-            return K9.Theme.USE_GLOBAL;
+            return QMail.Theme.USE_GLOBAL;
         } else {
-            return K9.Theme.LIGHT;
+            return QMail.Theme.LIGHT;
         }
     }
 
     private void saveSettings() {
         Storage storage = Preferences.getPreferences(this).getStorage();
 
-        K9.setK9Language(mLanguage.getValue());
+        QMail.setK9Language(mLanguage.getValue());
 
-        K9.setK9Theme(themeNameToId(mTheme.getValue()));
-        K9.setUseFixedMessageViewTheme(mFixedMessageTheme.isChecked());
-        K9.setK9MessageViewThemeSetting(themeNameToId(mMessageTheme.getValue()));
-        K9.setK9ComposerThemeSetting(themeNameToId(mComposerTheme.getValue()));
+        QMail.setK9Theme(themeNameToId(mTheme.getValue()));
+        QMail.setUseFixedMessageViewTheme(mFixedMessageTheme.isChecked());
+        QMail.setK9MessageViewThemeSetting(themeNameToId(mMessageTheme.getValue()));
+        QMail.setK9ComposerThemeSetting(themeNameToId(mComposerTheme.getValue()));
 
-        K9.setAnimations(mAnimations.isChecked());
-        K9.setGesturesEnabled(mGestures.isChecked());
-        K9.setUseVolumeKeysForNavigation(mVolumeNavigation.getCheckedItems()[0]);
-        K9.setUseVolumeKeysForListNavigation(mVolumeNavigation.getCheckedItems()[1]);
-        K9.setStartIntegratedInbox(!mHideSpecialAccounts.isChecked() && mStartIntegratedInbox.isChecked());
-        K9.setNotificationHideSubject(NotificationHideSubject.valueOf(mNotificationHideSubject.getValue()));
+        QMail.setAnimations(mAnimations.isChecked());
+        QMail.setGesturesEnabled(mGestures.isChecked());
+        QMail.setUseVolumeKeysForNavigation(mVolumeNavigation.getCheckedItems()[0]);
+        QMail.setUseVolumeKeysForListNavigation(mVolumeNavigation.getCheckedItems()[1]);
+        QMail.setStartIntegratedInbox(!mHideSpecialAccounts.isChecked() && mStartIntegratedInbox.isChecked());
+        QMail.setNotificationHideSubject(NotificationHideSubject.valueOf(mNotificationHideSubject.getValue()));
 
         int index = 0;
-        K9.setConfirmDelete(mConfirmActions.getCheckedItems()[index++]);
-        K9.setConfirmDeleteStarred(mConfirmActions.getCheckedItems()[index++]);
+        QMail.setConfirmDelete(mConfirmActions.getCheckedItems()[index++]);
+        QMail.setConfirmDeleteStarred(mConfirmActions.getCheckedItems()[index++]);
         if (NotificationController.platformSupportsExtendedNotifications()) {
-            K9.setConfirmDeleteFromNotification(mConfirmActions.getCheckedItems()[index++]);
+            QMail.setConfirmDeleteFromNotification(mConfirmActions.getCheckedItems()[index++]);
         }
-        K9.setConfirmSpam(mConfirmActions.getCheckedItems()[index++]);
-        K9.setConfirmDiscardMessage(mConfirmActions.getCheckedItems()[index++]);
-        K9.setConfirmMarkAllRead(mConfirmActions.getCheckedItems()[index++]);
+        QMail.setConfirmSpam(mConfirmActions.getCheckedItems()[index++]);
+        QMail.setConfirmDiscardMessage(mConfirmActions.getCheckedItems()[index++]);
+        QMail.setConfirmMarkAllRead(mConfirmActions.getCheckedItems()[index++]);
 
-        K9.setMeasureAccounts(mMeasureAccounts.isChecked());
-        K9.setCountSearchMessages(mCountSearch.isChecked());
-        K9.setHideSpecialAccounts(mHideSpecialAccounts.isChecked());
-        K9.setMessageListPreviewLines(Integer.parseInt(mPreviewLines.getValue()));
-        K9.setMessageListCheckboxes(mCheckboxes.isChecked());
-        K9.setMessageListStars(mStars.isChecked());
-        K9.setShowCorrespondentNames(mShowCorrespondentNames.isChecked());
-        K9.setMessageListSenderAboveSubject(mSenderAboveSubject.isChecked());
-        K9.setShowContactName(mShowContactName.isChecked());
-        K9.setShowContactPicture(mShowContactPicture.isChecked());
-        K9.setColorizeMissingContactPictures(mColorizeMissingContactPictures.isChecked());
-        K9.setUseBackgroundAsUnreadIndicator(mBackgroundAsUnreadIndicator.isChecked());
-        K9.setThreadedViewEnabled(mThreadedView.isChecked());
-        K9.setChangeContactNameColor(mChangeContactNameColor.isChecked());
-        K9.setMessageViewFixedWidthFont(mFixedWidth.isChecked());
-        K9.setMessageViewReturnToList(mReturnToList.isChecked());
-        K9.setMessageViewShowNext(mShowNext.isChecked());
-        K9.setAutofitWidth(mAutofitWidth.isChecked());
-        K9.setQuietTimeEnabled(mQuietTimeEnabled.isChecked());
+        QMail.setMeasureAccounts(mMeasureAccounts.isChecked());
+        QMail.setCountSearchMessages(mCountSearch.isChecked());
+        QMail.setHideSpecialAccounts(mHideSpecialAccounts.isChecked());
+        QMail.setMessageListPreviewLines(Integer.parseInt(mPreviewLines.getValue()));
+        QMail.setMessageListCheckboxes(mCheckboxes.isChecked());
+        QMail.setMessageListStars(mStars.isChecked());
+        QMail.setShowCorrespondentNames(mShowCorrespondentNames.isChecked());
+        QMail.setMessageListSenderAboveSubject(mSenderAboveSubject.isChecked());
+        QMail.setShowContactName(mShowContactName.isChecked());
+        QMail.setShowContactPicture(mShowContactPicture.isChecked());
+        QMail.setColorizeMissingContactPictures(mColorizeMissingContactPictures.isChecked());
+        QMail.setUseBackgroundAsUnreadIndicator(mBackgroundAsUnreadIndicator.isChecked());
+        QMail.setThreadedViewEnabled(mThreadedView.isChecked());
+        QMail.setChangeContactNameColor(mChangeContactNameColor.isChecked());
+        QMail.setMessageViewFixedWidthFont(mFixedWidth.isChecked());
+        QMail.setMessageViewReturnToList(mReturnToList.isChecked());
+        QMail.setMessageViewShowNext(mShowNext.isChecked());
+        QMail.setAutofitWidth(mAutofitWidth.isChecked());
+        QMail.setQuietTimeEnabled(mQuietTimeEnabled.isChecked());
 
         boolean[] enabledRefileActions = mVisibleRefileActions.getCheckedItems();
-        K9.setMessageViewDeleteActionVisible(enabledRefileActions[VISIBLE_REFILE_ACTIONS_DELETE]);
-        K9.setMessageViewArchiveActionVisible(enabledRefileActions[VISIBLE_REFILE_ACTIONS_ARCHIVE]);
-        K9.setMessageViewMoveActionVisible(enabledRefileActions[VISIBLE_REFILE_ACTIONS_MOVE]);
-        K9.setMessageViewCopyActionVisible(enabledRefileActions[VISIBLE_REFILE_ACTIONS_COPY]);
-        K9.setMessageViewSpamActionVisible(enabledRefileActions[VISIBLE_REFILE_ACTIONS_SPAM]);
+        QMail.setMessageViewDeleteActionVisible(enabledRefileActions[VISIBLE_REFILE_ACTIONS_DELETE]);
+        QMail.setMessageViewArchiveActionVisible(enabledRefileActions[VISIBLE_REFILE_ACTIONS_ARCHIVE]);
+        QMail.setMessageViewMoveActionVisible(enabledRefileActions[VISIBLE_REFILE_ACTIONS_MOVE]);
+        QMail.setMessageViewCopyActionVisible(enabledRefileActions[VISIBLE_REFILE_ACTIONS_COPY]);
+        QMail.setMessageViewSpamActionVisible(enabledRefileActions[VISIBLE_REFILE_ACTIONS_SPAM]);
 
-        K9.setNotificationDuringQuietTimeEnabled(!mDisableNotificationDuringQuietTime.isChecked());
-        K9.setQuietTimeStarts(mQuietTimeStarts.getTime());
-        K9.setQuietTimeEnds(mQuietTimeEnds.getTime());
-        K9.setWrapFolderNames(mWrapFolderNames.isChecked());
+        QMail.setNotificationDuringQuietTimeEnabled(!mDisableNotificationDuringQuietTime.isChecked());
+        QMail.setQuietTimeStarts(mQuietTimeStarts.getTime());
+        QMail.setQuietTimeEnds(mQuietTimeEnds.getTime());
+        QMail.setWrapFolderNames(mWrapFolderNames.isChecked());
 
         if (mNotificationQuickDelete != null) {
-            K9.setNotificationQuickDeleteBehaviour(
+            QMail.setNotificationQuickDeleteBehaviour(
                     NotificationQuickDelete.valueOf(mNotificationQuickDelete.getValue()));
         }
 
         if(mLockScreenNotificationVisibility != null) {
-            K9.setLockScreenNotificationVisibility(
-                K9.LockScreenNotificationVisibility.valueOf(mLockScreenNotificationVisibility.getValue()));
+            QMail.setLockScreenNotificationVisibility(
+                QMail.LockScreenNotificationVisibility.valueOf(mLockScreenNotificationVisibility.getValue()));
         }
 
-        K9.setSplitViewMode(SplitViewMode.valueOf(mSplitViewMode.getValue()));
-        K9.setAttachmentDefaultPath(mAttachmentPathPreference.getSummary().toString());
-        boolean needsRefresh = K9.setBackgroundOps(mBackgroundOps.getValue());
+        QMail.setSplitViewMode(SplitViewMode.valueOf(mSplitViewMode.getValue()));
+        QMail.setAttachmentDefaultPath(mAttachmentPathPreference.getSummary().toString());
+        boolean needsRefresh = QMail.setBackgroundOps(mBackgroundOps.getValue());
 
-        if (!K9.isDebug() && mDebugLogging.isChecked()) {
+        if (!QMail.isDebug() && mDebugLogging.isChecked()) {
             Toast.makeText(this, R.string.debug_logging_enabled, Toast.LENGTH_LONG).show();
         }
-        K9.setDebug(mDebugLogging.isChecked());
-        K9.DEBUG_SENSITIVE = mSensitiveLogging.isChecked();
-        K9.setHideUserAgent(mHideUserAgent.isChecked());
-        K9.setHideTimeZone(mHideTimeZone.isChecked());
+        QMail.setDebug(mDebugLogging.isChecked());
+        QMail.DEBUG_SENSITIVE = mSensitiveLogging.isChecked();
+        QMail.setHideUserAgent(mHideUserAgent.isChecked());
+        QMail.setHideTimeZone(mHideTimeZone.isChecked());
 
-        K9.setOpenPgpProvider(mOpenPgpProvider.getValue());
-        K9.setOpenPgpSupportSignOnly(mOpenPgpSupportSignOnly.isChecked());
+        QMail.setOpenPgpProvider(mOpenPgpProvider.getValue());
+        QMail.setOpenPgpSupportSignOnly(mOpenPgpSupportSignOnly.isChecked());
 
         StorageEditor editor = storage.edit();
-        K9.save(editor);
+        QMail.save(editor);
         editor.commit();
 
         if (needsRefresh) {
@@ -586,10 +586,10 @@ public class Prefs extends K9PreferenceActivity {
     private void onChooseContactNameColor() {
         new ColorPickerDialog(this, new ColorPickerDialog.OnColorChangedListener() {
             public void colorChanged(int color) {
-                K9.setContactNameColor(color);
+                QMail.setContactNameColor(color);
             }
         },
-        K9.getContactNameColor()).show();
+        QMail.getContactNameColor()).show();
     }
 
     @Override
@@ -622,7 +622,7 @@ public class Prefs extends K9PreferenceActivity {
                     String filePath = fileUri.getPath();
                     if (filePath != null) {
                         mAttachmentPathPreference.setSummary(filePath.toString());
-                        K9.setAttachmentDefaultPath(filePath.toString());
+                        QMail.setAttachmentDefaultPath(filePath.toString());
                     }
                 }
             }

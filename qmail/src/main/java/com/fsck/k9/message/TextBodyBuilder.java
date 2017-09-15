@@ -4,7 +4,7 @@ package com.fsck.k9.message;
 import android.text.TextUtils;
 import timber.log.Timber;
 
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.message.html.HtmlConverter;
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.internet.TextBody;
@@ -47,7 +47,7 @@ class TextBodyBuilder {
         if (mIncludeQuotedText) {
             InsertableHtmlContent quotedHtmlContent = getQuotedTextHtml();
 
-            if (K9.isDebug()) {
+            if (QMail.isDebug()) {
                 Timber.d("insertable: %s", quotedHtmlContent.toDebugString());
             }
 

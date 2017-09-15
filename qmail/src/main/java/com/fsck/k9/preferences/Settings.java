@@ -10,10 +10,10 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import com.fsck.k9.QMail;
 import timber.log.Timber;
 
 import com.fsck.k9.FontSizes;
-import com.fsck.k9.K9;
 
 /*
  * TODO:
@@ -166,7 +166,7 @@ public class Settings {
         T defaultValue = setting.getDefaultValue();
         validatedSettingsMutable.put(settingName, defaultValue);
 
-        if (K9.isDebug()) {
+        if (QMail.isDebug()) {
             String prettyValue = setting.toPrettyString(defaultValue);
             Timber.v("Added new setting \"%s\" with default value \"%s\"", settingName, prettyValue);
         }
@@ -258,7 +258,7 @@ public class Settings {
      *   <li>
      *   The one that is used by the internal preference {@link Storage}. It is usually obtained by
      *   calling {@code toString()} on the internal representation of the setting value (see e.g.
-     *   {@link K9#save(StorageEditor)}).
+     *   {@link QMail#save(StorageEditor)}).
      *   </li>
      *   <li>
      *   The "pretty" version that is used by the import/export settings file (e.g. colors are

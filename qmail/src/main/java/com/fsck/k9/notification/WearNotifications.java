@@ -10,7 +10,7 @@ import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.app.NotificationCompat.WearableExtender;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.controller.MessagingController;
@@ -226,7 +226,7 @@ class WearNotifications extends BaseNotifications {
     }
 
     private boolean isDeleteActionAvailableForWear() {
-        return isDeleteActionEnabled() && !K9.confirmDeleteFromNotification();
+        return isDeleteActionEnabled() && !QMail.confirmDeleteFromNotification();
     }
 
     private boolean isArchiveActionAvailableForWear(Account account) {
@@ -236,11 +236,11 @@ class WearNotifications extends BaseNotifications {
 
     private boolean isSpamActionAvailableForWear(Account account) {
         String spamFolderName = account.getSpamFolderId();
-        return spamFolderName != null && !K9.confirmSpam() && isMovePossible(account, spamFolderName);
+        return spamFolderName != null && !QMail.confirmSpam() && isMovePossible(account, spamFolderName);
     }
 
     private boolean isMovePossible(Account account, String destinationFolderName) {
-        if (K9.FOLDER_NONE.equalsIgnoreCase(destinationFolderName)) {
+        if (QMail.FOLDER_NONE.equalsIgnoreCase(destinationFolderName)) {
             return false;
         }
 

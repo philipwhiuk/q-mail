@@ -9,7 +9,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.text.TextUtils;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.mail.Folder;
 import com.fsck.k9.mailstore.LocalMessage;
@@ -116,7 +116,7 @@ public class NotificationController {
     void configureNotification(NotificationCompat.Builder builder, String ringtone, long[] vibrationPattern,
             Integer ledColor, int ledSpeed, boolean ringAndVibrate) {
 
-        if (K9.isQuietTime()) {
+        if (QMail.isQuietTime()) {
             return;
         }
 

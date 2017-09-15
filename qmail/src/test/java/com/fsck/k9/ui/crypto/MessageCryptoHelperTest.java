@@ -8,7 +8,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.autocrypt.AutocryptOperations;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Body;
@@ -67,7 +67,7 @@ public class MessageCryptoHelperTest {
         openPgpApi = mock(OpenPgpApi.class);
         autocryptOperations = mock(AutocryptOperations.class);
 
-        K9.setOpenPgpProvider("org.example.dummy");
+        QMail.setOpenPgpProvider("org.example.dummy");
 
         OpenPgpApiFactory openPgpApiFactory = mock(OpenPgpApiFactory.class);
         when(openPgpApiFactory.createOpenPgpApi(any(Context.class), any(IOpenPgpService2.class))).thenReturn(openPgpApi);

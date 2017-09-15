@@ -10,7 +10,7 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.FolderInfoHolder;
 import com.fsck.k9.activity.MessageInfoHolder;
@@ -52,7 +52,7 @@ public class MessageHelper {
                          final LocalMessage message,
                          final FolderInfoHolder folder,
                          Account account) {
-        final Contacts contactHelper = K9.showContactName() ? Contacts.getInstance(mContext) : null;
+        final Contacts contactHelper = QMail.showContactName() ? Contacts.getInstance(mContext) : null;
 
         target.message = message;
         target.compareArrival = message.getInternalDate();
@@ -92,7 +92,7 @@ public class MessageHelper {
     }
 
     public CharSequence getDisplayName(Account account, Address[] fromAddrs, Address[] toAddrs) {
-        final Contacts contactHelper = K9.showContactName() ? Contacts.getInstance(mContext) : null;
+        final Contacts contactHelper = QMail.showContactName() ? Contacts.getInstance(mContext) : null;
 
         CharSequence displayName;
         if (fromAddrs.length > 0 && account.isAnIdentity(fromAddrs[0])) {
@@ -128,9 +128,9 @@ public class MessageHelper {
      */
     public static CharSequence toFriendly(Address address, Contacts contacts) {
         return toFriendly(address,contacts,
-                K9.showCorrespondentNames(),
-                K9.changeContactNameColor(),
-                K9.getContactNameColor());
+                QMail.showCorrespondentNames(),
+                QMail.changeContactNameColor(),
+                QMail.getContactNameColor());
     }
 
     public static CharSequence toFriendly(Address[] addresses, Contacts contacts) {

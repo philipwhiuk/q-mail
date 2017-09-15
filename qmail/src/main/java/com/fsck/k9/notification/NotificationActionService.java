@@ -9,7 +9,7 @@ import android.content.Intent;
 import timber.log.Timber;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.controller.MessagingController;
@@ -178,7 +178,7 @@ public class NotificationActionService extends CoreService {
 
         String archiveFolderName = account.getArchiveFolderId();
         if (archiveFolderName == null ||
-                (archiveFolderName.equals(account.getSpamFolderId()) && K9.confirmSpam()) ||
+                (archiveFolderName.equals(account.getSpamFolderId()) && QMail.confirmSpam()) ||
                 !isMovePossible(controller, account, archiveFolderName)) {
             Timber.w("Can not archive messages");
             return;
@@ -205,7 +205,7 @@ public class NotificationActionService extends CoreService {
         }
 
         String spamFolderName = account.getSpamFolderId();
-        if (spamFolderName != null && !K9.confirmSpam() && isMovePossible(controller, account, spamFolderName)) {
+        if (spamFolderName != null && !QMail.confirmSpam() && isMovePossible(controller, account, spamFolderName)) {
             String sourceFolderName = messageReference.getFolderId();
             controller.moveMessage(account, sourceFolderName, messageReference, spamFolderName);
         }
@@ -233,7 +233,7 @@ public class NotificationActionService extends CoreService {
 
     private boolean isMovePossible(MessagingController controller, Account account,
             String destinationFolderName) {
-        boolean isSpecialFolderConfigured = !K9.FOLDER_NONE.equalsIgnoreCase(destinationFolderName);
+        boolean isSpecialFolderConfigured = !QMail.FOLDER_NONE.equalsIgnoreCase(destinationFolderName);
 
         return isSpecialFolderConfigured && controller.isMoveCapable(account);
     }

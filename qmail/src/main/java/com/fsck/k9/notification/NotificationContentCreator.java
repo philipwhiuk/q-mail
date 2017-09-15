@@ -6,7 +6,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.helper.Contacts;
@@ -99,7 +99,7 @@ class NotificationContentCreator {
 
     private String getMessageSender(Account account, Message message) {
         boolean isSelf = false;
-        final Contacts contacts = K9.showContactName() ? Contacts.getInstance(context) : null;
+        final Contacts contacts = QMail.showContactName() ? Contacts.getInstance(context) : null;
         final Address[] fromAddresses = message.getFrom();
 
         if (fromAddresses != null) {

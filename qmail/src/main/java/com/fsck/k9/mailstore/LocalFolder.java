@@ -27,7 +27,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.activity.Search;
 import com.fsck.k9.helper.FileHelper;
@@ -1122,7 +1122,7 @@ public class LocalFolder extends Folder<LocalMessage> {
                                     lMessage.getDatabaseId(),
                                     getId());
 
-                            String newUid = K9.LOCAL_UID_PREFIX + UUID.randomUUID().toString();
+                            String newUid = QMail.LOCAL_UID_PREFIX + UUID.randomUUID().toString();
                             message.setUid(newUid);
 
                             uidMap.put(oldUID, newUid);
@@ -1366,7 +1366,7 @@ public class LocalFolder extends Folder<LocalMessage> {
         String uid = message.getUid();
         boolean shouldCreateNewMessage = uid == null || copy;
         if (shouldCreateNewMessage) {
-            String randomLocalUid = K9.LOCAL_UID_PREFIX + UUID.randomUUID().toString();
+            String randomLocalUid = QMail.LOCAL_UID_PREFIX + UUID.randomUUID().toString();
 
             if (copy) {
                 // Save mapping: source UID -> target UID
@@ -2096,7 +2096,7 @@ public class LocalFolder extends Folder<LocalMessage> {
                 String messagePartId = cursor.getString(0);
                 File file = localStore.getAttachmentFile(messagePartId);
                 if (file.exists()) {
-                    if (!file.delete() && K9.isDebug()) {
+                    if (!file.delete() && QMail.isDebug()) {
                         Timber.d("Couldn't delete message part file: %s", file.getAbsolutePath());
                     }
                 }

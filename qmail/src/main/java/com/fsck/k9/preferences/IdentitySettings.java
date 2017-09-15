@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.fsck.k9.EmailAddressValidator;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.preferences.Settings.BooleanSetting;
 import com.fsck.k9.preferences.Settings.InvalidSettingValueException;
@@ -84,7 +84,7 @@ class IdentitySettings {
 
         @Override
         public String getDefaultValue() {
-            return K9.app.getResources().getString(R.string.default_signature);
+            return QMail.app.getResources().getString(R.string.default_signature);
         }
 
         @Override

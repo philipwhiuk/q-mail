@@ -9,10 +9,11 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.v4.content.LocalBroadcastManager;
+
+import com.fsck.k9.QMail;
 import timber.log.Timber;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.activity.UpgradeDatabases;
 import com.fsck.k9.mail.power.TracingPowerManager;
@@ -202,7 +203,7 @@ public class DatabaseUpgradeService extends Service {
             mProgress++;
         }
 
-        K9.setDatabasesUpToDate(true);
+        QMail.setDatabasesUpToDate(true);
         sendUpgradeCompleteBroadcast();
     }
 

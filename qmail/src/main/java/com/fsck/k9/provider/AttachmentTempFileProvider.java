@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.Locale;
 
 import android.content.BroadcastReceiver;
@@ -21,7 +20,7 @@ import android.support.v4.content.FileProvider;
 import timber.log.Timber;
 
 import com.fsck.k9.BuildConfig;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import okio.ByteString;
 import org.apache.commons.io.IOUtils;
 
@@ -106,7 +105,7 @@ public class AttachmentTempFileProvider extends FileProvider {
                     allFilesDeleted = false;
                 }
             } else {
-                if (K9.isDebug()) {
+                if (QMail.isDebug()) {
                     String timeLeftStr = String.format(
                             Locale.ENGLISH, "%.2f", (lastModified - deletionThreshold) / 1000 / 60.0);
                     Timber.e("Not deleting temp file (for another %s minutes)", timeLeftStr);

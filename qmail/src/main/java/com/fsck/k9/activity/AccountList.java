@@ -16,7 +16,7 @@ import android.widget.TextView;
 import com.fsck.k9.Account;
 import com.fsck.k9.BaseAccount;
 import com.fsck.k9.FontSizes;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.search.SearchAccount;
@@ -31,7 +31,7 @@ import com.fsck.k9.search.SearchAccount;
  * </p>
  */
 public abstract class AccountList extends K9ListActivity implements OnItemClickListener {
-    private FontSizes mFontSizes = K9.getFontSizes();
+    private FontSizes mFontSizes = QMail.getFontSizes();
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -70,7 +70,7 @@ public abstract class AccountList extends K9ListActivity implements OnItemClickL
     public void populateListView(List<Account> realAccounts) {
         List<BaseAccount> accounts = new ArrayList<BaseAccount>();
 
-        if (displaySpecialAccounts() && !K9.isHideSpecialAccounts()) {
+        if (displaySpecialAccounts() && !QMail.isHideSpecialAccounts()) {
             BaseAccount unifiedInboxAccount = SearchAccount.createUnifiedInboxAccount(this);
             BaseAccount allMessagesAccount = SearchAccount.createAllMessagesAccount(this);
 

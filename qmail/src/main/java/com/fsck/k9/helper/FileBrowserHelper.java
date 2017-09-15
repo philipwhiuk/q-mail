@@ -12,7 +12,7 @@ import android.net.Uri;
 import android.text.InputType;
 import android.widget.EditText;
 
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 
 public class FileBrowserHelper {
@@ -77,7 +77,7 @@ public class FileBrowserHelper {
         boolean success = false;
 
         if (startPath == null) {
-            startPath = new File(K9.getAttachmentDefaultPath());
+            startPath = new File(QMail.getAttachmentDefaultPath());
         }
 
         int listIndex = 0;
@@ -109,7 +109,7 @@ public class FileBrowserHelper {
         boolean success = false;
 
         if (startPath == null) {
-            startPath = new File(K9.getAttachmentDefaultPath());
+            startPath = new File(QMail.getAttachmentDefaultPath());
         }
 
         int listIndex = 0;

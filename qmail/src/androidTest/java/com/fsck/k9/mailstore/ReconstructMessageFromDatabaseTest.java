@@ -12,7 +12,7 @@ import android.test.ApplicationTestCase;
 import android.test.RenamingDelegatingContext;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.FetchProfile;
 import com.fsck.k9.mail.MessagingException;
@@ -22,7 +22,7 @@ import com.fsck.k9.mail.internet.MimeMessage;
 import org.apache.james.mime4j.util.MimeUtil;
 
 
-public class ReconstructMessageFromDatabaseTest extends ApplicationTestCase<K9> {
+public class ReconstructMessageFromDatabaseTest extends ApplicationTestCase<QMail> {
 
     public static final String MESSAGE_SOURCE = "From: from@example.com\r\n" +
             "To: to@example.com\r\n" +
@@ -56,7 +56,7 @@ public class ReconstructMessageFromDatabaseTest extends ApplicationTestCase<K9> 
     private Account account;
 
     public ReconstructMessageFromDatabaseTest() {
-        super(K9.class);
+        super(QMail.class);
     }
 
     @Override

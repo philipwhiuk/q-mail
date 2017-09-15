@@ -5,8 +5,8 @@ import android.app.Notification;
 import android.support.v4.app.NotificationManagerCompat;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
-import com.fsck.k9.K9.NotificationHideSubject;
+import com.fsck.k9.QMail;
+import com.fsck.k9.QMail.NotificationHideSubject;
 import com.fsck.k9.K9RobolectricTestRunner;
 import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.mailstore.LocalMessage;
@@ -358,7 +358,7 @@ public class NewMailNotificationsTest {
     }
 
     private void enablePrivacyMode() {
-        K9.setNotificationHideSubject(NotificationHideSubject.ALWAYS);
+        QMail.setNotificationHideSubject(NotificationHideSubject.ALWAYS);
     }
 
     static class TestNewMailNotifications extends NewMailNotifications {

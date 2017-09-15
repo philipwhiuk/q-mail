@@ -13,7 +13,7 @@ import android.os.Environment;
 import android.widget.Toast;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
 import com.fsck.k9.R;
 import com.fsck.k9.cache.TemporaryAttachmentStore;
@@ -65,7 +65,7 @@ public class ICalendarController {
     }
 
     public void saveICalendar() {
-        saveICalendarTo(K9.getAttachmentDefaultPath());
+        saveICalendarTo(QMail.getAttachmentDefaultPath());
     }
 
     public void saveICalendarTo(String directory) {

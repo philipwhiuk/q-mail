@@ -20,7 +20,7 @@ import android.text.TextUtils;
 import timber.log.Timber;
 
 import com.fsck.k9.Account;
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.internet.MimeHeader;
@@ -65,7 +65,7 @@ class MigrationTo51 {
 
         File attachmentDirNew, attachmentDirOld;
         Account account = migrationsHelper.getAccount();
-        attachmentDirNew = StorageManager.getInstance(K9.app).getAttachmentDirectory(
+        attachmentDirNew = StorageManager.getInstance(QMail.app).getAttachmentDirectory(
                 account.getUuid(), account.getLocalStorageProviderId());
         attachmentDirOld = renameOldAttachmentDirAndCreateNew(account, attachmentDirNew);
 

@@ -2,12 +2,9 @@ package com.fsck.k9.message.html;
 
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.Annotation;
@@ -18,7 +15,7 @@ import android.text.Spannable;
 import android.text.Spanned;
 import android.text.TextUtils;
 
-import com.fsck.k9.K9;
+import com.fsck.k9.QMail;
 import org.xml.sax.XMLReader;
 
 /**
@@ -113,7 +110,7 @@ public class HtmlConverter {
         }
 
         /**
-         * Fetch the matching opening Annotation object and verify that it's the one added by K9.
+         * Fetch the matching opening Annotation object and verify that it's the one added by QMail.
          * @param output Spannable string we're working with.
          * @return Starting Annotation object.
          */
@@ -1261,7 +1258,7 @@ public class HtmlConverter {
     }
 
     static String cssStyleTheme() {
-        if (K9.getK9MessageViewTheme() == K9.Theme.DARK)  {
+        if (QMail.getK9MessageViewTheme() == QMail.Theme.DARK)  {
             return "<style type=\"text/css\">" +
                     "* { background: black ! important; color: #F3F3F3 !important }" +
                     ":link, :link * { color: #CCFF33 !important }" +
@@ -1284,7 +1281,7 @@ public class HtmlConverter {
      *      {@code <head>} element when messages are displayed.
      */
     static String cssStylePre() {
-        final String font = K9.messageViewFixedWidthFont()
+        final String font = QMail.messageViewFixedWidthFont()
                 ? "monospace"
                 : "sans-serif";
         return "<style type=\"text/css\"> pre." + K9MAIL_CSS_CLASS +

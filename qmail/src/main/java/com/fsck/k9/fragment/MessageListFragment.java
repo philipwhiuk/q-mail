@@ -2495,13 +2495,6 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         return (folderId != null && folderId.equals(account.getOutboxFolderId()));
     }
 
-<<<<<<< HEAD:qmail/src/main/java/com/fsck/k9/fragment/MessageListFragment.java
-    private boolean isErrorFolder() {
-        return QMail.ERROR_FOLDER_ID.equals(folderId);
-    }
-
-=======
->>>>>>> upstream-master:k9mail/src/main/java/com/fsck/k9/fragment/MessageListFragment.java
     public boolean isRemoteFolder() {
         if (search.isManualSearch() || isOutbox()) {
             return false;

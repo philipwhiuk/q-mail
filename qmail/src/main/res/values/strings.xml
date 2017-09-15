@@ -1329,4 +1329,6 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="message_view_status_calendar_not_saved">Unable to save attachment to SD card.</string>
     <string name="dialog_calendar_progress_title">Downloading calendar</string>
     <string name="openpgp_encryption">OpenPGP Encryption</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
 </resources>

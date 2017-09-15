@@ -23,6 +23,9 @@ import android.os.Parcelable;
 
 import com.fsck.k9.QMail;
 import timber.log.Timber;
+
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v4.widget.DrawerLayout;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,6 +34,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,28 +82,25 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
     @Deprecated
     //TODO: Remove after 2017-09-11
     private static final String EXTRA_SEARCH_OLD = "search";
-
     private static final String EXTRA_SEARCH = "search_bytes";
     private static final String EXTRA_NO_THREADING = "no_threading";
-
     private static final String ACTION_SHORTCUT = "shortcut";
     private static final String EXTRA_SPECIAL_FOLDER = "special_folder";
-
     private static final String EXTRA_MESSAGE_REFERENCE = "message_reference";
-
     // used for remote search
     public static final String EXTRA_SEARCH_ACCOUNT = "com.fsck.k9.search_account";
     private static final String EXTRA_SEARCH_FOLDER = "com.fsck.k9.search_folder";
-
     private static final String STATE_DISPLAY_MODE = "displayMode";
     private static final String STATE_MESSAGE_LIST_WAS_DISPLAYED = "messageListWasDisplayed";
     private static final String STATE_FIRST_BACK_STACK_ID = "firstBackstackId";
-
     // Used for navigating to next/previous message
     private static final int PREVIOUS = 1;
     private static final int NEXT = 2;
-
     public static final int REQUEST_MASK_PENDING_INTENT = 1 << 16;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private DrawerLayout drawerLayout;
+    private ListView drawerList;
+    private String[] planetTitles;
 
     public static void actionDisplaySearch(Context context, SearchSpecification search,
             boolean noThreading, boolean newTask) {
@@ -214,12 +216,47 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
             setContentView(R.layout.split_message_list);
         } else {
             setContentView(R.layout.message_list);
+
+            planetTitles = new String[]{"a", "b"};
+            drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawerList = (ListView) findViewById(R.id.left_drawer);
+
+            // Set the adapter for the list view
+            drawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_folder_list_item, planetTitles));
+            // Set the list's click listener
+
             mViewSwitcher = (ViewSwitcher) findViewById(R.id.container);
             mViewSwitcher.setFirstInAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in_left));
             mViewSwitcher.setFirstOutAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_out_right));
             mViewSwitcher.setSecondInAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in_right));
             mViewSwitcher.setSecondOutAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_out_left));
             mViewSwitcher.setOnSwitchCompleteListener(this);
+
+            mDrawerToggle = new ActionBarDrawerToggle(
+                    this,                  /* host Activity */
+                    drawerLayout,         /* DrawerLayout object */
+                    R.string.drawer_open,  /* "open drawer" description */
+                    R.string.drawer_close  /* "close drawer" description */
+            ) {
+
+                /** Called when a drawer has settled in a completely closed state. */
+                public void onDrawerClosed(View view) {
+                    super.onDrawerClosed(view);
+                    getActionBar().setTitle("Message List");
+                }
+
+                /** Called when a drawer has settled in a completely open state. */
+                public void onDrawerOpened(View drawerView) {
+                    super.onDrawerOpened(drawerView);
+                    getActionBar().setTitle("folders");
+                }
+            };
+
+            drawerLayout.setDrawerListener(mDrawerToggle);
+
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+
         }
 
         initializeActionBar();

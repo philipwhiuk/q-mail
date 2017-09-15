@@ -275,7 +275,7 @@ public class AttachmentController {
     }
 
     private void displayAttachmentNotSavedMessage() {
-        String message = context.getString(R.string.message_view_status_attachment_not_saved);
+        String message = context.getString(R.string.message_view_status_attachment_not_mounted);
         displayMessageToUser(message);
     }
 

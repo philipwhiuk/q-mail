@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import android.Manifest;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -149,10 +150,13 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
      * @see #onRetainNonConfigurationInstance()
      */
     private NonConfigurationInstance mNonConfigurationInstance;
+    private boolean exportIncludeGlobals;
+    private Account exportAccount;
 
 
     private static final int ACTIVITY_REQUEST_PICK_SETTINGS_FILE = 1;
     private static final int ACTIVITY_REQUEST_SAVE_SETTINGS_FILE = 2;
+    private static final int EXPORT_SAVE_PERMISSION = 100;
 
     class AccountsHandler extends Handler {
         private void setViewTitle() {
@@ -1924,7 +1928,28 @@ public class Accounts extends K9ListActivity implements OnItemClickListener {
 
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] result){
+        super.onRequestPermissionsResult(requestCode, permissions, result);
+
+
+        if(requestCode == EXPORT_SAVE_PERMISSION && result[0] == PackageManager.PERMISSION_GRANTED){
+            performExport(exportIncludeGlobals, exportAccount);
+        }
+    }
+
     public void onExport(final boolean includeGlobals, final Account account) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && this.checkSelfPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            exportIncludeGlobals = includeGlobals;
+            exportAccount = account;
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, EXPORT_SAVE_PERMISSION);
+        } else {
+            performExport(includeGlobals, account);
+        }
+    }
+
+    private void performExport(final boolean includeGlobals, final Account account) {
         // TODO, prompt to allow a user to choose which accounts to export
         ArrayList<String> accountUuids = null;
         if (account != null) {

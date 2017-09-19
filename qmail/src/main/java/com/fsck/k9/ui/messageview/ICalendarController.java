@@ -1,6 +1,7 @@
 package com.fsck.k9.ui.messageview;
 
 
+import android.Manifest;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.widget.Toast;
 
@@ -117,7 +119,7 @@ public class ICalendarController {
     private void saveICalendarTo(File directory) {
         boolean isExternalStorageMounted = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
         if (!isExternalStorageMounted) {
-            String message = context.getString(R.string.message_view_status_calendar_not_saved);
+            String message = context.getString(R.string.message_view_status_calendar_not_mounted);
             displayMessageToUser(message);
             return;
         }
@@ -134,6 +136,11 @@ public class ICalendarController {
     }
 
     private File saveICalendarWithUniqueFileName(File directory) throws IOException {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                messageViewFragment.getActivity().checkSelfPermission(
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
         String filename = FileHelper.sanitizeFilename(iCalendar.iCalData.getCalendarData().get(0).getSummary());
         File file = FileHelper.createUniqueFile(directory, filename);
 
@@ -259,7 +266,7 @@ public class ICalendarController {
     }
 
     private void displayICalendarNotSavedMessage() {
-        String message = context.getString(R.string.message_view_status_calendar_not_saved);
+        String message = context.getString(R.string.message_view_status_calendar_not_saved_error);
         displayMessageToUser(message);
     }
 

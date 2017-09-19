@@ -51,8 +51,9 @@ public class MessageHelper {
     public void populate(final MessageInfoHolder target,
                          final LocalMessage message,
                          final FolderInfoHolder folder,
-                         Account account) {
-        final Contacts contactHelper = QMail.showContactName() ? Contacts.getInstance(mContext) : null;
+                         Account account,
+                         boolean canUseContacts) {
+        final Contacts contactHelper = QMail.showContactName() && canUseContacts ? Contacts.getInstance(mContext) : null;
 
         target.message = message;
         target.compareArrival = message.getInternalDate();
@@ -91,8 +92,8 @@ public class MessageHelper {
         target.uri = message.getUri();
     }
 
-    public CharSequence getDisplayName(Account account, Address[] fromAddrs, Address[] toAddrs) {
-        final Contacts contactHelper = QMail.showContactName() ? Contacts.getInstance(mContext) : null;
+    public CharSequence getDisplayName(Account account, Address[] fromAddrs, Address[] toAddrs, boolean canUseContacts) {
+        final Contacts contactHelper = QMail.showContactName() && canUseContacts ? Contacts.getInstance(mContext) : null;
 
         CharSequence displayName;
         if (fromAddrs.length > 0 && account.isAnIdentity(fromAddrs[0])) {

@@ -6,7 +6,9 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -14,6 +16,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.widget.ImageView;
@@ -34,8 +37,10 @@ import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
 import com.bumptech.glide.load.resource.transcode.BitmapToGlideDrawableTranscoder;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.fsck.k9.QMail;
 import com.fsck.k9.helper.Contacts;
 import com.fsck.k9.mail.Address;
+import com.fsck.k9.view.AbstractRecipient;
 import com.fsck.k9.view.RecipientSelectView.Recipient;
 
 
@@ -114,11 +119,16 @@ public class ContactPictureLoader {
     }
 
     public void loadContactPicture(final Address address, final ImageView imageView) {
-        Uri photoUri = mContactsHelper.getPhotoUri(address.getAddress());
+        Uri photoUri = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && QMail.app.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+        } else {
+            photoUri = mContactsHelper.getPhotoUri(address.getAddress());
+        }
         loadContactPicture(photoUri, address, imageView);
     }
 
-    public void loadContactPicture(Recipient recipient, ImageView imageView) {
+    public void loadContactPicture(AbstractRecipient recipient, ImageView imageView) {
         loadContactPicture(recipient.photoThumbnailUri, recipient.address, imageView);
     }
 

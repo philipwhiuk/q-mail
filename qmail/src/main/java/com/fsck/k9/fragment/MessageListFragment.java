@@ -317,7 +317,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         // regular folder content display
         if (!isManualSearch() && singleFolderMode) {
             Activity activity = getActivity();
-            String displayName = currentFolder.displayName;
+                String displayName = currentFolder.displayName;
 
             fragmentListener.setMessageListTitle(displayName);
 

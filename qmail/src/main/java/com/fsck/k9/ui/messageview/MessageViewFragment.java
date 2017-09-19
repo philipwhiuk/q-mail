@@ -4,6 +4,7 @@ package com.fsck.k9.ui.messageview;
 import java.util.Collections;
 import java.util.Locale;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.DownloadManager;
@@ -13,7 +14,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -68,6 +71,8 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
 
     public static final int REQUEST_MASK_LOADER_HELPER = (1 << 8);
     public static final int REQUEST_MASK_CRYPTO_PRESENTER = (1 << 9);
+    private static final int ATTACHMENT_SAVE_PERMISSION_DEFAULT = 400;
+    private static final int ATTACHMENT_SAVE_PERMISSION_CHOOSE = 401;
 
     public static final int PROGRESS_THRESHOLD_MILLIS = 500 * 1000;
 
@@ -259,12 +264,21 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
     }
 
     private void displayHeaderForLoadingMessage(LocalMessage message) {
-        mMessageView.setHeaders(message, mAccount);
+        mMessageView.setHeaders(message, mAccount, canUseContacts());
         if (QMail.isOpenPgpProviderConfigured()) {
             mMessageView.getMessageHeaderView().setCryptoStatusLoading();
         }
         displayMessageSubject(getSubjectForMessage(message));
         mFragmentListener.updateMenu();
+    }
+
+    private boolean canUseContacts() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && this.getActivity()
+                .checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -349,7 +363,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
             boolean newState = !mMessage.isSet(Flag.FLAGGED);
             mController.setFlag(mAccount, mMessage.getFolder().getId(),
                     Collections.singletonList(mMessage), Flag.FLAGGED, newState);
-            mMessageView.setHeaders(mMessage, mAccount);
+            mMessageView.setHeaders(mMessage, mAccount, canUseContacts());
         }
     }
 
@@ -496,7 +510,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         if (mMessage != null) {
             mController.setFlag(mAccount, mMessage.getFolder().getId(),
                     Collections.singletonList(mMessage), Flag.SEEN, !mMessage.isSet(Flag.SEEN));
-            mMessageView.setHeaders(mMessage, mAccount);
+            mMessageView.setHeaders(mMessage, mAccount, canUseContacts());
             String subject = mMessage.getSubject();
             displayMessageSubject(subject);
             mFragmentListener.updateMenu();
@@ -875,7 +889,30 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] result){
+        super.onRequestPermissionsResult(requestCode, permissions, result);
+
+        if(requestCode == ATTACHMENT_SAVE_PERMISSION_DEFAULT && result[0] == PackageManager.PERMISSION_GRANTED){
+            saveAttachment(currentAttachmentViewInfo);
+        } else if (requestCode == ATTACHMENT_SAVE_PERMISSION_CHOOSE && result[0] == PackageManager.PERMISSION_GRANTED){
+            saveAttachmentChoose(currentAttachmentViewInfo);
+        }
+    }
+
+    @Override
     public void onSaveAttachment(AttachmentViewInfo attachment) {
+        //TODO: check if we have to download the attachment first
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && getActivity().checkSelfPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            currentAttachmentViewInfo = attachment;
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, ATTACHMENT_SAVE_PERMISSION_DEFAULT);
+        } else {
+            saveAttachment(attachment);
+        }
+    }
+
+    private void saveAttachment(AttachmentViewInfo attachment) {
+        //TODO: check if we have to download the attachment first
         currentAttachmentViewInfo = attachment;
         getAttachmentController(attachment).saveAttachment();
     }
@@ -883,6 +920,15 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
     @Override
     public void onSaveAttachmentToUserProvidedDirectory(final AttachmentViewInfo attachment) {
         currentAttachmentViewInfo = attachment;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && getActivity().checkSelfPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, ATTACHMENT_SAVE_PERMISSION_CHOOSE);
+        } else {
+            saveAttachmentChoose(attachment);
+        }
+    }
+
+    private void saveAttachmentChoose(final AttachmentViewInfo attachment) {
         FileBrowserHelper.getInstance().showFileBrowserActivity(MessageViewFragment.this, null,
                 ACTIVITY_CHOOSE_DIRECTORY_ATTACHMENT, new FileBrowserFailOverCallback() {
                     @Override

@@ -241,8 +241,8 @@ public class MessageTopView extends LinearLayout {
         return mHeaderContainer;
     }
 
-    public void setHeaders(final Message message, Account account) {
-        mHeaderContainer.populate(message, account);
+    public void setHeaders(final Message message, Account account, boolean canUseContacts) {
+        mHeaderContainer.populate(message, account, canUseContacts);
         mHeaderContainer.setVisibility(View.VISIBLE);
 
         subject = message.getSubject();

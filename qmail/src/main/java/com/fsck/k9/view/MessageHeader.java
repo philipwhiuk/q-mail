@@ -268,8 +268,8 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
 
     }
 
-    public void populate(final Message message, final Account account) {
-        final Contacts contacts = QMail.showContactName() ? mContacts : null;
+    public void populate(final Message message, final Account account, boolean canUseContacts) {
+        final Contacts contacts = QMail.showContactName() && canUseContacts ? mContacts : null;
         final CharSequence from = MessageHelper.toFriendly(message.getFrom(), contacts);
         final CharSequence to = MessageHelper.toFriendly(message.getRecipients(Message.RecipientType.TO), contacts);
         final CharSequence cc = MessageHelper.toFriendly(message.getRecipients(Message.RecipientType.CC), contacts);

@@ -1,7 +1,10 @@
 package com.fsck.k9.notification;
 
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 
@@ -99,7 +102,12 @@ class NotificationContentCreator {
 
     private String getMessageSender(Account account, Message message) {
         boolean isSelf = false;
-        final Contacts contacts = QMail.showContactName() ? Contacts.getInstance(context) : null;
+        boolean canUseContacts = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && QMail.app.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            canUseContacts = false;
+        }
+        final Contacts contacts = QMail.showContactName() && canUseContacts ? Contacts.getInstance(context) : null;
         final Address[] fromAddresses = message.getFrom();
 
         if (fromAddresses != null) {

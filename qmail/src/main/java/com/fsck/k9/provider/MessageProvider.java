@@ -15,6 +15,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.ContentProvider;
@@ -22,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
+import android.content.pm.PackageManager;
 import android.database.CharArrayBuffer;
 import android.database.ContentObserver;
 import android.database.CrossProcessCursor;
@@ -362,14 +364,14 @@ public class MessageProvider extends ContentProvider {
      * Extracts the {@link LocalMessage#getDatabaseId() ID} from the given {@link MessageInfoHolder}. The underlying
      * {@link Message} is expected to be a {@link LocalMessage}.
      */
-    public static class IdExtractor implements FieldExtractor<MessageInfoHolder, Long> {
+    private static class IdExtractor implements FieldExtractor<MessageInfoHolder, Long> {
         @Override
         public Long getField(MessageInfoHolder source) {
             return source.message.getDatabaseId();
         }
     }
 
-    public static class CountExtractor<T> implements FieldExtractor<T, Integer> {
+    private static class CountExtractor<T> implements FieldExtractor<T, Integer> {
         private Integer count;
 
         public CountExtractor(int count) {
@@ -382,14 +384,14 @@ public class MessageProvider extends ContentProvider {
         }
     }
 
-    public static class SubjectExtractor implements FieldExtractor<MessageInfoHolder, String> {
+    private static class SubjectExtractor implements FieldExtractor<MessageInfoHolder, String> {
         @Override
         public String getField(MessageInfoHolder source) {
             return source.message.getSubject();
         }
     }
 
-    public static class SendDateExtractor implements FieldExtractor<MessageInfoHolder, Long> {
+    private static class SendDateExtractor implements FieldExtractor<MessageInfoHolder, Long> {
         @Override
         public Long getField(MessageInfoHolder source) {
             return source.message.getSentDate().getTime();
@@ -1093,13 +1095,19 @@ public class MessageProvider extends ContentProvider {
         public void listLocalMessagesAddMessages(Account account, String folderId, String folderName, List<LocalMessage> messages) {
             Context context = getContext();
 
+            boolean canUseContacts = true;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                    && QMail.app.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                canUseContacts = false;
+            }
+
             for (LocalMessage message : messages) {
                 MessageInfoHolder messageInfoHolder = new MessageInfoHolder();
                 LocalFolder messageFolder = message.getFolder();
                 Account messageAccount = message.getAccount();
 
                 FolderInfoHolder folderInfoHolder = new FolderInfoHolder(context, messageFolder, messageAccount);
-                messageHelper.populate(messageInfoHolder, message, folderInfoHolder, messageAccount);
+                messageHelper.populate(messageInfoHolder, message, folderInfoHolder, messageAccount, canUseContacts);
 
                 holders.add(messageInfoHolder);
             }

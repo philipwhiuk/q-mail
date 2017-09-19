@@ -2,11 +2,14 @@ package com.fsck.k9.fragment;
 
 import java.util.Locale;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -158,7 +161,15 @@ class MessageListAdapter extends CursorAdapter {
         boolean toMe = fragment.messageHelper.toMe(account, toAddrs);
         boolean ccMe = fragment.messageHelper.toMe(account, ccAddrs);
 
-        CharSequence displayName = fragment.messageHelper.getDisplayName(account, fromAddrs, toAddrs);
+        boolean canUseContacts = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && fragment.getActivity()
+                .checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            canUseContacts = false;
+        }
+
+        CharSequence displayName = fragment.messageHelper.getDisplayName(account, fromAddrs, toAddrs, canUseContacts);
+
         CharSequence displayDate = DateUtils.getRelativeTimeSpanString(context, cursor.getLong(DATE_COLUMN));
 
         Address counterpartyAddress = fetchCounterPartyAddress(fromMe, toAddrs, ccAddrs, fromAddrs);

@@ -246,12 +246,8 @@ class ImapFolderPusher extends ImapFolder {
             idling = false;
             pushReceiver.setPushActive(getId(), getName(), false);
 
-            try {
+            if (connection != null)
                 connection.close();
-            } catch (Exception me) {
-                Timber.e(me, "Got exception while closing for exception for %s", getLogId());
-            }
-
             connection = null;
         }
 

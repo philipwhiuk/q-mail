@@ -20,6 +20,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -443,6 +444,7 @@ public class QMail extends Application {
         }
 
         registerReceiver(new ShutdownReceiver(), new IntentFilter(Intent.ACTION_SHUTDOWN));
+        registerReceiver(new BootReceiver(), new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         Timber.i("Registered: shutdown receiver");
     }
 

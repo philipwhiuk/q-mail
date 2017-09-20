@@ -28,6 +28,7 @@ import java.util.zip.InflaterInputStream;
 
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.TrafficStats;
 
 import com.fsck.k9.mail.Authentication;
 import com.fsck.k9.mail.AuthenticationFailedException;
@@ -216,6 +217,7 @@ class ImapConnection {
 
         SocketAddress socketAddress = new InetSocketAddress(address, port);
 
+        TrafficStats.setThreadStatsTag(settings.hashCode());
         Socket socket;
         if (settings.getConnectionSecurity() == ConnectionSecurity.SSL_TLS_REQUIRED) {
             socket = socketFactory.createSocket(null, host, port, clientCertificateAlias);
@@ -223,8 +225,8 @@ class ImapConnection {
             socket = new Socket();
         }
 
+        TrafficStats.tagSocket(socket);
         socket.connect(socketAddress, socketConnectTimeout);
-
         return socket;
     }
 
@@ -695,6 +697,7 @@ class ImapConnection {
         open = false;
         stacktraceForClose = new Exception();
 
+        untagQuietly(socket);
         IOUtils.closeQuietly(inputStream);
         IOUtils.closeQuietly(outputStream);
         IOUtils.closeQuietly(socket);
@@ -702,6 +705,15 @@ class ImapConnection {
         inputStream = null;
         outputStream = null;
         socket = null;
+    }
+
+    private void untagQuietly(Socket socket) {
+        if (socket != null) {
+            try {
+                TrafficStats.untagSocket(socket);
+            } catch (SocketException ignored) {
+            }
+        }
     }
 
     public OutputStream getOutputStream() {

@@ -22,13 +22,13 @@ import com.fsck.k9.view.MessageCryptoDisplayStatus;
 import timber.log.Timber;
 
 
-public class MessageCryptoPresenter implements OnCryptoClickListener {
+public class MessageSecurityPresenter implements OnSecurityClickListener {
     public static final int REQUEST_CODE_UNKNOWN_KEY = 123;
     public static final int REQUEST_CODE_SECURITY_WARNING = 124;
 
 
     // injected state
-    private final MessageCryptoMvpView messageCryptoMvpView;
+    private final MessageSecurityMvpView messageSecurityMvpView;
 
 
     // persistent state
@@ -40,8 +40,8 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
     private boolean reloadOnResumeWithoutRecreateFlag;
 
 
-    public MessageCryptoPresenter(Bundle savedInstanceState, MessageCryptoMvpView messageCryptoMvpView) {
-        this.messageCryptoMvpView = messageCryptoMvpView;
+    public MessageSecurityPresenter(Bundle savedInstanceState, MessageSecurityMvpView messageSecurityMvpView) {
+        this.messageSecurityMvpView = messageSecurityMvpView;
 
         if (savedInstanceState != null) {
             overrideCryptoWarning = savedInstanceState.getBoolean("overrideCryptoWarning");
@@ -55,7 +55,7 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
     public void onResume() {
         if (reloadOnResumeWithoutRecreateFlag) {
             reloadOnResumeWithoutRecreateFlag = false;
-            messageCryptoMvpView.restartMessageCryptoProcessing();
+            messageSecurityMvpView.restartMessageCryptoProcessing();
         }
     }
 
@@ -167,7 +167,7 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
     }
 
     @Override
-    public void onCryptoClick() {
+    public void onSecurityClick() {
         if (cryptoResultAnnotation == null) {
             return;
         }
@@ -193,21 +193,21 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
                 return;
             }
 
-            messageCryptoMvpView.restartMessageCryptoProcessing();
+            messageSecurityMvpView.restartMessageCryptoProcessing();
         } else if (requestCode == REQUEST_CODE_SECURITY_WARNING) {
             if (overrideCryptoWarning || resultCode != Activity.RESULT_OK) {
                 return;
             }
 
             overrideCryptoWarning = true;
-            messageCryptoMvpView.redisplayMessage();
+            messageSecurityMvpView.redisplayMessage();
         } else {
             throw new IllegalStateException("got an activity result that wasn't meant for us. this is a bug!");
         }
     }
 
     private void displayCryptoInfoDialog(MessageCryptoDisplayStatus displayStatus) {
-        messageCryptoMvpView.showCryptoInfoDialog(
+        messageSecurityMvpView.showSecurityInfoDialog(
                 displayStatus, cryptoResultAnnotation.hasOpenPgpInsecureWarningPendingIntent());
     }
 
@@ -215,7 +215,7 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
         try {
             PendingIntent pendingIntent = cryptoResultAnnotation.getOpenPgpPendingIntent();
             if (pendingIntent != null) {
-                messageCryptoMvpView.startPendingIntentForCryptoPresenter(
+                messageSecurityMvpView.startPendingIntentForCryptoPresenter(
                         pendingIntent.getIntentSender(), REQUEST_CODE_UNKNOWN_KEY, null, 0, 0, 0);
             }
         } catch (IntentSender.SendIntentException e) {
@@ -227,7 +227,7 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
         try {
             PendingIntent pendingIntent = cryptoResultAnnotation.getOpenPgpSigningKeyIntentIfAny();
             if (pendingIntent != null) {
-                messageCryptoMvpView.startPendingIntentForCryptoPresenter(
+                messageSecurityMvpView.startPendingIntentForCryptoPresenter(
                         pendingIntent.getIntentSender(), null, null, 0, 0, 0);
             }
         } catch (IntentSender.SendIntentException e) {
@@ -236,19 +236,19 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
     }
 
     public void onClickRetryCryptoOperation() {
-        messageCryptoMvpView.restartMessageCryptoProcessing();
+        messageSecurityMvpView.restartMessageCryptoProcessing();
     }
 
     public void onClickShowMessageOverrideWarning() {
         overrideCryptoWarning = true;
-        messageCryptoMvpView.redisplayMessage();
+        messageSecurityMvpView.redisplayMessage();
     }
 
     public void onClickShowCryptoWarningDetails() {
         try {
             PendingIntent pendingIntent = cryptoResultAnnotation.getOpenPgpInsecureWarningPendingIntent();
             if (pendingIntent != null) {
-                messageCryptoMvpView.startPendingIntentForCryptoPresenter(
+                messageSecurityMvpView.startPendingIntentForCryptoPresenter(
                         pendingIntent.getIntentSender(), REQUEST_CODE_SECURITY_WARNING, null, 0, 0, 0);
             }
         } catch (IntentSender.SendIntentException e) {
@@ -278,17 +278,17 @@ public class MessageCryptoPresenter implements OnCryptoClickListener {
 
     public void onClickConfigureProvider() {
         reloadOnResumeWithoutRecreateFlag = true;
-        messageCryptoMvpView.showCryptoConfigDialog();
+        messageSecurityMvpView.showCryptoConfigDialog();
     }
 
-    public interface MessageCryptoMvpView {
+    public interface MessageSecurityMvpView {
         void redisplayMessage();
         void restartMessageCryptoProcessing();
 
         void startPendingIntentForCryptoPresenter(IntentSender si, Integer requestCode, Intent fillIntent,
                 int flagsMask, int flagValues, int extraFlags) throws IntentSender.SendIntentException;
 
-        void showCryptoInfoDialog(MessageCryptoDisplayStatus displayStatus, boolean hasSecurityWarning);
+        void showSecurityInfoDialog(MessageCryptoDisplayStatus displayStatus, boolean hasSecurityWarning);
         void showCryptoConfigDialog();
     }
 }

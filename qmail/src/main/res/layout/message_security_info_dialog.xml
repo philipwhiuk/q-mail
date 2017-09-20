@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="24dp"
+    android:orientation="vertical"
+    android:layout_gravity="center_horizontal">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/security_info_signature"
+        >
+
+        <FrameLayout
+            android:layout_width="36dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignBottom="@+id/security_info_authentication_text"
+            android:id="@+id/security_info_authentication_frame"
+            >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:id="@+id/security_info_authentication_icon_1"
+                tools:src="@drawable/status_signature_verified_cutout"
+                tools:tint="?attr/openpgp_blue"
+                />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:id="@+id/security_info_authentication_icon_2"
+                android:tint="?attr/openpgp_grey"
+                tools:src="@drawable/status_none_dots_3"
+                />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:id="@+id/security_info_authentication_icon_3"
+                />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/security_info_authentication_frame"
+            android:layout_marginBottom="12dp"
+            android:layout_marginLeft="20dp"
+            android:minLines="2"
+            android:gravity="center_vertical"
+            android:id="@+id/security_info_authentication_text"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            tools:text="Signed, but not encrypted."
+            />
+
+        <FrameLayout
+            android:layout_width="36dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/security_info_authentication_text"
+            android:layout_alignBottom="@+id/security_info_trust_text"
+            android:id="@+id/security_info_trust_frame"
+            >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:id="@+id/security_info_trust_icon_1"
+                android:tint="?attr/openpgp_grey"
+                tools:src="@drawable/status_signature_verified_cutout"
+                />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:id="@+id/security_info_trust_icon_2"
+                tools:src="@drawable/status_none_dots_3"
+                tools:tint="?attr/openpgp_blue"
+                />
+
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/security_info_authentication_text"
+            android:layout_toRightOf="@+id/security_info_trust_frame"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="12dp"
+            android:id="@+id/security_info_trust_text"
+            android:minLines="2"
+            android:gravity="center_vertical"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            tools:text="Signed by trusted key."
+            />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="2dp"
+            android:layout_below="@+id/security_info_trust_text"
+            android:id="@+id/separator"
+            android:visibility="visible"
+            android:background="@android:color/darker_gray"/>
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/security_info_view_signer_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/security_info_signature"
+        android:layout_alignLeft="@+id/security_info_signature"
+        android:layout_alignStart="@+id/security_info_signature"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="20dp"
+        android:text="@string/crypto_info_view_security_warning" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/security_info_transport"
+        android:layout_below="@+id/security_info_view_signer_button"
+        >
+
+        <FrameLayout
+            android:layout_width="36dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/security_info_transport_security_text"
+            android:id="@+id/security_info_transport_security_frame"
+            >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:id="@+id/security_info_transport_security_icon_1"
+                android:tint="?attr/openpgp_green"
+                tools:src="@drawable/status_lock_closed"
+                />
+
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/security_info_transport_security_frame"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="12dp"
+            android:id="@+id/security_info_transport_security_text"
+            android:minLines="2"
+            android:gravity="center_vertical"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            tools:text="Transported securely"
+            />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="2dp"
+            android:layout_below="@+id/security_info_transport_security_text"
+            android:id="@+id/separator_transport"
+            android:visibility="visible"
+            android:background="@android:color/darker_gray"/>
+
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/security_info_view_transport_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/security_info_transport"
+        android:layout_alignLeft="@+id/security_info_transport"
+        android:layout_alignStart="@+id/security_info_transport"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/crypto_info_view_security_warning" />
+
+    <FrameLayout
+        android:layout_width="36dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/security_info_view_transport_button"
+        android:layout_alignBottom="@+id/security_info_sender_auth_text"
+        android:id="@+id/security_info_sender_auth_frame"
+        >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:id="@+id/security_info_sender_auth_icon_1"
+            android:tint="?attr/openpgp_green"
+            tools:src="@drawable/status_lock_closed"
+            />
+
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/security_info_view_transport_button"
+        android:layout_toRightOf="@+id/security_info_sender_auth_frame"
+        android:layout_marginLeft="20dp"
+        android:layout_marginBottom="12dp"
+        android:id="@+id/security_info_sender_auth_text"
+        android:minLines="2"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        tools:text="Sender Policy Framework (SPF) check passed."
+        />
+
+    <FrameLayout
+        android:layout_width="36dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/security_info_sender_auth_text"
+        android:layout_alignBottom="@+id/security_info_message_integrity_text"
+        android:id="@+id/security_info_message_integrity_frame"
+        >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:id="@+id/security_info_message_integrity_icon_1"
+            android:tint="?attr/openpgp_green"
+            tools:src="@drawable/status_lock_closed"
+            />
+
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/security_info_sender_auth_text"
+        android:layout_toRightOf="@+id/security_info_message_integrity_frame"
+        android:layout_marginLeft="20dp"
+        android:layout_marginBottom="12dp"
+        android:id="@+id/security_info_message_integrity_text"
+        android:minLines="2"
+        android:gravity="center_vertical"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        tools:text="DomainKeys Identified Mail (DKIM) check passed."
+        />
+
+</RelativeLayout>

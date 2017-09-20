@@ -16,7 +16,8 @@
         <View
             android:id="@+id/chip"
             android:layout_width="8dip"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            tools:background="#330000"/>
 
         <LinearLayout
             android:layout_width="match_parent"

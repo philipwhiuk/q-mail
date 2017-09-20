@@ -40,7 +40,6 @@ import com.bumptech.glide.request.target.Target;
 import com.fsck.k9.QMail;
 import com.fsck.k9.helper.Contacts;
 import com.fsck.k9.mail.Address;
-import com.fsck.k9.view.AbstractRecipient;
 import com.fsck.k9.view.RecipientSelectView.Recipient;
 
 
@@ -128,7 +127,7 @@ public class ContactPictureLoader {
         loadContactPicture(photoUri, address, imageView);
     }
 
-    public void loadContactPicture(AbstractRecipient recipient, ImageView imageView) {
+    public void loadContactPicture(Recipient recipient, ImageView imageView) {
         loadContactPicture(recipient.photoThumbnailUri, recipient.address, imageView);
     }
 

@@ -51,8 +51,8 @@ import com.fsck.k9.mailstore.AttachmentViewInfo;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
 import com.fsck.k9.mailstore.LocalMessage;
 import com.fsck.k9.mailstore.MessageViewInfo;
-import com.fsck.k9.ui.messageview.CryptoInfoDialog.OnClickShowCryptoKeyListener;
-import com.fsck.k9.ui.messageview.MessageCryptoPresenter.MessageCryptoMvpView;
+import com.fsck.k9.ui.messageview.SecurityInfoDialog.OnClickShowCryptoKeyListener;
+import com.fsck.k9.ui.messageview.MessageSecurityPresenter.MessageSecurityMvpView;
 import com.fsck.k9.ui.messageview.ical.ICalendarViewCallback;
 import com.fsck.k9.view.MessageCryptoDisplayStatus;
 import com.fsck.k9.view.MessageHeader;
@@ -95,7 +95,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
     private DownloadManager downloadManager;
     private Handler handler = new Handler();
     private MessageLoaderHelper messageLoaderHelper;
-    private MessageCryptoPresenter messageCryptoPresenter;
+    private MessageSecurityPresenter messageCryptoPresenter;
     private Long showProgressThreshold;
 
     /**
@@ -143,7 +143,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         Context context = getActivity().getApplicationContext();
         mController = MessagingController.getInstance(context);
         downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-        messageCryptoPresenter = new MessageCryptoPresenter(savedInstanceState, messageCryptoMvpView);
+        messageCryptoPresenter = new MessageSecurityPresenter(savedInstanceState, messageSecurityMvpView);
         messageLoaderHelper =
                 new MessageLoaderHelper(context, getLoaderManager(), getFragmentManager(), messageLoaderCallbacks);
         mInitialized = true;
@@ -257,8 +257,6 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
             mMessageView.showMessage(mAccount, messageViewInfo);
             if (QMail.isOpenPgpProviderConfigured()) {
                 mMessageView.getMessageHeaderView().setCryptoStatusDisabled();
-            } else {
-                mMessageView.getMessageHeaderView().hideCryptoStatus();
             }
         }
     }
@@ -742,7 +740,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         // mMessageView.refreshAttachmentThumbnail(attachment);
     }
 
-    private MessageCryptoMvpView messageCryptoMvpView = new MessageCryptoMvpView() {
+    private MessageSecurityMvpView messageSecurityMvpView = new MessageSecurityMvpView() {
         @Override
         public void redisplayMessage() {
             messageLoaderHelper.asyncReloadMessage();
@@ -762,10 +760,10 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         }
 
         @Override
-        public void showCryptoInfoDialog(MessageCryptoDisplayStatus displayStatus, boolean hasSecurityWarning) {
-            CryptoInfoDialog dialog = CryptoInfoDialog.newInstance(displayStatus, hasSecurityWarning);
+        public void showSecurityInfoDialog(MessageCryptoDisplayStatus displayStatus, boolean hasSecurityWarning) {
+            SecurityInfoDialog dialog = SecurityInfoDialog.newInstance(displayStatus, hasSecurityWarning);
             dialog.setTargetFragment(MessageViewFragment.this, 0);
-            dialog.show(getFragmentManager(), "crypto_info_dialog");
+            dialog.show(getFragmentManager(), "security_info_dialog");
         }
 
         @Override

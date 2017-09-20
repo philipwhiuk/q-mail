@@ -51,7 +51,7 @@ public class BootReceiver extends CoreReceiver {
             Timber.i("BootReceiver Got alarm to fire alarmedIntent %s", alarmedAction);
             alarmedIntent.putExtra(WAKE_LOCK_ID, tmpWakeLockId);
             tmpWakeLockId = null;
-            context.startService(alarmedIntent);
+            Utils.startServicePossiblyInForeground(context, alarmedIntent);
         } else if (SCHEDULE_INTENT.equals(action)) {
             long atTime = intent.getLongExtra(AT_TIME, -1);
             Intent alarmedIntent = intent.getParcelableExtra(ALARMED_INTENT);

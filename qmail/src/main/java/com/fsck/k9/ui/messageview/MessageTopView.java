@@ -53,7 +53,7 @@ public class MessageTopView extends LinearLayout {
     private boolean isShowingProgress;
     private String subject = null;
 
-    private MessageCryptoPresenter messageCryptoPresenter;
+    private MessageSecurityPresenter messageCryptoPresenter;
 
 
     public MessageTopView(Context context, AttributeSet attrs) {
@@ -281,9 +281,9 @@ public class MessageTopView extends LinearLayout {
         attachmentCallback = callback;
     }
 
-    public void setMessageCryptoPresenter(MessageCryptoPresenter messageCryptoPresenter) {
+    public void setMessageCryptoPresenter(MessageSecurityPresenter messageCryptoPresenter) {
         this.messageCryptoPresenter = messageCryptoPresenter;
-        mHeaderContainer.setOnCryptoClickListener(messageCryptoPresenter);
+        mHeaderContainer.setOnSecurityClickListener(messageCryptoPresenter);
     }
 
     public void enableDownloadButton() {

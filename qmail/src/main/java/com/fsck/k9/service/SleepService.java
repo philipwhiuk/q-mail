@@ -9,10 +9,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
+import android.support.v4.app.NotificationCompat;
 
 import com.fsck.k9.mail.power.TracingPowerManager.TracingWakeLock;
 import timber.log.Timber;
 
+import static com.fsck.k9.service.MailService.FOREGROUND_SERVICE_NOTIFICATION_ID;
 import static java.lang.Thread.currentThread;
 
 
@@ -117,6 +119,8 @@ public class SleepService extends CoreService {
 
     @Override
     public int startService(Intent intent, int startId) {
+        startForeground(FOREGROUND_SERVICE_NOTIFICATION_ID,
+                new NotificationCompat.Builder(this).setContentTitle("Sleeping").build());
         try {
           if (intent.getAction().startsWith(ALARM_FIRED)) {
               Integer id = intent.getIntExtra(LATCH_ID, -1);

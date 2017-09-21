@@ -16,9 +16,15 @@ import android.support.annotation.StringRes;
 import com.fsck.k9.Account;
 import com.fsck.k9.QMail;
 import com.fsck.k9.R;
+import com.fsck.k9.mail.internet.DKIMState;
+import com.fsck.k9.mail.internet.SPFState;
+import com.fsck.k9.mail.internet.SecureTransportState;
 import com.fsck.k9.mailstore.CryptoResultAnnotation;
 import com.fsck.k9.mailstore.MessageViewInfo;
-import com.fsck.k9.view.MessageCryptoDisplayStatus;
+import com.fsck.k9.view.securityStatus.MessageCryptoDisplayStatus;
+import com.fsck.k9.view.securityStatus.MessageDKIMDisplayStatus;
+import com.fsck.k9.view.securityStatus.MessageSPFDisplayStatus;
+import com.fsck.k9.view.securityStatus.MessageTransportSecurityDisplayStatus;
 import timber.log.Timber;
 
 
@@ -37,6 +43,9 @@ public class MessageSecurityPresenter implements OnSecurityClickListener {
 
     // transient state
     private CryptoResultAnnotation cryptoResultAnnotation;
+    private SecureTransportState secureTransportState;
+    private SPFState spfState;
+    private DKIMState dkimState;
     private boolean reloadOnResumeWithoutRecreateFlag;
 
 
@@ -61,6 +70,9 @@ public class MessageSecurityPresenter implements OnSecurityClickListener {
 
     public boolean maybeHandleShowMessage(MessageTopView messageView, Account account, MessageViewInfo messageViewInfo) {
         this.cryptoResultAnnotation = messageViewInfo.cryptoResultAnnotation;
+        this.secureTransportState = messageViewInfo.secureTransportState;
+        this.spfState = messageViewInfo.spfState;
+        this.dkimState = messageViewInfo.dkimState;
 
         MessageCryptoDisplayStatus displayStatus =
                 MessageCryptoDisplayStatus.fromResultAnnotation(messageViewInfo.cryptoResultAnnotation);
@@ -136,7 +148,7 @@ public class MessageSecurityPresenter implements OnSecurityClickListener {
             }
 
             case ENCRYPTED_NO_PROVIDER: {
-                messageView.showCryptoProviderNotConfigured(messageViewInfo);
+                messageView.showCryptoProviderNotConfigured(messageViewInfo, cryptoResultAnnotation.getProviderType());
                 break;
             }
 
@@ -168,11 +180,19 @@ public class MessageSecurityPresenter implements OnSecurityClickListener {
 
     @Override
     public void onSecurityClick() {
+        MessageCryptoDisplayStatus displayStatus;
         if (cryptoResultAnnotation == null) {
-            return;
+            displayStatus = MessageCryptoDisplayStatus.DISABLED;
+        } else {
+            displayStatus =
+                    MessageCryptoDisplayStatus.fromResultAnnotation(cryptoResultAnnotation);
         }
-        MessageCryptoDisplayStatus displayStatus =
-                MessageCryptoDisplayStatus.fromResultAnnotation(cryptoResultAnnotation);
+        MessageTransportSecurityDisplayStatus transportDisplayStatus =
+                MessageTransportSecurityDisplayStatus.fromResultAnnotation(secureTransportState);
+        MessageSPFDisplayStatus spfDisplayStatus =
+                MessageSPFDisplayStatus.fromResultAnnotation(spfState);
+        MessageDKIMDisplayStatus dkimDisplayStatus =
+                MessageDKIMDisplayStatus.fromResultAnnotation(dkimState);
         switch (displayStatus) {
             case LOADING:
                 // no need to do anything, there is a progress bar...
@@ -181,7 +201,7 @@ public class MessageSecurityPresenter implements OnSecurityClickListener {
                 launchPendingIntent(cryptoResultAnnotation);
                 break;
             default:
-                displayCryptoInfoDialog(displayStatus);
+                displaySecurityInfoDialog(displayStatus, transportDisplayStatus, spfDisplayStatus, dkimDisplayStatus);
                 break;
         }
     }
@@ -206,9 +226,14 @@ public class MessageSecurityPresenter implements OnSecurityClickListener {
         }
     }
 
-    private void displayCryptoInfoDialog(MessageCryptoDisplayStatus displayStatus) {
+    private void displaySecurityInfoDialog(MessageCryptoDisplayStatus displayStatus,
+            MessageTransportSecurityDisplayStatus transportSecurityDisplayStatus,
+            MessageSPFDisplayStatus spfDisplayStatus,
+            MessageDKIMDisplayStatus dkimDisplayStatus) {
         messageSecurityMvpView.showSecurityInfoDialog(
-                displayStatus, cryptoResultAnnotation.hasOpenPgpInsecureWarningPendingIntent());
+                displayStatus, transportSecurityDisplayStatus,
+                spfDisplayStatus, dkimDisplayStatus,
+                cryptoResultAnnotation != null && cryptoResultAnnotation.hasOpenPgpInsecureWarningPendingIntent());
     }
 
     private void launchPendingIntent(CryptoResultAnnotation cryptoResultAnnotation) {
@@ -288,7 +313,11 @@ public class MessageSecurityPresenter implements OnSecurityClickListener {
         void startPendingIntentForCryptoPresenter(IntentSender si, Integer requestCode, Intent fillIntent,
                 int flagsMask, int flagValues, int extraFlags) throws IntentSender.SendIntentException;
 
-        void showSecurityInfoDialog(MessageCryptoDisplayStatus displayStatus, boolean hasSecurityWarning);
+        void showSecurityInfoDialog(MessageCryptoDisplayStatus displayStatus,
+                MessageTransportSecurityDisplayStatus transportSecurityDisplayStatus,
+                MessageSPFDisplayStatus spfDisplayStatus,
+                MessageDKIMDisplayStatus dkimDisplayStatus,
+                boolean hasSecurityWarning);
         void showCryptoConfigDialog();
     }
 }

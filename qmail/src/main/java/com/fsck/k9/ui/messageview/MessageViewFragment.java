@@ -54,8 +54,11 @@ import com.fsck.k9.mailstore.MessageViewInfo;
 import com.fsck.k9.ui.messageview.SecurityInfoDialog.OnClickShowCryptoKeyListener;
 import com.fsck.k9.ui.messageview.MessageSecurityPresenter.MessageSecurityMvpView;
 import com.fsck.k9.ui.messageview.ical.ICalendarViewCallback;
-import com.fsck.k9.view.MessageCryptoDisplayStatus;
+import com.fsck.k9.view.securityStatus.MessageCryptoDisplayStatus;
 import com.fsck.k9.view.MessageHeader;
+import com.fsck.k9.view.securityStatus.MessageDKIMDisplayStatus;
+import com.fsck.k9.view.securityStatus.MessageSPFDisplayStatus;
+import com.fsck.k9.view.securityStatus.MessageTransportSecurityDisplayStatus;
 import timber.log.Timber;
 
 
@@ -760,8 +763,17 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         }
 
         @Override
-        public void showSecurityInfoDialog(MessageCryptoDisplayStatus displayStatus, boolean hasSecurityWarning) {
-            SecurityInfoDialog dialog = SecurityInfoDialog.newInstance(displayStatus, hasSecurityWarning);
+        public void showSecurityInfoDialog(MessageCryptoDisplayStatus displayStatus,
+                MessageTransportSecurityDisplayStatus transportSecurityDisplayStatus,
+                MessageSPFDisplayStatus spfDisplayStatus,
+                MessageDKIMDisplayStatus dkimDisplayStatus,
+                boolean hasSecurityWarning) {
+            SecurityInfoDialog dialog = SecurityInfoDialog.newInstance(
+                    displayStatus,
+                    transportSecurityDisplayStatus,
+                    spfDisplayStatus,
+                    dkimDisplayStatus,
+                    hasSecurityWarning);
             dialog.setTargetFragment(MessageViewFragment.this, 0);
             dialog.show(getFragmentManager(), "security_info_dialog");
         }

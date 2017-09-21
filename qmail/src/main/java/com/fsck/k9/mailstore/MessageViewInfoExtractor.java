@@ -19,7 +19,11 @@ import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
+import com.fsck.k9.mail.internet.DKIMState;
 import com.fsck.k9.mail.internet.MessageExtractor;
+import com.fsck.k9.mail.internet.ReceivedHeaders;
+import com.fsck.k9.mail.internet.SPFState;
+import com.fsck.k9.mail.internet.SecureTransportState;
 import com.fsck.k9.mail.internet.Viewable;
 import com.fsck.k9.mail.internet.Viewable.Flowed;
 import com.fsck.k9.mailstore.util.FlowedMessageUtils;
@@ -77,6 +81,9 @@ public class MessageViewInfoExtractor {
             throws MessagingException {
         Part rootPart;
         CryptoResultAnnotation cryptoResultAnnotation;
+        SecureTransportState secureTransportState;
+        SPFState spfState;
+        DKIMState dkimState;
         List<Part> insecureParts;
 
         CryptoMessageParts cryptoMessageParts = MessageCryptoSplitter.split(message, annotations);
@@ -92,6 +99,10 @@ public class MessageViewInfoExtractor {
             cryptoResultAnnotation = null;
             insecureParts = null;
         }
+
+        secureTransportState = ReceivedHeaders.wasMessageTransmittedSecurely(message);
+        spfState = ReceivedHeaders.isEmailPotentialSpoof(message);
+        dkimState = ReceivedHeaders.isEmailIntegrityValid(message);
 
         List<AttachmentViewInfo> attachmentInfos = new ArrayList<>();
         List<ICalendarViewInfo> iCalendarInfos = new ArrayList<>();
@@ -117,7 +128,8 @@ public class MessageViewInfoExtractor {
         return MessageViewInfo.createWithExtractedContent(
                 message, isMessageIncomplete, rootPart, viewable.html,
                 attachmentInfos, iCalendarInfos,
-                cryptoResultAnnotation, attachmentResolver, extraViewableText, insecureAttachmentInfos, insecureICalendarInfos);
+                cryptoResultAnnotation, secureTransportState, spfState, dkimState,
+                attachmentResolver, extraViewableText, insecureAttachmentInfos, insecureICalendarInfos);
     }
 
     private ViewableExtractedText extractViewableAndAttachments(List<Part> parts,

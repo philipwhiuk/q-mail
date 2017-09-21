@@ -334,7 +334,7 @@ public class RecipientMvpView implements OnFocusChangeListener, OnClickListener 
     }
 
     public void showErrorOpenPgpRetrieveStatus() {
-        Toast.makeText(activity, R.string.error_recipient_crypto_retrieve, Toast.LENGTH_LONG).show();
+        Toast.makeText(activity, R.string.error_recipient_openpgp_retrieve, Toast.LENGTH_LONG).show();
     }
 
     public void showErrorOpenPgpIncompatible() {

@@ -175,6 +175,15 @@ public final class CryptoResultAnnotation {
         return encapsulatedResult;
     }
 
+    public CryptoProviderType getProviderType() {
+        return CryptoProviderType.OPENPGP;
+    }
+
+    public enum CryptoProviderType {
+        OPENPGP,
+        SMIME
+    }
+
     public enum CryptoError {
         OPENPGP_OK,
         OPENPGP_UI_CANCELED,

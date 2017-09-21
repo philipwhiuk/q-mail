@@ -721,7 +721,7 @@ public class AccountSettings extends K9PreferenceActivity {
                         dialog.dismiss();
                     }
                     Toast.makeText(AccountSettings.this,
-                            R.string.no_crypto_provider_see_global, Toast.LENGTH_SHORT).show();
+                            R.string.no_openpgp_provider_see_global, Toast.LENGTH_SHORT).show();
                     return true;
                 }
             });

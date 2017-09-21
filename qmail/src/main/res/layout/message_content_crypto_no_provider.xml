@@ -24,7 +24,8 @@
         android:layout_marginBottom="30dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:text="@string/crypto_no_provider_message"
+        android:id="@+id/no_provider_message"
+        android:text="@string/openpgp_no_provider_message"
         />
 
     <Button
@@ -32,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:id="@+id/crypto_settings"
-        android:text="@string/crypto_no_provider_button"
+        android:text="@string/openpgp_no_provider_button"
         />
 
 </LinearLayout>

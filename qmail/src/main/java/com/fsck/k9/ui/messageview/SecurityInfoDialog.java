@@ -22,12 +22,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fsck.k9.R;
-import com.fsck.k9.view.MessageCryptoDisplayStatus;
+import com.fsck.k9.view.securityStatus.MessageCryptoDisplayStatus;
+import com.fsck.k9.view.securityStatus.MessageDKIMDisplayStatus;
+import com.fsck.k9.view.securityStatus.MessageSPFDisplayStatus;
+import com.fsck.k9.view.securityStatus.MessageTransportSecurityDisplayStatus;
 import com.fsck.k9.view.ThemeUtils;
 
 
 public class SecurityInfoDialog extends DialogFragment {
-    public static final String ARG_DISPLAY_STATUS = "display_status";
+    public static final String ARG_MESSAGE_CRYPTO_DISPLAY_STATUS = "message_crypto_display_status";
+    public static final String ARG_TRANSPORT_CRYPTO_DISPLAY_STATUS = "transport_crypto_display_status";
+    public static final String ARG_SPF_DISPLAY_STATUS = "spf_display_status";
+    public static final String ARG_DKIM_DISPLAY_STATUS = "dkim_display_status";
     public static final String ARG_HAS_SECURITY_WARNING = "has_security_warning";
     public static final int ICON_ANIM_DELAY = 400;
     public static final int ICON_ANIM_DURATION = 350;
@@ -50,12 +56,28 @@ public class SecurityInfoDialog extends DialogFragment {
     private ImageView transportSecurityIcon_1;
     private TextView transportSecurityText;
 
+    private View spfIconFrame;
+    private ImageView spfIcon_1;
+    private TextView spfText;
 
-    public static SecurityInfoDialog newInstance(MessageCryptoDisplayStatus displayStatus, boolean hasSecurityWarning) {
+    private View dkimIconFrame;
+    private ImageView dkimIcon_1;
+    private TextView dkimText;
+
+
+    public static SecurityInfoDialog newInstance(
+            MessageCryptoDisplayStatus cryptoDisplayStatus,
+            MessageTransportSecurityDisplayStatus transportSecurityDisplayStatus,
+            MessageSPFDisplayStatus spfDisplayStatus,
+            MessageDKIMDisplayStatus dkimSecurityDisplayStatus,
+            boolean hasSecurityWarning) {
         SecurityInfoDialog frag = new SecurityInfoDialog();
 
         Bundle args = new Bundle();
-        args.putString(ARG_DISPLAY_STATUS, displayStatus.toString());
+        args.putString(ARG_MESSAGE_CRYPTO_DISPLAY_STATUS, cryptoDisplayStatus.toString());
+        args.putString(ARG_TRANSPORT_CRYPTO_DISPLAY_STATUS, transportSecurityDisplayStatus.toString());
+        args.putString(ARG_SPF_DISPLAY_STATUS, spfDisplayStatus.toString());
+        args.putString(ARG_DKIM_DISPLAY_STATUS, dkimSecurityDisplayStatus.toString());
         args.putBoolean(ARG_HAS_SECURITY_WARNING, hasSecurityWarning);
         frag.setArguments(args);
 
@@ -81,12 +103,26 @@ public class SecurityInfoDialog extends DialogFragment {
         trustText = (TextView) dialogView.findViewById(R.id.security_info_trust_text);
 
         transportSecurityIconFrame = dialogView.findViewById(R.id.security_info_transport_security_frame);
-        transportSecurityIcon_1 = (ImageView) trustIconFrame.findViewById(R.id.security_info_transport_security_icon_1);
+        transportSecurityIcon_1 = (ImageView) transportSecurityIconFrame.findViewById(R.id.security_info_transport_security_icon_1);
         transportSecurityText = (TextView) dialogView.findViewById(R.id.security_info_transport_security_text);
 
+        spfIconFrame = dialogView.findViewById(R.id.security_info_sender_auth_frame);
+        spfIcon_1 = (ImageView) spfIconFrame.findViewById(R.id.security_info_sender_auth_icon_1);
+        spfText = (TextView) dialogView.findViewById(R.id.security_info_sender_auth_text);
+
+        dkimIconFrame = dialogView.findViewById(R.id.security_info_message_integrity_frame);
+        dkimIcon_1 = (ImageView) dkimIconFrame.findViewById(R.id.security_info_message_integrity_icon_1);
+        dkimText = (TextView) dialogView.findViewById(R.id.security_info_message_integrity_text);
+
         MessageCryptoDisplayStatus displayStatus =
-                MessageCryptoDisplayStatus.valueOf(getArguments().getString(ARG_DISPLAY_STATUS));
-        setMessageForDisplayStatus(displayStatus);
+                MessageCryptoDisplayStatus.valueOf(getArguments().getString(ARG_MESSAGE_CRYPTO_DISPLAY_STATUS));
+        MessageTransportSecurityDisplayStatus transportDisplayStatus =
+                MessageTransportSecurityDisplayStatus.valueOf(getArguments().getString(ARG_TRANSPORT_CRYPTO_DISPLAY_STATUS));
+        MessageSPFDisplayStatus spfDisplayStatus =
+                MessageSPFDisplayStatus.valueOf(getArguments().getString(ARG_SPF_DISPLAY_STATUS));
+        MessageDKIMDisplayStatus dkimDisplayStatus =
+                MessageDKIMDisplayStatus.valueOf(getArguments().getString(ARG_DKIM_DISPLAY_STATUS));
+        setMessageForDisplayStatus(displayStatus, transportDisplayStatus, spfDisplayStatus, dkimDisplayStatus);
 
         b.setView(dialogView);
         b.setPositiveButton(R.string.crypto_info_ok, new OnClickListener() {
@@ -124,27 +160,36 @@ public class SecurityInfoDialog extends DialogFragment {
     }
 
     private void setMessageForDisplayStatus(MessageCryptoDisplayStatus cryptoDisplayStatus,
-            MessageTransportSecurityDisplayStatus transportSecurityDisplayStatus) {
+            MessageTransportSecurityDisplayStatus transportSecurityDisplayStatus,
+            MessageSPFDisplayStatus spfDisplayStatus, MessageDKIMDisplayStatus dkimDisplayStatus) {
         if (cryptoDisplayStatus.textResTop == null) {
             throw new AssertionError("Crypto info dialog can only be displayed for items with text!");
         }
 
         if (cryptoDisplayStatus.textResBottom == null) {
-            setMessageSingleLine(cryptoDisplayStatus.colorAttr,
+            setCryptoMessageSingleLine(cryptoDisplayStatus.colorAttr,
                     cryptoDisplayStatus.textResTop, cryptoDisplayStatus.statusIconRes,
                     cryptoDisplayStatus.statusDotsRes);
         } else {
             if (cryptoDisplayStatus.statusDotsRes == null) {
                 throw new AssertionError("second icon must be non-null if second text is non-null!");
             }
-            setMessageWithAnimation(cryptoDisplayStatus.colorAttr,
+            setCryptoMessageWithAnimation(cryptoDisplayStatus.colorAttr,
                     cryptoDisplayStatus.textResTop, cryptoDisplayStatus.statusIconRes,
                     cryptoDisplayStatus.textResBottom, cryptoDisplayStatus.statusDotsRes);
         }
 
+        setTransportSecurityMessageSingleLine(transportSecurityDisplayStatus.colorAttr,
+                transportSecurityDisplayStatus.textResTop, transportSecurityDisplayStatus.statusIconRes);
+
+        setSPFMessageSingleLine(spfDisplayStatus.colorAttr,
+                spfDisplayStatus.textResTop, spfDisplayStatus.statusIconRes);
+
+        setDKIMMessageSingleLine(dkimDisplayStatus.colorAttr,
+                dkimDisplayStatus.textResTop, dkimDisplayStatus.statusIconRes);
     }
 
-    private void setMessageSingleLine(@AttrRes int colorAttr,
+    private void setCryptoMessageSingleLine(@AttrRes int colorAttr,
             @StringRes int topTextRes, @DrawableRes int statusIconRes,
             @DrawableRes Integer statusDotsRes) {
         @ColorInt int color = ThemeUtils.getStyledColor(getActivity(), colorAttr);
@@ -165,7 +210,7 @@ public class SecurityInfoDialog extends DialogFragment {
         trustIconFrame.setVisibility(View.GONE);
     }
 
-    private void setMessageWithAnimation(@AttrRes int colorAttr,
+    private void setCryptoMessageWithAnimation(@AttrRes int colorAttr,
             @StringRes int topTextRes, @DrawableRes int statusIconRes,
             @StringRes int bottomTextRes, @DrawableRes int statusDotsRes) {
         authenticationIcon_1.setImageResource(statusIconRes);
@@ -181,6 +226,33 @@ public class SecurityInfoDialog extends DialogFragment {
         trustIcon_2.setColorFilter(ThemeUtils.getStyledColor(getActivity(), colorAttr));
 
         prepareIconAnimation();
+    }
+
+    private void setTransportSecurityMessageSingleLine(@AttrRes int colorAttr,
+            @StringRes int topTextRes, @DrawableRes int statusIconRes) {
+        @ColorInt int color = ThemeUtils.getStyledColor(getActivity(), colorAttr);
+
+        transportSecurityIcon_1.setImageResource(statusIconRes);
+        transportSecurityIcon_1.setColorFilter(color);
+        transportSecurityText.setText(topTextRes);
+    }
+
+    private void setSPFMessageSingleLine(@AttrRes int colorAttr,
+            @StringRes int topTextRes, @DrawableRes int statusIconRes) {
+        @ColorInt int color = ThemeUtils.getStyledColor(getActivity(), colorAttr);
+
+        spfIcon_1.setImageResource(statusIconRes);
+        spfIcon_1.setColorFilter(color);
+        spfText.setText(topTextRes);
+    }
+
+    private void setDKIMMessageSingleLine(@AttrRes int colorAttr,
+            @StringRes int topTextRes, @DrawableRes int statusIconRes) {
+        @ColorInt int color = ThemeUtils.getStyledColor(getActivity(), colorAttr);
+
+        dkimIcon_1.setImageResource(statusIconRes);
+        dkimIcon_1.setColorFilter(color);
+        dkimText.setText(topTextRes);
     }
 
     private void prepareIconAnimation() {

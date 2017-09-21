@@ -24,6 +24,7 @@ import com.fsck.k9.R;
 import com.fsck.k9.helper.Contacts;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Message;
+import com.fsck.k9.mailstore.CryptoResultAnnotation.CryptoProviderType;
 import com.fsck.k9.mailstore.MessageViewInfo;
 import com.fsck.k9.ui.messageview.MessageContainerView.OnRenderingFinishedListener;
 import com.fsck.k9.ui.messageview.ical.ICalendarViewCallback;
@@ -207,9 +208,14 @@ public class MessageTopView extends LinearLayout {
         displayViewOnLoadFinished(false);
     }
 
-    public void showCryptoProviderNotConfigured(final MessageViewInfo messageViewInfo) {
+    public void showCryptoProviderNotConfigured(final MessageViewInfo messageViewInfo, final CryptoProviderType providerType) {
         resetAndPrepareMessageView(messageViewInfo);
         View view = mInflater.inflate(R.layout.message_content_crypto_no_provider, containerView, false);
+
+        switch (providerType) {
+            case OPENPGP:
+                ((TextView) view.findViewById(R.id.no_provider_message)).setText(getResources().getString(R.string.openpgp_no_provider_message));
+        }
 
         view.findViewById(R.id.crypto_settings).setOnClickListener(new OnClickListener() {
             @Override

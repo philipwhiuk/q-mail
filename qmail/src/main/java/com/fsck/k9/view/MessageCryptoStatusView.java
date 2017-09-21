@@ -9,6 +9,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.fsck.k9.R;
+import com.fsck.k9.view.securityStatus.MessageCryptoDisplayStatus;
 
 
 public class MessageCryptoStatusView extends FrameLayout {

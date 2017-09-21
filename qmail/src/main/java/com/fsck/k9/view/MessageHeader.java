@@ -17,6 +17,8 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.StyleSpan;
 import android.util.AttributeSet;
+
+import com.fsck.k9.view.securityStatus.MessageCryptoDisplayStatus;
 import timber.log.Timber;
 import android.view.Gravity;
 import android.view.View;

@@ -4,22 +4,21 @@ package com.fsck.k9.service;
 
 import java.util.Collection;
 
-import android.annotation.TargetApi;
+import android.app.Notification;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.support.v4.app.NotificationBuilderWithBuilderAccessor;
 import android.support.v4.app.NotificationCompat;
 
 import com.fsck.k9.Account;
 import com.fsck.k9.Account.FolderMode;
 import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
+import com.fsck.k9.R;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.helper.Utility;
 import com.fsck.k9.mail.Pusher;
@@ -125,38 +124,32 @@ public class MailService extends CoreService {
 
         // MessagingController.getInstance(getApplication()).addListener(mListener);
         if (ACTION_CHECK_MAIL.equals(intent.getAction())) {
-            if (VERSION.SDK_INT >= VERSION_CODES.O)
-                startForeground(FOREGROUND_SERVICE_NOTIFICATION_ID, new NotificationCompat.Builder(this).setContentTitle("Checking email").build());
             Timber.i("***** MailService *****: checking mail");
             if (hasConnectivity && doBackground) {
                 PollService.startService(this);
             }
             reschedulePollInBackground(hasConnectivity, doBackground, startId, false);
         } else if (ACTION_CANCEL.equals(intent.getAction())) {
+            startForegroundWithNotification("Fetching email");
             Timber.v("***** MailService *****: cancel");
             cancel();
         } else if (ACTION_RESET.equals(intent.getAction())) {
-            if (VERSION.SDK_INT >= VERSION_CODES.O)
-                startForeground(FOREGROUND_SERVICE_NOTIFICATION_ID, new NotificationCompat.Builder(this).setContentTitle("Fetching email").build());
+            startForegroundWithNotification("Fetching email");
             Timber.v("***** MailService *****: reschedule");
             rescheduleAllInBackground(hasConnectivity, doBackground, startId);
         } else if (ACTION_RESTART_PUSHERS.equals(intent.getAction())) {
-            if (VERSION.SDK_INT >= VERSION_CODES.O)
-                startForeground(FOREGROUND_SERVICE_NOTIFICATION_ID, new NotificationCompat.Builder(this).setContentTitle("Push email active").build());
+            startForegroundWithNotification("Push email active");
             Timber.v("***** MailService *****: restarting pushers");
             reschedulePushersInBackground(hasConnectivity, doBackground, startId);
         } else if (ACTION_RESCHEDULE_POLL.equals(intent.getAction())) {
-            if (VERSION.SDK_INT >= VERSION_CODES.O)
-                startForeground(FOREGROUND_SERVICE_NOTIFICATION_ID, new NotificationCompat.Builder(this).setContentTitle("Polling email").build());
+            startForegroundWithNotification("Polling email");
             Timber.v("***** MailService *****: rescheduling poll");
             reschedulePollInBackground(hasConnectivity, doBackground, startId, true);
         } else if (ACTION_REFRESH_PUSHERS.equals(intent.getAction())) {
-            if (VERSION.SDK_INT >= VERSION_CODES.O)
-                startForeground(FOREGROUND_SERVICE_NOTIFICATION_ID, new NotificationCompat.Builder(this).setContentTitle("Push email active").build());
+            startForegroundWithNotification("Push email active");
             refreshPushersInBackground(hasConnectivity, doBackground, startId);
         } else if (CONNECTIVITY_CHANGE.equals(intent.getAction())) {
-            if (VERSION.SDK_INT >= VERSION_CODES.O)
-                startForeground(FOREGROUND_SERVICE_NOTIFICATION_ID, new NotificationCompat.Builder(this).setContentTitle("Fetching email").build());
+            startForegroundWithNotification("Fetching email");
             rescheduleAllInBackground(hasConnectivity, doBackground, startId);
             Timber.i("Got connectivity action with hasConnectivity = %s, doBackground = %s",
                     hasConnectivity, doBackground);
@@ -164,7 +157,7 @@ public class MailService extends CoreService {
             /* do nothing */
         } else {
             if (VERSION.SDK_INT >= VERSION_CODES.O)
-                startForeground(FOREGROUND_SERVICE_NOTIFICATION_ID, new NotificationCompat.Builder(this).setContentTitle("Fetching email").build());
+                startForegroundWithNotification("Fetching email");
         }
 
         if (isSyncDisabled() != oldIsSyncDisabled) {
@@ -174,6 +167,21 @@ public class MailService extends CoreService {
         Timber.i("MailService.onStart took %d ms", SystemClock.elapsedRealtime() - startTime);
 
         return START_NOT_STICKY;
+    }
+
+    private void startForegroundWithNotification(String content) {
+        if (VERSION.SDK_INT >= VERSION_CODES.O)
+            startForeground(FOREGROUND_SERVICE_NOTIFICATION_ID,
+                    new NotificationCompat.Builder(this, "sync")
+                            .setTicker(content)
+                            .setSmallIcon(R.drawable.icon)
+                            .setColor(getResources().getColor(R.color.light_black))
+                            .setContentTitle(content)
+                            .setContentText(content)
+                            .setWhen(System.currentTimeMillis())
+                            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                            .build());
+
     }
 
     @Override

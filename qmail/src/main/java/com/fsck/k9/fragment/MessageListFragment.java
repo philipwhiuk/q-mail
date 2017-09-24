@@ -2370,6 +2370,7 @@ public class MessageListFragment extends Fragment implements OnItemClickListener
         void onResendMessage(MessageReference message);
         void onForward(MessageReference message);
         void onReply(MessageReference message);
+        void onReplyList(MessageReference message);
         void onReplyAll(MessageReference message);
         void openMessage(MessageReference messageReference);
         void setMessageListTitle(String title);

@@ -24,8 +24,11 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,6 +67,8 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
 
     private View mChip;
     private CheckBox mFlagged;
+    private ImageView mAttachments;
+    private ListView mAttachmentsList;
     private int defaultSubjectColor;
     private TextView mAdditionalHeadersView;
     private View mAnsweredIcon;
@@ -123,6 +128,18 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
         mChip = findViewById(R.id.chip);
         mDateView = (TextView) findViewById(R.id.date);
         mFlagged = (CheckBox) findViewById(R.id.flagged);
+        mAttachments = findViewById(R.id.attachments);
+        mAttachmentsList = findViewById(R.id.attachmentList);
+        mAttachments.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mAttachmentsList.getVisibility() != VISIBLE) {
+                    mAttachmentsList.setVisibility(VISIBLE);
+                } else {
+                    mAttachmentsList.setVisibility(GONE);
+                }
+            }
+        });
 
         defaultSubjectColor = mSubjectView.getCurrentTextColor();
         mFontSizes.setViewTextSize(mSubjectView, mFontSizes.getMessageViewSubject());
@@ -352,6 +369,7 @@ public class MessageHeader extends LinearLayout implements OnClickListener, OnLo
         mAnsweredIcon.setVisibility(message.isSet(Flag.ANSWERED) ? View.VISIBLE : View.GONE);
         mForwardedIcon.setVisibility(message.isSet(Flag.FORWARDED) ? View.VISIBLE : View.GONE);
         mFlagged.setChecked(message.isSet(Flag.FLAGGED));
+        mAttachments.setVisibility(message.hasAttachments() ? VISIBLE: GONE);
 
         mChip.setBackgroundColor(mAccount.getChipColor());
 

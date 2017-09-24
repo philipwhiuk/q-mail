@@ -97,7 +97,7 @@ public class RecipientPresenterTest {
         Message message = mock(Message.class);
         when(replyToParser.getRecipientsToReplyTo(message, account)).thenReturn(TO_ADDRESSES);
 
-        recipientPresenter.initFromReplyToMessage(message, false);
+        recipientPresenter.initFromReplyToMessage(message, ReplyMode.NORMAL);
         runBackgroundTask();
 
         verify(recipientMvpView).addRecipients(eq(RecipientType.TO), any(Recipient[].class));
@@ -110,7 +110,7 @@ public class RecipientPresenterTest {
         ReplyToAddresses replyToAddresses = new ReplyToAddresses(ALL_TO_ADDRESSES, ALL_CC_ADDRESSES);
         when(replyToParser.getRecipientsToReplyAllTo(message, account)).thenReturn(replyToAddresses);
 
-        recipientPresenter.initFromReplyToMessage(message, true);
+        recipientPresenter.initFromReplyToMessage(message, ReplyMode.ALL);
         // one for To, one for Cc
         runBackgroundTask();
         runBackgroundTask();
@@ -124,7 +124,7 @@ public class RecipientPresenterTest {
         Message message = mock(Message.class);
         when(replyToParser.getRecipientsToReplyTo(message, account)).thenReturn(TO_ADDRESSES);
 
-        recipientPresenter.initFromReplyToMessage(message, false);
+        recipientPresenter.initFromReplyToMessage(message, ReplyMode.NORMAL);
 
         verify(composePgpInlineDecider).shouldReplyInline(message);
     }

@@ -100,6 +100,7 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="compose_title_compose">Compose</string>
     <string name="compose_title_reply">Reply</string>
     <string name="compose_title_reply_all">Reply all</string>
+    <string name="compose_title_reply_list">Reply to List</string>
     <string name="compose_title_forward">Forward</string>
 
     <string name="choose_folder_title">Choose Folder</string>
@@ -133,6 +134,7 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="select_action">Select</string>
     <string name="deselect_action">Deselect</string>
     <string name="reply_action">Reply</string>
+    <string name="reply_list_action">Reply List</string>
     <string name="reply_all_action">Reply all</string>
     <string name="delete_action">Delete</string>
     <string name="archive_action">Archive</string>
@@ -1375,4 +1377,6 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
     <string name="transport_crypto_insecure_ssl_version">Transmitted using old version of SSL protocol</string>
+    <string name="reply_subject" translatable="false">Re: %1s</string>
+    <string name="forward_subject" translatable="false">Fwd: %1s</string>
 </resources>

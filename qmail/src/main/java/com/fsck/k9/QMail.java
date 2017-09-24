@@ -13,6 +13,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
 import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +25,9 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -544,6 +549,14 @@ public class QMail extends Application {
                 return DEBUG_SENSITIVE;
             }
         });
+
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel channel = new NotificationChannel("sync", "Sync", NotificationManager.IMPORTANCE_LOW);
+            notificationManager.createNotificationChannel(channel);
+        }
+
 
         checkCachedDatabaseVersion();
 

@@ -6,17 +6,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.Manifest;
 import android.content.AsyncTaskLoader;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Contacts.Data;
 import android.support.annotation.Nullable;
 
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.view.RecipientSelectView.Recipient;
@@ -203,9 +207,12 @@ public class RecipientLoader extends AsyncTaskLoader<List<Recipient>> {
             Map<String, Recipient> recipientMap) {
 
         boolean foundValidCursor = false;
-        foundValidCursor |= fillContactDataFromNickname(query, recipients, recipientMap);
-        foundValidCursor |= fillContactDataFromNameAndEmail(query, recipients, recipientMap);
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && QMail.app.checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+        } else {
+            foundValidCursor |= fillContactDataFromNickname(query, recipients, recipientMap);
+            foundValidCursor |= fillContactDataFromNameAndEmail(query, recipients, recipientMap);
+        }
         if (foundValidCursor) {
             registerContentObserver();
         }

@@ -8,6 +8,9 @@
     <item
          android:id="@+id/reply_all"
          android:title="@string/reply_all_action"/>
+    <item
+        android:id="@+id/reply_list"
+        android:title="@string/reply_list_action"/>
      <item
          android:id="@+id/reply"
          android:title="@string/reply_action"/>

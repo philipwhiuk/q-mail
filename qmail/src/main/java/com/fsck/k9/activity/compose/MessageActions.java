@@ -30,14 +30,20 @@ public class MessageActions {
      * the function is reply all instead of simply reply.
      */
     public static Intent getActionReplyIntent(
-            Context context, MessageReference messageReference, boolean replyAll, Parcelable decryptionResult) {
+            Context context, MessageReference messageReference, ReplyMode replyMode, Parcelable decryptionResult) {
         Intent i = new Intent(context, MessageCompose.class);
         i.putExtra(MessageCompose.EXTRA_MESSAGE_DECRYPTION_RESULT, decryptionResult);
         i.putExtra(MessageCompose.EXTRA_MESSAGE_REFERENCE, messageReference.toIdentityString());
-        if (replyAll) {
-            i.setAction(MessageCompose.ACTION_REPLY_ALL);
-        } else {
-            i.setAction(MessageCompose.ACTION_REPLY);
+        switch (replyMode) {
+            case ALL:
+                i.setAction(MessageCompose.ACTION_REPLY_ALL);
+                break;
+            case LIST:
+                i.setAction(MessageCompose.ACTION_REPLY_LIST);
+                break;
+            default:
+                i.setAction(MessageCompose.ACTION_REPLY);
+                break;
         }
         return i;
     }
@@ -56,8 +62,8 @@ public class MessageActions {
      * is reply all instead of simply reply.
      */
     public static void actionReply(
-            Context context, MessageReference messageReference, boolean replyAll, Parcelable decryptionResult) {
-        context.startActivity(getActionReplyIntent(context, messageReference, replyAll, decryptionResult));
+            Context context, MessageReference messageReference, ReplyMode replyMode, Parcelable decryptionResult) {
+        context.startActivity(getActionReplyIntent(context, messageReference, replyMode, decryptionResult));
     }
 
     /**

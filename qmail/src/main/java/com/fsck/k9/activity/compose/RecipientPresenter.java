@@ -161,11 +161,21 @@ public class RecipientPresenter implements PermissionPingCallback {
         return false;
     }
 
-    public void initFromReplyToMessage(Message message, boolean isReplyAll) {
-        ReplyToAddresses replyToAddresses = isReplyAll ?
-                replyToParser.getRecipientsToReplyAllTo(message, account) :
-                replyToParser.getRecipientsToReplyTo(message, account);
-
+    public void initFromReplyToMessage(Message message, ReplyMode replyMode) {
+        ReplyToAddresses replyToAddresses;
+        switch (replyMode) {
+            case ALL:
+                replyToAddresses = replyToParser.getRecipientsToReplyAllTo(message, account);
+                break;
+            case LIST:
+                replyToAddresses = replyToParser.getRecipientsToReplyListTo(message, account);
+                break;
+            case NORMAL:
+                replyToAddresses = replyToParser.getRecipientsToReplyTo(message, account);
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected reply mode: " + replyMode);
+        }
         addToAddresses(replyToAddresses.to);
         addCcAddresses(replyToAddresses.cc);
 

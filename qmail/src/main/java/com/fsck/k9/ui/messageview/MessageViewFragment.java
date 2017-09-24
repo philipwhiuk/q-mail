@@ -47,6 +47,7 @@ import com.fsck.k9.fragment.ConfirmationDialogFragment.ConfirmationDialogFragmen
 import com.fsck.k9.helper.FileBrowserHelper;
 import com.fsck.k9.helper.FileBrowserHelper.FileBrowserFailOverCallback;
 import com.fsck.k9.mail.Flag;
+import com.fsck.k9.mail.internet.ListHeaders;
 import com.fsck.k9.mailstore.AttachmentViewInfo;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
 import com.fsck.k9.mailstore.LocalMessage;
@@ -301,6 +302,10 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         return mMessageView.getMessageHeaderView().additionalHeadersVisible();
     }
 
+    public boolean isMessageToList() {
+        return (mMessage != null) && ListHeaders.getListPostAddresses(mMessage).length > 0;
+    }
+
     private void delete() {
         if (mMessage != null) {
             // Disable the delete button after it's tapped (to try to prevent
@@ -344,6 +349,12 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
     public void onReply() {
         if (mMessage != null) {
             mFragmentListener.onReply(mMessage.makeMessageReference(), messageCryptoPresenter.getDecryptionResultForReply());
+        }
+    }
+
+    public void onReplyList() {
+        if (mMessage != null) {
+            mFragmentListener.onReplyList(mMessage.makeMessageReference(), messageCryptoPresenter.getDecryptionResultForReply());
         }
     }
 
@@ -804,6 +815,7 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         void onForward(MessageReference messageReference, Parcelable decryptionResultForReply);
         void disableDeleteAction();
         void onReplyAll(MessageReference messageReference, Parcelable decryptionResultForReply);
+        void onReplyList(MessageReference messageReference, Parcelable decryptionResultForReply);
         void onReply(MessageReference messageReference, Parcelable decryptionResultForReply);
         void displayMessageSubject(String title);
         void setProgress(boolean b);

@@ -12,6 +12,7 @@ if (rootProject.testCoverage) {
 
 repositories {
     jcenter()
+    maven { url "https://maven.google.com" }
 }
 
 //noinspection GroovyAssignabilityCheck
@@ -27,7 +28,7 @@ dependencies {
     compile project(':plugins:openpgp-api-lib:openpgp-api')
     compile "com.squareup.okio:okio:${okioVersion}"
     compile 'commons-io:commons-io:2.4'
-    compile "com.android.support:support-v4:${androidSupportLibraryVersion}"
+    compile "com.android.support:support-compat:${androidSupportLibraryVersion}"
     compile "com.android.support:appcompat-v7:${androidSupportLibraryVersion}"
     compile 'org.jsoup:jsoup:1.10.2'
     compile 'de.cketti.library.changelog:ckchangelog:1.2.1'

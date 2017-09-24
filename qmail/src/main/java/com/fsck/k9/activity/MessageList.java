@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 
 import com.fsck.k9.QMail;
+import com.fsck.k9.activity.compose.ReplyMode;
 import timber.log.Timber;
 
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -927,6 +928,10 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
                 mMessageViewFragment.onReply();
                 return true;
             }
+            case R.id.reply_list: {
+                mMessageViewFragment.onReplyList();
+                return true;
+            }
             case R.id.reply_all: {
                 mMessageViewFragment.onReplyAll();
                 return true;
@@ -1150,6 +1155,10 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
             } else {
                 menu.findItem(R.id.hide_headers).setVisible(false);
             }
+
+            if (!mMessageViewFragment.isMessageToList()) {
+                menu.findItem(R.id.reply_list).setVisible(false);
+            }
         }
 
 
@@ -1295,7 +1304,17 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
 
     @Override
     public void onReply(MessageReference messageReference, Parcelable decryptionResultForReply) {
-        MessageActions.actionReply(this, messageReference, false, decryptionResultForReply);
+        MessageActions.actionReply(this, messageReference, ReplyMode.NORMAL, decryptionResultForReply);
+    }
+
+    @Override
+    public void onReplyList(MessageReference messageReference) {
+        onReplyList(messageReference, null);
+    }
+
+    @Override
+    public void onReplyList(MessageReference messageReference, Parcelable decryptionResultForReply) {
+        MessageActions.actionReply(this, messageReference, ReplyMode.LIST, decryptionResultForReply);
     }
 
     @Override
@@ -1305,7 +1324,7 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
 
     @Override
     public void onReplyAll(MessageReference messageReference, Parcelable decryptionResultForReply) {
-        MessageActions.actionReply(this, messageReference, true, decryptionResultForReply);
+        MessageActions.actionReply(this, messageReference, ReplyMode.ALL, decryptionResultForReply);
     }
 
     @Override

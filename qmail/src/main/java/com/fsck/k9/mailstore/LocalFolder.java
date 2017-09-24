@@ -260,7 +260,7 @@ public class LocalFolder extends Folder<LocalMessage> {
             public Boolean doDbWork(final SQLiteDatabase db) throws WrappedException {
                 Cursor cursor = null;
                 try {
-                    cursor = db.rawQuery("SELECT id FROM folders where folders.id = ?",
+                    cursor = db.rawQuery("SELECT id FROM folders where folders.remoteId = ?",
                             new String[] { LocalFolder.this.getId() });
                     if (cursor.moveToFirst()) {
                         int folderId = cursor.getInt(0);

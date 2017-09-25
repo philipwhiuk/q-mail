@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.openintents.openpgp.util;
+package org.openintents.smime.util;
 
 
 import java.util.ArrayList;
@@ -36,13 +36,15 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import org.openintents.openpgp.R;
+import org.openintents.smime.R;
+import org.openintents.smime.util.SMimeApi;
+
 
 /**
  * Does not extend ListPreference, but is very similar to it!
  * http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.4_r1/android/preference/ListPreference.java/?v=source
  */
-public class OpenPgpAppPreference extends DialogPreference {
+public class SMimeAppPreference extends DialogPreference {
     private static final String OPENKEYCHAIN_PACKAGE = "org.sufficientlysecure.keychain";
     private static final String MARKET_INTENT_URI_BASE = "market://details?id=%s";
     private static final Intent MARKET_INTENT = new Intent(Intent.ACTION_VIEW, Uri.parse(
@@ -61,12 +63,12 @@ public class OpenPgpAppPreference extends DialogPreference {
 
     private String mSelectedPackage;
 
-    public OpenPgpAppPreference(Context context, AttributeSet attrs) {
+    public SMimeAppPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         populateAppList();
     }
 
-    public OpenPgpAppPreference(Context context) {
+    public SMimeAppPreference(Context context) {
         this(context, null);
     }
 
@@ -139,7 +141,7 @@ public class OpenPgpAppPreference extends DialogPreference {
                          * Clicking on an item simulates the positive button click, and dismisses
                          * the dialog.
                          */
-                        OpenPgpAppPreference.this.onClick(dialog, DialogInterface.BUTTON_POSITIVE);
+                        SMimeAppPreference.this.onClick(dialog, DialogInterface.BUTTON_POSITIVE);
                         dialog.dismiss();
                     }
                 });
@@ -252,7 +254,7 @@ public class OpenPgpAppPreference extends DialogPreference {
             }
         }
 
-        return getContext().getString(R.string.openpgp_list_preference_none);
+        return getContext().getString(R.string.smime_list_preference_none);
     }
 
     private void populateAppList() {
@@ -260,14 +262,14 @@ public class OpenPgpAppPreference extends DialogPreference {
 
         // add "none"-entry
         mList.add(0, new OpenPgpProviderEntry("",
-                getContext().getString(R.string.openpgp_list_preference_none),
+                getContext().getString(R.string.smime_list_preference_none),
                 getContext().getResources().getDrawable(R.drawable.ic_action_cancel_launchersize)));
 
         // add all additional (legacy) providers
         mList.addAll(mLegacyList);
 
         // search for OpenPGP providers...
-        Intent intent = new Intent(OpenPgpApi.SERVICE_INTENT_2);
+        Intent intent = new Intent(SMimeApi.SERVICE_INTENT_2);
         List<ResolveInfo> resInfo = getContext().getPackageManager().queryIntentServices(intent, 0);
         boolean hasNonBlacklistedChoices = false;
         if (resInfo != null) {
@@ -292,18 +294,16 @@ public class OpenPgpAppPreference extends DialogPreference {
             // add install links if provider list is empty
             resInfo = getContext().getPackageManager().queryIntentActivities
                     (MARKET_INTENT, 0);
-            if (resInfo != null) {
-                for (ResolveInfo resolveInfo : resInfo) {
-                    Intent marketIntent = new Intent(MARKET_INTENT);
-                    marketIntent.setPackage(resolveInfo.activityInfo.packageName);
-                    Drawable icon = resolveInfo.activityInfo.loadIcon(getContext().getPackageManager());
-                    String marketName = String.valueOf(resolveInfo.activityInfo.applicationInfo
-                            .loadLabel(getContext().getPackageManager()));
-                    String simpleName = String.format(getContext().getString(R.string
-                            .openpgp_install_openkeychain_via), marketName);
-                    mList.add(new OpenPgpProviderEntry(OPENKEYCHAIN_PACKAGE, simpleName,
-                            icon, marketIntent));
-                }
+            for (ResolveInfo resolveInfo : resInfo) {
+                Intent marketIntent = new Intent(MARKET_INTENT);
+                marketIntent.setPackage(resolveInfo.activityInfo.packageName);
+                Drawable icon = resolveInfo.activityInfo.loadIcon(getContext().getPackageManager());
+                String marketName = String.valueOf(resolveInfo.activityInfo.applicationInfo
+                        .loadLabel(getContext().getPackageManager()));
+                String simpleName = String.format(getContext().getString(R.string
+                        .smime_install_opensmime_via), marketName);
+                mList.add(new OpenPgpProviderEntry(OPENKEYCHAIN_PACKAGE, simpleName,
+                        icon, marketIntent));
             }
         }
     }

@@ -22,33 +22,23 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.fsck.k9.QMail;
 import com.fsck.k9.Preferences;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.preferences.StorageEditor;
-import com.fsck.k9.ui.dialog.ApgDeprecationWarningDialog;
-import org.openintents.openpgp.util.OpenPgpApi;
-import org.openintents.openpgp.util.OpenPgpAppPreference;
+import org.openintents.smime.util.SMimeApi;
 
 
-public class OpenPgpAppSelectDialog extends Activity {
-    private static final String OPENKEYCHAIN_PACKAGE = "org.sufficientlysecure.keychain";
-    private static final String APG_PROVIDER_PLACEHOLDER = "apg-placeholder";
-    private static final String PACKAGE_NAME_APG = "org.thialfihar.android.apg";
+public class SMimeAppSelectDialog extends Activity {
+    private static final String OPENSMIME_PACKAGE = "com.whiuk.philip.opensmime";
 
-    public static final String FRAG_OPENPGP_SELECT = "openpgp_select";
-    public static final String FRAG_APG_DEPRECATE = "apg_deprecate";
+    public static final String FRAG_SMIME_SELECT = "smime_select";
 
     private static final String MARKET_INTENT_URI_BASE = "market://details?id=%s";
     private static final Intent MARKET_INTENT = new Intent(Intent.ACTION_VIEW, Uri.parse(
-            String.format(MARKET_INTENT_URI_BASE, OPENKEYCHAIN_PACKAGE)));
+            String.format(MARKET_INTENT_URI_BASE, OPENSMIME_PACKAGE)));
 
     private static final ArrayList<String> PROVIDER_BLACKLIST = new ArrayList<>();
-
-    static {
-        // Unfortunately, the current released version of APG includes a broken version of the API
-        PROVIDER_BLACKLIST.add(PACKAGE_NAME_APG);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,42 +48,31 @@ public class OpenPgpAppSelectDialog extends Activity {
                 R.style.Theme_K9_Dialog_Translucent_Light : R.style.Theme_K9_Dialog_Translucent_Dark);
 
         if (savedInstanceState == null) {
-            showOpenPgpSelectDialogFragment();
+            showSMimeSelectDialogFragment();
         }
     }
 
-    private void showOpenPgpSelectDialogFragment() {
-        OpenPgpAppSelectFragment fragment = new OpenPgpAppSelectFragment();
-        fragment.show(getFragmentManager(), FRAG_OPENPGP_SELECT);
+    private void showSMimeSelectDialogFragment() {
+        SMimeAppSelectFragment fragment = new SMimeAppSelectFragment();
+        fragment.show(getFragmentManager(), FRAG_SMIME_SELECT);
     }
 
-    private void showApgDeprecationDialogFragment() {
-        ApgDeprecationDialogFragment fragment = new ApgDeprecationDialogFragment();
-        fragment.show(getFragmentManager(), FRAG_APG_DEPRECATE);
-    }
-
-    public static class OpenPgpAppSelectFragment extends DialogFragment {
-        private ArrayList<OpenPgpProviderEntry> openPgpProviderList = new ArrayList<>();
+    public static class SMimeAppSelectFragment extends DialogFragment {
+        private ArrayList<SMimeProviderEntry> sMimeProviderList = new ArrayList<>();
         private String selectedPackage;
 
         private void populateAppList() {
-            openPgpProviderList.clear();
+            sMimeProviderList.clear();
 
             Context context = getActivity();
 
-            OpenPgpProviderEntry noneEntry = new OpenPgpProviderEntry("",
-                    context.getString(R.string.openpgp_list_preference_none),
+            SMimeProviderEntry noneEntry = new SMimeProviderEntry("",
+                    context.getString(R.string.smime_list_preference_none),
                     getResources().getDrawable(R.drawable.ic_action_cancel_launchersize));
-            openPgpProviderList.add(0, noneEntry);
+            sMimeProviderList.add(0, noneEntry);
 
-            if (OpenPgpAppPreference.isApgInstalled(getActivity())) {
-                Drawable icon = getResources().getDrawable(R.drawable.ic_apg_small);
-                openPgpProviderList.add(new OpenPgpProviderEntry(
-                        APG_PROVIDER_PLACEHOLDER, getString(R.string.apg), icon));
-            }
-
-            // search for OpenPGP providers...
-            Intent intent = new Intent(OpenPgpApi.SERVICE_INTENT_2);
+            // search for SMIME providers...
+            Intent intent = new Intent(SMimeApi.SERVICE_INTENT_2);
             List<ResolveInfo> resInfo = getActivity().getPackageManager().queryIntentServices(intent, 0);
             boolean hasNonBlacklistedChoices = false;
             if (resInfo != null) {
@@ -107,7 +86,7 @@ public class OpenPgpAppSelectDialog extends Activity {
                     Drawable icon = resolveInfo.serviceInfo.loadIcon(context.getPackageManager());
 
                     if (!PROVIDER_BLACKLIST.contains(packageName)) {
-                        openPgpProviderList.add(new OpenPgpProviderEntry(packageName, simpleName, icon));
+                        sMimeProviderList.add(new SMimeProviderEntry(packageName, simpleName, icon));
                         hasNonBlacklistedChoices = true;
                     }
                 }
@@ -122,9 +101,9 @@ public class OpenPgpAppSelectDialog extends Activity {
                     Drawable icon = resolveInfo.activityInfo.loadIcon(context.getPackageManager());
                     String marketName = String.valueOf(resolveInfo.activityInfo.applicationInfo
                             .loadLabel(context.getPackageManager()));
-                    String simpleName = String.format(context.getString(R.string
-                            .openpgp_install_openkeychain_via), marketName);
-                    openPgpProviderList.add(new OpenPgpProviderEntry(OPENKEYCHAIN_PACKAGE, simpleName,
+                    String simpleName = context.getString(R.string
+                            .smime_install_opensmime_via, marketName);
+                    sMimeProviderList.add(new SMimeProviderEntry(OPENSMIME_PACKAGE, simpleName,
                             icon, marketIntent));
                 }
             }
@@ -133,7 +112,7 @@ public class OpenPgpAppSelectDialog extends Activity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            selectedPackage = QMail.getOpenPgpProvider();
+            selectedPackage = QMail.getSMimeProvider();
         }
 
         @NonNull
@@ -141,21 +120,21 @@ public class OpenPgpAppSelectDialog extends Activity {
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-            builder.setTitle(R.string.account_settings_openpgp_app);
+            builder.setTitle(R.string.account_settings_smime_app);
 
             // do again, maybe an app has now been installed
             populateAppList();
 
-            // Init ArrayAdapter with OpenPGP Providers
-            ListAdapter adapter = new ArrayAdapter<OpenPgpProviderEntry>(getActivity(),
-                    android.R.layout.select_dialog_singlechoice, android.R.id.text1, openPgpProviderList) {
+            // Init ArrayAdapter with S/MIME Providers
+            ListAdapter adapter = new ArrayAdapter<SMimeProviderEntry>(getActivity(),
+                    android.R.layout.select_dialog_singlechoice, android.R.id.text1, sMimeProviderList) {
                 public View getView(int position, View convertView, ViewGroup parent) {
                     // User super class to create the View
                     View v = super.getView(position, convertView, parent);
                     TextView tv = (TextView) v.findViewById(android.R.id.text1);
 
                     // Put the image on the TextView
-                    tv.setCompoundDrawablesWithIntrinsicBounds(openPgpProviderList.get(position).icon, null,
+                    tv.setCompoundDrawablesWithIntrinsicBounds(sMimeProviderList.get(position).icon, null,
                             null, null);
 
                     // Add margin between image and text (support various screen densities)
@@ -171,7 +150,7 @@ public class OpenPgpAppSelectDialog extends Activity {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            OpenPgpProviderEntry entry = openPgpProviderList.get(which);
+                            SMimeProviderEntry entry = sMimeProviderList.get(which);
 
                             if (entry.intent != null) {
                                 /*
@@ -181,7 +160,7 @@ public class OpenPgpAppSelectDialog extends Activity {
                                  * If he does not, the selected package is not valid.
                                  *
                                  * However  applications should always consider this could happen,
-                                 * as the user might remove the currently used OpenPGP app.
+                                 * as the user might remove the currently used S/MIME app.
                                  */
                                 getActivity().startActivity(entry.intent);
                                 return;
@@ -197,12 +176,11 @@ public class OpenPgpAppSelectDialog extends Activity {
         }
 
         private int getIndexOfProviderList(String packageName) {
-            for (OpenPgpProviderEntry app : openPgpProviderList) {
+            for (SMimeProviderEntry app : sMimeProviderList) {
                 if (app.packageName.equals(packageName)) {
-                    return openPgpProviderList.indexOf(app);
+                    return sMimeProviderList.indexOf(app);
                 }
             }
-
             // default is "none"
             return 0;
         }
@@ -211,36 +189,17 @@ public class OpenPgpAppSelectDialog extends Activity {
         public void onDismiss(DialogInterface dialog) {
             super.onDismiss(dialog);
 
-            ((OpenPgpAppSelectDialog) getActivity()).onSelectProvider(selectedPackage);
-        }
-    }
-
-    public static class ApgDeprecationDialogFragment extends DialogFragment {
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return new ApgDeprecationWarningDialog(getActivity());
-        }
-
-        @Override
-        public void onDismiss(DialogInterface dialog) {
-            super.onDismiss(dialog);
-
-            ((OpenPgpAppSelectDialog) getActivity()).onDismissApgDialog();
+            ((SMimeAppSelectDialog) getActivity()).onSelectProvider(selectedPackage);
         }
     }
 
     public void onSelectProvider(String selectedPackage) {
-        if (APG_PROVIDER_PLACEHOLDER.equals(selectedPackage)) {
-            showApgDeprecationDialogFragment();
-            return;
-        }
-
-        persistOpenPgpProviderSetting(selectedPackage);
+        persistSMimeProviderSetting(selectedPackage);
         finish();
     }
 
-    private void persistOpenPgpProviderSetting(String selectedPackage) {
-        QMail.setOpenPgpProvider(selectedPackage);
+    private void persistSMimeProviderSetting(String selectedPackage) {
+        QMail.setSMimeProvider(selectedPackage);
 
         StorageEditor editor = Preferences.getPreferences(this).getStorage().edit();
         QMail.save(editor);
@@ -248,22 +207,22 @@ public class OpenPgpAppSelectDialog extends Activity {
     }
 
     public void onDismissApgDialog() {
-        showOpenPgpSelectDialogFragment();
+        showSMimeSelectDialogFragment();
     }
 
-    private static class OpenPgpProviderEntry {
+    private static class SMimeProviderEntry {
         private String packageName;
         private String simpleName;
         private Drawable icon;
         private Intent intent;
 
-        OpenPgpProviderEntry(String packageName, String simpleName, Drawable icon) {
+        SMimeProviderEntry(String packageName, String simpleName, Drawable icon) {
             this.packageName = packageName;
             this.simpleName = simpleName;
             this.icon = icon;
         }
 
-        OpenPgpProviderEntry(String packageName, String simpleName, Drawable icon, Intent intent) {
+        SMimeProviderEntry(String packageName, String simpleName, Drawable icon, Intent intent) {
             this(packageName, simpleName, icon);
             this.intent = intent;
         }

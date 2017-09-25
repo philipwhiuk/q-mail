@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:padding="16dp">
@@ -25,7 +26,7 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:id="@+id/no_provider_message"
-        android:text="@string/openpgp_no_provider_message"
+        tools:text="@string/openpgp_no_provider_message"
         />
 
     <Button

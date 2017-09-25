@@ -613,7 +613,8 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="account_settings_folders">Folders</string>
     <string name="account_settings_quote_prefix_label">Quoted text prefix</string>
     <string name="account_settings_crypto">Cryptography</string>
-    <string name="account_settings_crypto_app">OpenPGP app</string>
+    <string name="account_settings_openpgp_app">OpenPGP app</string>
+    <string name="account_settings_smime_app">S/MIME app</string>
     <string name="account_settings_crypto_key">My Key</string>
     <string name="account_settings_no_openpgp_provider_configured">No OpenPGP app configured</string>
 
@@ -1248,6 +1249,7 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="locked_ical_title">Unprotected iCalendar</string>
 
     <!-- Security - E2E - OpenPGP -->
+    <string name="openpgp_encryption">OpenPGP Encryption</string>
     <string name="error_recipient_openpgp_retrieve">Error retrieving recipient status from OpenPGP provider!</string>
     <string name="openpgp_no_provider_message">This email has been encrypted with OpenPGP.\n
         To read it, you need to install and configure a compatible OpenPGP App.</string>
@@ -1306,9 +1308,12 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="apg_deprecated_ok">Got it!</string>
 
     <!-- Security - E2E - S/MIME -->
+    <string name="smime_install_opensmime_via">Install OpenSMIME via</string>
+    <string name="smime_no_provider_message">This email has been encrypted with S/MIME.\n
+        To read it, you need to install and configure a compatible S/MIME App.</string>
 
     <!-- Security - Transport Crypto -->
-
+    <string name="transport_crypto_insecure_ssl_version">Transmitted using old version of SSL protocol</string>
     <string name="transport_crypto_msg_loading">Loading information on whether message was encrypted during transport.</string>
     <string name="transport_crypto_msg_unknown">No information is available on whether this message was encrypted during transport.</string>
     <string name="transport_crypto_msg_encrypted">Message headers suggest this message was encrypted during transport.</string>
@@ -1369,14 +1374,12 @@ Please submit bug reports, contribute new features and ask questions at
         <item quantity="one">Repeats every second</item>
         <item quantity="other">Repeats every <xliff:g id="interval">%1$d</xliff:g> seconds</item>
     </plurals>
-
     <string name="message_view_status_calendar_not_saved_error">An error occurred while saving the calendar item</string>
     <string name="message_view_status_calendar_not_mounted">Unable to access device storage.</string>
     <string name="dialog_calendar_progress_title">Downloading calendar</string>
-    <string name="openpgp_encryption">OpenPGP Encryption</string>
+
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
-    <string name="transport_crypto_insecure_ssl_version">Transmitted using old version of SSL protocol</string>
     <string name="reply_subject" translatable="false">Re: %1s</string>
     <string name="forward_subject" translatable="false">Fwd: %1s</string>
 </resources>

@@ -214,13 +214,18 @@ public class MessageTopView extends LinearLayout {
 
         switch (providerType) {
             case OPENPGP:
-                ((TextView) view.findViewById(R.id.no_provider_message)).setText(getResources().getString(R.string.openpgp_no_provider_message));
+                ((TextView) view.findViewById(R.id.no_provider_message))
+                        .setText(getResources().getString(R.string.openpgp_no_provider_message));
+                break;
+            case SMIME:
+                ((TextView) view.findViewById(R.id.no_provider_message))
+                        .setText(getResources().getString(R.string.smime_no_provider_message));
         }
 
         view.findViewById(R.id.crypto_settings).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                messageCryptoPresenter.onClickConfigureProvider();
+                messageCryptoPresenter.onClickConfigureProvider(providerType);
             }
         });
 

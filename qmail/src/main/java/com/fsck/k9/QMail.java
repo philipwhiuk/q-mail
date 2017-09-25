@@ -58,6 +58,7 @@ import timber.log.Timber.DebugTree;
 
 
 public class QMail extends Application {
+
     /**
      * Components that are interested in knowing when the QMail instance is
      * available and ready (Android invokes Application.onCreate() after other
@@ -248,6 +249,7 @@ public class QMail extends Application {
 
     private static String sOpenPgpProvider = "";
     private static boolean sOpenPgpSupportSignOnly = false;
+    private static String sSMimeProvider = "";
 
     private static SortType mSortType;
     private static Map<SortType, Boolean> mSortAscending = new HashMap<SortType, Boolean>();
@@ -319,6 +321,8 @@ public class QMail extends Application {
     public static final int BOOT_RECEIVER_WAKE_LOCK_TIMEOUT = 60000;
 
     public static final String NO_OPENPGP_PROVIDER = "";
+
+    public static final String NO_SMIME_PROVIDER = "";
 
     public static class Intents {
 
@@ -1303,6 +1307,18 @@ public class QMail extends Application {
 
     public static void setOpenPgpSupportSignOnly(boolean supportSignOnly) {
         sOpenPgpSupportSignOnly = supportSignOnly;
+    }
+
+    public static boolean isSMimeProviderConfigured() {
+        return !NO_SMIME_PROVIDER.equals(sSMimeProvider);
+    }
+
+    public static String getSMimeProvider() {
+        return sSMimeProvider;
+    }
+
+    public static void setSMimeProvider(String sMimeProvider) {
+        sSMimeProvider = sMimeProvider;
     }
 
     public static String getAttachmentDefaultPath() {

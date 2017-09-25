@@ -20,6 +20,7 @@ import com.fsck.k9.mail.internet.DKIMState;
 import com.fsck.k9.mail.internet.SPFState;
 import com.fsck.k9.mail.internet.SecureTransportState;
 import com.fsck.k9.mailstore.CryptoResultAnnotation;
+import com.fsck.k9.mailstore.CryptoResultAnnotation.CryptoProviderType;
 import com.fsck.k9.mailstore.MessageViewInfo;
 import com.fsck.k9.view.securityStatus.MessageCryptoDisplayStatus;
 import com.fsck.k9.view.securityStatus.MessageDKIMDisplayStatus;
@@ -301,9 +302,9 @@ public class MessageSecurityPresenter implements OnSecurityClickListener {
         }
     }
 
-    public void onClickConfigureProvider() {
+    public void onClickConfigureProvider(CryptoProviderType cryptoProviderType) {
         reloadOnResumeWithoutRecreateFlag = true;
-        messageSecurityMvpView.showCryptoConfigDialog();
+        messageSecurityMvpView.showCryptoConfigDialog(cryptoProviderType);
     }
 
     public interface MessageSecurityMvpView {
@@ -318,6 +319,6 @@ public class MessageSecurityPresenter implements OnSecurityClickListener {
                 MessageSPFDisplayStatus spfDisplayStatus,
                 MessageDKIMDisplayStatus dkimDisplayStatus,
                 boolean hasSecurityWarning);
-        void showCryptoConfigDialog();
+        void showCryptoConfigDialog(CryptoProviderType cryptoProviderType);
     }
 }

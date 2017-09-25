@@ -243,24 +243,30 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
                 /** Called when a drawer has settled in a completely closed state. */
                 public void onDrawerClosed(View view) {
                     super.onDrawerClosed(view);
-                    getActionBar().setTitle("Message List");
+                    if (getActionBar() != null)
+                        getActionBar().setTitle("Message List");
                 }
 
                 /** Called when a drawer has settled in a completely open state. */
                 public void onDrawerOpened(View drawerView) {
                     super.onDrawerOpened(drawerView);
-                    getActionBar().setTitle("folders");
+                    if (getActionBar() != null)
+                        getActionBar().setTitle("folders");
                 }
             };
 
             drawerLayout.setDrawerListener(mDrawerToggle);
 
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setHomeButtonEnabled(true);
+            if (getActionBar() != null) {
+                getActionBar().setDisplayHomeAsUpEnabled(true);
+                getActionBar().setHomeButtonEnabled(true);
+            }
 
         }
 
-        initializeActionBar();
+        if (getActionBar() != null) {
+            initializeActionBar();
+        }
 
         // Enable gesture detection for MessageLists
         setupGestureDetector(this);
@@ -1216,7 +1222,8 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
     }
 
     public void setActionBarTitle(String title) {
-        mActionBarTitle.setText(title);
+        if (mActionBarTitle != null)
+            mActionBarTitle.setText(title);
     }
 
     public void setActionBarSubTitle(String subTitle) {
@@ -1488,7 +1495,8 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
     @Override
     public void enableActionBarProgress(boolean enable) {
         if (mMenuButtonCheckMail != null && mMenuButtonCheckMail.isVisible()) {
-            mActionBarProgress.setVisibility(ProgressBar.GONE);
+            if (mActionBarProgress != null)
+                mActionBarProgress.setVisibility(ProgressBar.GONE);
             if (enable) {
                 mMenuButtonCheckMail
                         .setActionView(mActionButtonIndeterminateProgress);
@@ -1498,20 +1506,24 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
         } else {
             if (mMenuButtonCheckMail != null)
                 mMenuButtonCheckMail.setActionView(null);
-            if (enable) {
-                mActionBarProgress.setVisibility(ProgressBar.VISIBLE);
-            } else {
-                mActionBarProgress.setVisibility(ProgressBar.GONE);
+            if (mActionBarProgress != null) {
+                if (enable) {
+                    mActionBarProgress.setVisibility(ProgressBar.VISIBLE);
+                } else {
+                    mActionBarProgress.setVisibility(ProgressBar.GONE);
+                }
             }
         }
     }
 
     @Override
     public void displayMessageSubject(String subject) {
-        if (mDisplayMode == DisplayMode.MESSAGE_VIEW) {
-            mActionBarSubject.setText(subject);
-        } else {
-            mActionBarSubject.showSubjectInMessageHeader();
+        if (mActionBarSubject != null) {
+            if (mDisplayMode == DisplayMode.MESSAGE_VIEW) {
+                mActionBarSubject.setText(subject);
+            } else {
+                mActionBarSubject.showSubjectInMessageHeader();
+            }
         }
     }
 
@@ -1553,7 +1565,8 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
 
     @Override
     public void messageHeaderViewAvailable(MessageHeader header) {
-        mActionBarSubject.setMessageHeader(header);
+        if (mActionBarSubject != null)
+            mActionBarSubject.setMessageHeader(header);
     }
 
     private boolean showNextMessage() {
@@ -1633,19 +1646,23 @@ public class MessageList extends K9Activity implements MessageListFragmentListen
     }
 
     private void showDefaultTitleView() {
-        mActionBarMessageView.setVisibility(View.GONE);
-        mActionBarMessageList.setVisibility(View.VISIBLE);
+        if (mActionBar != null) {
+            mActionBarMessageView.setVisibility(View.GONE);
+            mActionBarMessageList.setVisibility(View.VISIBLE);
+            mActionBarSubject.setMessageHeader(null);
+        }
 
         if (mMessageListFragment != null) {
             mMessageListFragment.updateTitle();
         }
 
-        mActionBarSubject.setMessageHeader(null);
     }
 
     private void showMessageTitleView() {
-        mActionBarMessageList.setVisibility(View.GONE);
-        mActionBarMessageView.setVisibility(View.VISIBLE);
+        if (mActionBar != null) {
+            mActionBarMessageList.setVisibility(View.GONE);
+            mActionBarMessageView.setVisibility(View.VISIBLE);
+        }
 
         if (mMessageViewFragment != null) {
             displayMessageSubject(null);

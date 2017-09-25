@@ -418,11 +418,16 @@
         <org.openintents.openpgp.util.OpenPgpAppPreference
             android:persistent="false"
             android:key="openpgp_provider"
-            android:title="@string/account_settings_crypto_app" />
+            android:title="@string/account_settings_openpgp_app" />
+
+        <org.openintents.smime.util.SMimeAppPreference
+            android:persistent="false"
+            android:key="smime_provider"
+            android:title="@string/account_settings_smime_app" />
 
         <CheckBoxPreference
             android:persistent="false"
-            android:key="openpgp_support_sign_only"
+            android:key="crypto_support_sign_only"
             android:title="@string/account_settings_crypto_support_sign_only"
             />
 

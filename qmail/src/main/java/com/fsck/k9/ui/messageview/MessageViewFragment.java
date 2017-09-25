@@ -40,6 +40,7 @@ import com.fsck.k9.activity.MessageLoaderHelper;
 import com.fsck.k9.activity.MessageLoaderHelper.MessageLoaderCallbacks;
 import com.fsck.k9.activity.MessageReference;
 import com.fsck.k9.activity.setup.OpenPgpAppSelectDialog;
+import com.fsck.k9.activity.setup.SMimeAppSelectDialog;
 import com.fsck.k9.controller.MessagingController;
 import com.fsck.k9.fragment.AttachmentDownloadDialogFragment;
 import com.fsck.k9.fragment.ConfirmationDialogFragment;
@@ -49,6 +50,7 @@ import com.fsck.k9.helper.FileBrowserHelper.FileBrowserFailOverCallback;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.internet.ListHeaders;
 import com.fsck.k9.mailstore.AttachmentViewInfo;
+import com.fsck.k9.mailstore.CryptoResultAnnotation.CryptoProviderType;
 import com.fsck.k9.mailstore.ICalendarViewInfo;
 import com.fsck.k9.mailstore.LocalMessage;
 import com.fsck.k9.mailstore.MessageViewInfo;
@@ -435,6 +437,11 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         startActivity(i);
     }
 
+    private void startSMimeChooserActivity() {
+        Intent i = new Intent(getActivity(), SMimeAppSelectDialog.class);
+        startActivity(i);
+    }
+
     public void onPendingIntentResult(int requestCode, int resultCode, Intent data) {
         if ((requestCode & REQUEST_MASK_LOADER_HELPER) == REQUEST_MASK_LOADER_HELPER) {
             requestCode ^= REQUEST_MASK_LOADER_HELPER;
@@ -796,8 +803,14 @@ public class MessageViewFragment extends Fragment implements ConfirmationDialogF
         }
 
         @Override
-        public void showCryptoConfigDialog() {
-            startOpenPgpChooserActivity();
+        public void showCryptoConfigDialog(CryptoProviderType cryptoProviderType) {
+            switch (cryptoProviderType) {
+                case OPENPGP:
+                    startOpenPgpChooserActivity();
+                    break;
+                case SMIME:
+                    startSMimeChooserActivity();
+            }
         }
     };
 

@@ -31,6 +31,8 @@ public class MessageDecryptVerifier {
     private static final String PROTOCOL_PARAMETER = "protocol";
     private static final String APPLICATION_PGP_ENCRYPTED = "application/pgp-encrypted";
     private static final String APPLICATION_PGP_SIGNATURE = "application/pgp-signature";
+    private static final String APPLICATION_SMIME_ENCRYPTED = "application/pkcs7-encrypted";
+    private static final String APPLICATION_SMIME_SIGNATURE = "application/pkcs7-signature";
     private static final String TEXT_PLAIN = "text/plain";
     // APPLICATION/PGP is a special case which occurs from mutt. see http://www.mutt.org/doc/PGP-Notes.txt
     private static final String APPLICATION_PGP = "application/pgp";
@@ -232,6 +234,19 @@ public class MessageDecryptVerifier {
                 APPLICATION_PGP_SIGNATURE.equalsIgnoreCase(protocolParameter);
 
         return isPgpEncrypted || isPgpSigned;
+    }
+
+    // TODO also guess by mime-type of contained part?
+    public static boolean isSMimeEncryptedOrSignedPart(Part part) {
+        String contentType = part.getContentType();
+        String protocolParameter = MimeUtility.getHeaderParameter(contentType, PROTOCOL_PARAMETER);
+
+        boolean isSMimeEncrypted = isSameMimeType(part.getMimeType(), MULTIPART_ENCRYPTED) &&
+                APPLICATION_SMIME_ENCRYPTED.equalsIgnoreCase(protocolParameter);
+        boolean isSMimeSigned = isSameMimeType(part.getMimeType(), MULTIPART_SIGNED) &&
+                APPLICATION_SMIME_SIGNATURE.equalsIgnoreCase(protocolParameter);
+
+        return isSMimeEncrypted || isSMimeSigned;
     }
 
     @VisibleForTesting

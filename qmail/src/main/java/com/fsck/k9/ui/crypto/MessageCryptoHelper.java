@@ -46,14 +46,13 @@ import org.openintents.openpgp.OpenPgpDecryptionResult;
 import org.openintents.openpgp.OpenPgpError;
 import org.openintents.openpgp.OpenPgpSignatureResult;
 import org.openintents.openpgp.util.OpenPgpApi;
-import org.openintents.openpgp.util.OpenPgpApi.CancelableBackgroundOperation;
 import org.openintents.openpgp.util.OpenPgpApi.IOpenPgpCallback;
 import org.openintents.openpgp.util.OpenPgpApi.IOpenPgpSinkResultCallback;
 import org.openintents.openpgp.util.OpenPgpApi.OpenPgpDataSink;
 import org.openintents.openpgp.util.OpenPgpApi.OpenPgpDataSource;
 import org.openintents.openpgp.util.OpenPgpServiceConnection;
-import org.openintents.openpgp.util.OpenPgpServiceConnection.OnBound;
 import org.openintents.openpgp.util.OpenPgpUtils;
+import org.openintents.smime.ISMimeService2;
 import org.openintents.smime.SMimeDecryptionResult;
 import org.openintents.smime.SMimeError;
 import org.openintents.smime.SMimeSignatureResult;
@@ -74,6 +73,7 @@ public class MessageCryptoHelper {
 
     private final Context context;
     private final String openPgpProviderPackage;
+    private final String sMimeProviderPackage;
     private final AutocryptOperations autocryptOperations;
     private final Object callbackLock = new Object();
     private final Deque<CryptoPart> partsToProcess = new ArrayDeque<>();
@@ -82,7 +82,8 @@ public class MessageCryptoHelper {
     private MessageCryptoCallback callback;
 
     private Message currentMessage;
-    private OpenPgpDecryptionResult cachedDecryptionResult;
+    private OpenPgpDecryptionResult cachedOpenPgpDecryptionResult;
+    private SMimeDecryptionResult cachedSMimeDecryptionResult;
     private MessageCryptoAnnotations queuedResult;
     private PendingIntent queuedPendingIntent;
 
@@ -104,7 +105,7 @@ public class MessageCryptoHelper {
     private SMimeApiFactory sMimeApiFactory;
 
 
-    public MessageCryptoHelper(Context context, OpenPgpApiFactory openPgpApiFactory,
+    public MessageCryptoHelper(Context context, OpenPgpApiFactory openPgpApiFactory, SMimeApiFactory sMimeApiFactory,
             AutocryptOperations autocryptOperations) {
         this.context = context.getApplicationContext();
 
@@ -114,15 +115,25 @@ public class MessageCryptoHelper {
 
         this.autocryptOperations = autocryptOperations;
         this.openPgpApiFactory = openPgpApiFactory;
+        this.sMimeApiFactory = sMimeApiFactory;
         openPgpProviderPackage = QMail.getOpenPgpProvider();
+        sMimeProviderPackage = QMail.getSMimeProvider();
     }
 
     public boolean isConfiguredForOutdatedCryptoProvider() {
+        return isConfiguredForOutdatedOpenPgpProvider() || isConfiguredForOutdatedSMimeProvider();
+    }
+
+    public boolean isConfiguredForOutdatedOpenPgpProvider() {
         return !openPgpProviderPackage.equals(QMail.getOpenPgpProvider());
     }
 
+    public boolean isConfiguredForOutdatedSMimeProvider() {
+        return !sMimeProviderPackage.equals(QMail.getSMimeProvider());
+    }
+
     public void asyncStartOrResumeProcessingMessage(Message message, MessageCryptoCallback callback,
-            OpenPgpDecryptionResult cachedDecryptionResult) {
+            OpenPgpDecryptionResult cachedOpenPgpDecryptionResult, SMimeDecryptionResult cachedSMimeDecryptionResult) {
         if (this.currentMessage != null) {
             reattachCallback(message, callback);
             return;
@@ -131,7 +142,8 @@ public class MessageCryptoHelper {
         this.messageAnnotations = new MessageCryptoAnnotations();
         this.state = State.START;
         this.currentMessage = message;
-        this.cachedDecryptionResult = cachedDecryptionResult;
+        this.cachedOpenPgpDecryptionResult = cachedOpenPgpDecryptionResult;
+        this.cachedSMimeDecryptionResult = cachedSMimeDecryptionResult;
         this.callback = callback;
 
         nextStep();
@@ -240,8 +252,13 @@ public class MessageCryptoHelper {
             return;
         }
 
-        if (!isBoundToCryptoProviderService()) {
-            connectToCryptoProviderService();
+        if (!isBoundToOpenPgpProviderService()) {
+            connectToOpenPgpProviderService();
+            return;
+        }
+
+        if (!isBoundToSMimeProviderService()) {
+            connectToSMimeProviderService();
             return;
         }
 
@@ -253,13 +270,17 @@ public class MessageCryptoHelper {
         }
     }
 
-    private boolean isBoundToCryptoProviderService() {
+    private boolean isBoundToOpenPgpProviderService() {
         return openPgpApi != null;
     }
 
-    private void connectToCryptoProviderService() {
+    private boolean isBoundToSMimeProviderService() {
+        return openPgpApi != null;
+    }
+
+    private void connectToOpenPgpProviderService() {
         openPgpServiceConnection = new OpenPgpServiceConnection(context, openPgpProviderPackage,
-                new OnBound() {
+                new OpenPgpServiceConnection.OnBound() {
 
                     @Override
                     public void onBound(IOpenPgpService2 service) {
@@ -275,6 +296,26 @@ public class MessageCryptoHelper {
                     }
                 });
         openPgpServiceConnection.bindToService();
+    }
+
+    private void connectToSMimeProviderService() {
+        sMimeServiceConnection = new SMimeServiceConnection(context, sMimeProviderPackage,
+                new SMimeServiceConnection.OnBound() {
+
+                    @Override
+                    public void onBound(ISMimeService2 service) {
+                        sMimeApi = sMimeApiFactory.createSMimeApi(context, service);
+
+                        nextStep();
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        // TODO actually handle (hand to ui, offer retry?)
+                        Timber.e(e, "Couldn't connect to SMimeService");
+                    }
+                });
+        sMimeServiceConnection.bindToService();
     }
 
     private void decryptOrVerifyCurrentPart() {
@@ -311,7 +352,7 @@ public class MessageCryptoHelper {
         autocryptOperations.addAutocryptPeerUpdateToIntentIfPresent(currentMessage, decryptIntent);
 
         decryptIntent.putExtra(OpenPgpApi.EXTRA_SUPPORT_OVERRIDE_CRYPTO_WARNING, true);
-        decryptIntent.putExtra(OpenPgpApi.EXTRA_DECRYPTION_RESULT, cachedDecryptionResult);
+        decryptIntent.putExtra(OpenPgpApi.EXTRA_DECRYPTION_RESULT, cachedOpenPgpDecryptionResult);
 
         return decryptIntent;
     }
@@ -325,7 +366,7 @@ public class MessageCryptoHelper {
             decryptIntent.putExtra(SMimeApi.EXTRA_SENDER_ADDRESS, from[0].getAddress());
         }
         decryptIntent.putExtra(SMimeApi.EXTRA_SUPPORT_OVERRIDE_CRYPTO_WARNING, true);
-        decryptIntent.putExtra(SMimeApi.EXTRA_DECRYPTION_RESULT, cachedDecryptionResult);
+        decryptIntent.putExtra(SMimeApi.EXTRA_DECRYPTION_RESULT, cachedSMimeDecryptionResult);
 
         return decryptIntent;
     }

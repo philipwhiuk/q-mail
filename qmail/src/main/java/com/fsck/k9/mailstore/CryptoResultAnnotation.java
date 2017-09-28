@@ -262,6 +262,7 @@ public final class CryptoResultAnnotation {
         SIGNED_BUT_UNSUPPORTED,
         ENCRYPTED_BUT_UNSUPPORTED,
         OPENPGP_ENCRYPTED_NO_PROVIDER,
+        OPENPGP_SIGNED_NO_PROVIDER,
         SMIME_OK,
         SMIME_UI_CANCELED,
         SMIME_SIGNED_API_ERROR,
@@ -269,5 +270,7 @@ public final class CryptoResultAnnotation {
         SMIME_SIGNED_BUT_INCOMPLETE,
         SMIME_ENCRYPTED_BUT_INCOMPLETE,
         SMIME_ENCRYPTED_NO_PROVIDER,
+        SMIME_SIGNED_NO_PROVIDER,
+        ENCRYPTED_NO_PROVIDER
     }
 }

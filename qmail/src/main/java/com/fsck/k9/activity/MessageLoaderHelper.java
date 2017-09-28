@@ -135,7 +135,7 @@ public class MessageLoaderHelper {
     public void asyncRestartMessageCryptoProcessing() {
         cancelAndClearCryptoOperation();
         cancelAndClearDecodeLoader();
-        if (QMail.isOpenPgpProviderConfigured()) {
+        if (QMail.isOpenPgpProviderConfigured() || QMail.isSMimeProviderConfigured()) {
             startOrResumeCryptoOperation();
         } else {
             startOrResumeDecodeMessage();

@@ -248,7 +248,7 @@ public class QMail extends Application {
     private static boolean mHideTimeZone = false;
 
     private static String sOpenPgpProvider = "";
-    private static boolean sOpenPgpSupportSignOnly = false;
+    private static boolean sCryptoSupportSignOnly = false;
     private static String sSMimeProvider = "";
 
     private static SortType mSortType;
@@ -492,7 +492,7 @@ public class QMail extends Application {
         editor.putBoolean("hideTimeZone", mHideTimeZone);
 
         editor.putString("openPgpProvider", sOpenPgpProvider);
-        editor.putBoolean("openPgpSupportSignOnly", sOpenPgpSupportSignOnly);
+        editor.putBoolean("cryptoSupportSignOnly", sCryptoSupportSignOnly);
 
         editor.putString("language", language);
         editor.putInt("theme", theme.ordinal());
@@ -736,7 +736,7 @@ public class QMail extends Application {
         mHideTimeZone = storage.getBoolean("hideTimeZone", false);
 
         sOpenPgpProvider = storage.getString("openPgpProvider", NO_OPENPGP_PROVIDER);
-        sOpenPgpSupportSignOnly = storage.getBoolean("openPgpSupportSignOnly", false);
+        sCryptoSupportSignOnly = storage.getBoolean("cryptoSupportSignOnly", false);
 
         mConfirmDelete = storage.getBoolean("confirmDelete", false);
         mConfirmDiscardMessage = storage.getBoolean("confirmDiscardMessage", true);
@@ -1301,12 +1301,12 @@ public class QMail extends Application {
         sOpenPgpProvider = openPgpProvider;
     }
 
-    public static boolean getOpenPgpSupportSignOnly() {
-        return sOpenPgpSupportSignOnly;
+    public static boolean getCryptoSupportSignOnly() {
+        return sCryptoSupportSignOnly;
     }
 
-    public static void setOpenPgpSupportSignOnly(boolean supportSignOnly) {
-        sOpenPgpSupportSignOnly = supportSignOnly;
+    public static void setCryptoSupportSignOnly(boolean supportSignOnly) {
+        sCryptoSupportSignOnly = supportSignOnly;
     }
 
     public static boolean isSMimeProviderConfigured() {

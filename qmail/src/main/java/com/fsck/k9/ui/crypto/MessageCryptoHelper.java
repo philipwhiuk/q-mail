@@ -425,6 +425,14 @@ public class MessageCryptoHelper {
     }
 
     private void callAsyncOpenPgpInlineOperation(Intent intent) throws IOException {
+        if (openPgpApi == null) {
+            CryptoResultAnnotation annotation =
+                    CryptoResultAnnotation.createErrorAnnotation(CryptoError.OPENPGP_ENCRYPTED_NO_PROVIDER, null);
+            addCryptoResultAnnotationToMessage(annotation);
+            onCryptoFinished();
+            return;
+        }
+
         OpenPgpDataSource dataSource = getDataSourceForOpenPgpEncryptedOrInlineData();
         OpenPgpDataSink<MimeBodyPart> dataSink = getDataSinkForOpenPgpDecryptedInlineData();
 
@@ -457,6 +465,14 @@ public class MessageCryptoHelper {
     }
 
     private void callAsyncOpenPgpDecrypt(Intent intent) throws IOException {
+        if (openPgpApi == null) {
+            CryptoResultAnnotation annotation =
+                    CryptoResultAnnotation.createErrorAnnotation(CryptoError.OPENPGP_ENCRYPTED_NO_PROVIDER, null);
+            addCryptoResultAnnotationToMessage(annotation);
+            onCryptoFinished();
+            return;
+        }
+
         OpenPgpDataSource dataSource = getDataSourceForOpenPgpEncryptedOrInlineData();
         OpenPgpDataSink<MimeBodyPart> openPgpDataSink = getDataSinkForOpenPgpDecryptedData();
 
@@ -478,6 +494,15 @@ public class MessageCryptoHelper {
     }
 
     private void callAsyncOpenPgpDetachedVerify(Intent intent) throws IOException, MessagingException {
+        if (openPgpApi == null) {
+            MimeBodyPart replacementPart = getMultipartSignedContentPartIfAvailable(currentCryptoPart.part);
+            CryptoResultAnnotation annotation =
+                    CryptoResultAnnotation.createErrorAnnotation(CryptoError.OPENPGP_SIGNED_NO_PROVIDER, replacementPart);
+            addCryptoResultAnnotationToMessage(annotation);
+            onCryptoFinished();
+            return;
+        }
+
         OpenPgpDataSource dataSource = getDataSourceForOpenPgpSignedData(currentCryptoPart.part);
 
         byte[] signatureData = MessageDecryptVerifier.getSignatureData(currentCryptoPart.part);
@@ -500,6 +525,14 @@ public class MessageCryptoHelper {
     }
 
     private void callAsyncSMimeDecrypt(Intent intent) throws IOException {
+        if (sMimeApi == null) {
+            CryptoResultAnnotation annotation =
+                    CryptoResultAnnotation.createErrorAnnotation(CryptoError.SMIME_ENCRYPTED_NO_PROVIDER, null);
+            addCryptoResultAnnotationToMessage(annotation);
+            onCryptoFinished();
+            return;
+        }
+
         SMimeDataSource dataSource = getDataSourceForSMimeEncryptedOrInlineData();
         SMimeDataSink<MimeBodyPart> sMimeDataSink = getDataSinkForSMimeDecryptedData();
 
@@ -521,6 +554,15 @@ public class MessageCryptoHelper {
     }
 
     private void callAsyncSMimeDetachedVerify(Intent intent) throws IOException, MessagingException {
+        if (sMimeApi == null) {
+            MimeBodyPart replacementPart = getMultipartSignedContentPartIfAvailable(currentCryptoPart.part);
+            CryptoResultAnnotation annotation =
+                    CryptoResultAnnotation.createErrorAnnotation(CryptoError.SMIME_SIGNED_NO_PROVIDER, replacementPart);
+            addCryptoResultAnnotationToMessage(annotation);
+            onCryptoFinished();
+            return;
+        }
+
         SMimeDataSource dataSource = getDataSourceForSMimeSignedData(currentCryptoPart.part);
 
         byte[] signatureData = MessageDecryptVerifier.getSignatureData(currentCryptoPart.part);

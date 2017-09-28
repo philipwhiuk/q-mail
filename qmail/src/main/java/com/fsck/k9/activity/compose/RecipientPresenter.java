@@ -291,7 +291,7 @@ public class RecipientPresenter implements PermissionPingCallback {
             menu.findItem(R.id.openpgp_encrypt_enable).setVisible(!isEncrypting);
             menu.findItem(R.id.openpgp_encrypt_disable).setVisible(isEncrypting);
 
-            boolean showSignOnly = QMail.getOpenPgpSupportSignOnly();
+            boolean showSignOnly = QMail.getCryptoSupportSignOnly();
             boolean isSignOnly = currentCryptoStatus.isSignOnly();
             menu.findItem(R.id.openpgp_sign_only).setVisible(showSignOnly && !isSignOnly);
             menu.findItem(R.id.openpgp_sign_only_disable).setVisible(showSignOnly && isSignOnly);

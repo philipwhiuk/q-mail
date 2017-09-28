@@ -28,7 +28,7 @@ public class MessageCryptoSplitter {
 
         if (annotations == null) {
             CryptoResultAnnotation rootPartAnnotation =
-                    CryptoResultAnnotation.createErrorAnnotation(CryptoError.OPENPGP_ENCRYPTED_NO_PROVIDER, null);
+                    CryptoResultAnnotation.createErrorAnnotation(CryptoError.ENCRYPTED_NO_PROVIDER, null);
             return new CryptoMessageParts(primaryPart, rootPartAnnotation, extraParts);
         }
 

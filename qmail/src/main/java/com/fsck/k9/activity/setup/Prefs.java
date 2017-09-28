@@ -41,6 +41,7 @@ import com.fsck.k9.preferences.TimePickerPreference;
 import com.fsck.k9.service.MailService;
 import com.fsck.k9.ui.dialog.ApgDeprecationWarningDialog;
 import org.openintents.openpgp.util.OpenPgpAppPreference;
+import org.openintents.smime.util.SMimeAppPreference;
 
 
 public class Prefs extends K9PreferenceActivity {
@@ -94,7 +95,8 @@ public class Prefs extends K9PreferenceActivity {
     private static final String PREFERENCE_HIDE_TIMEZONE = "privacy_hide_timezone";
 
     private static final String PREFERENCE_OPENPGP_PROVIDER = "openpgp_provider";
-    private static final String PREFERENCE_OPENPGP_SUPPORT_SIGN_ONLY = "openpgp_support_sign_only";
+    private static final String PREFERENCE_SMIME_PROVIDER = "smime_provider";
+    private static final String PREFERENCE_CRYPTO_SUPPORT_SIGN_ONLY = "crypto_support_sign_only";
 
     private static final String PREFERENCE_AUTOFIT_WIDTH = "messageview_autofit_width";
     private static final String PREFERENCE_BACKGROUND_OPS = "background_ops";
@@ -156,7 +158,8 @@ public class Prefs extends K9PreferenceActivity {
     private CheckBoxListPreference mVisibleRefileActions;
 
     private OpenPgpAppPreference mOpenPgpProvider;
-    private CheckBoxPreference mOpenPgpSupportSignOnly;
+    private SMimeAppPreference mSMimeProvider;
+    private CheckBoxPreference mCryptoSupportSignOnly;
 
     private CheckBoxPreference mQuietTimeEnabled;
     private CheckBoxPreference mDisableNotificationDuringQuietTime;
@@ -403,8 +406,18 @@ public class Prefs extends K9PreferenceActivity {
             }
         });
 
-        mOpenPgpSupportSignOnly = (CheckBoxPreference) findPreference(PREFERENCE_OPENPGP_SUPPORT_SIGN_ONLY);
-        mOpenPgpSupportSignOnly.setChecked(QMail.getOpenPgpSupportSignOnly());
+        mSMimeProvider = (SMimeAppPreference) findPreference(PREFERENCE_SMIME_PROVIDER);
+        mSMimeProvider.setValue(QMail.getSMimeProvider());
+        mSMimeProvider.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                String value = newValue.toString();
+                mSMimeProvider.setValue(value);
+                return false;
+            }
+        });
+
+        mCryptoSupportSignOnly = (CheckBoxPreference) findPreference(PREFERENCE_CRYPTO_SUPPORT_SIGN_ONLY);
+        mCryptoSupportSignOnly.setChecked(QMail.getCryptoSupportSignOnly());
 
         mAttachmentPathPreference = findPreference(PREFERENCE_ATTACHMENT_DEF_PATH);
         mAttachmentPathPreference.setSummary(QMail.getAttachmentDefaultPath());
@@ -562,7 +575,8 @@ public class Prefs extends K9PreferenceActivity {
         QMail.setHideTimeZone(mHideTimeZone.isChecked());
 
         QMail.setOpenPgpProvider(mOpenPgpProvider.getValue());
-        QMail.setOpenPgpSupportSignOnly(mOpenPgpSupportSignOnly.isChecked());
+        QMail.setSMimeProvider(mSMimeProvider.getValue());
+        QMail.setCryptoSupportSignOnly(mCryptoSupportSignOnly.isChecked());
 
         StorageEditor editor = storage.edit();
         QMail.save(editor);

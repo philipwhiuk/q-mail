@@ -118,7 +118,7 @@ public class MessageTopView extends LinearLayout {
                 containerView, false);
         containerView.addView(messageContainerView);
 
-        boolean hideUnsignedTextDivider = !QMail.getOpenPgpSupportSignOnly();
+        boolean hideUnsignedTextDivider = !QMail.getCryptoSupportSignOnly();
         messageContainerView.displayMessageViewContainer(messageViewInfo, new OnRenderingFinishedListener() {
             @Override
             public void onLoadFinished() {

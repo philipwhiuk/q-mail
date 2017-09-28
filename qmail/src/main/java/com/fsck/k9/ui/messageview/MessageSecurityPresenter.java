@@ -81,7 +81,7 @@ public class MessageSecurityPresenter implements OnSecurityClickListener {
             return false;
         }
 
-        boolean suppressSignOnlyMessages = !QMail.getOpenPgpSupportSignOnly();
+        boolean suppressSignOnlyMessages = !QMail.getCryptoSupportSignOnly();
         if (suppressSignOnlyMessages && displayStatus.isUnencryptedSigned()) {
             return false;
         }

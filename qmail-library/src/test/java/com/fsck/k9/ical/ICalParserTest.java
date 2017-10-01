@@ -13,6 +13,13 @@ import static org.junit.Assert.assertEquals;
 public class ICalParserTest {
 
     @Test
+    public void parse_withNoText_returnsDataWithNoEvents() throws MessagingException {
+        ICalPart part = new ICalPart(null);
+        ICalData data = ICalParser.parse(part);
+        assertEquals(0, data.getCalendarData().size());
+    }
+
+    @Test
     public void parse_returnsCorrectDataForMinimalPublishEvent() throws MessagingException {
         String calendar =
 "BEGIN:VCALENDAR\r\n" +

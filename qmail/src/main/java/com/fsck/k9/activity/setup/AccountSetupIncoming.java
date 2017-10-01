@@ -228,20 +228,26 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
             mSecurityTypeView.setAdapter(securityTypesAdapter);
 
             // Select currently configured security type
-            if (savedInstanceState == null) {
-                mCurrentSecurityTypeViewPosition = securityTypesAdapter.getConnectionSecurityPosition(settings.connectionSecurity);
-            } else {
+            int providedPosition;
 
-                /*
-                 * Restore the spinner state now, before calling
-                 * setOnItemSelectedListener(), thus avoiding a call to
-                 * onItemSelected(). Then, when the system restores the state
-                 * (again) in onRestoreInstanceState(), The system will see that
-                 * the new state is the same as the current state (set here), so
-                 * once again onItemSelected() will not be called.
-                 */
-                mCurrentSecurityTypeViewPosition = savedInstanceState.getInt(STATE_SECURITY_TYPE_POSITION);
+            if (savedInstanceState == null) {
+                providedPosition = securityTypesAdapter.getConnectionSecurityPosition(settings.connectionSecurity);
+            } else {
+               providedPosition = savedInstanceState.getInt(STATE_SECURITY_TYPE_POSITION);
             }
+            if (providedPosition == -1) {
+                providedPosition = securityTypesAdapter.getConnectionSecurityPosition(ConnectionSecurity.SSL_TLS_REQUIRED);
+            }
+            mCurrentSecurityTypeViewPosition = providedPosition;
+
+            /*
+             * Restore the spinner state now, before calling
+             * setOnItemSelectedListener(), thus avoiding a call to
+             * onItemSelected(). Then, when the system restores the state
+             * (again) in onRestoreInstanceState(), The system will see that
+             * the new state is the same as the current state (set here), so
+             * once again onItemSelected() will not be called.
+             */
             mSecurityTypeView.setSelection(mCurrentSecurityTypeViewPosition, false);
 
             updateAuthPlainTextFromSecurityType(settings.connectionSecurity);
@@ -618,7 +624,6 @@ public class AccountSetupIncoming extends K9Activity implements OnClickListener 
                      * convenience.
                      */
                 }
-
 
                 AccountSetupOutgoing.actionOutgoingSettings(this, mAccount, mMakeDefault);
                 finish();

@@ -35,7 +35,7 @@ public class ReceivedHeadersTest {
                         "by localhost (scarlet.richardwhiuk.com [127.0.0.1]) (amavisd-new, port 10024)\n" +
                         "with ESMTP id kEaYiQPLCxiT for <philip@whiuk.com>;	Fri, 25 Mar 2016 10:38:27 +0000 (GMT)\n",
                 " from serpentine.unitedhosting.co.uk (serpentine.unitedhosting.co.uk [83.223.125.16])\n" +
-                        "(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))\n" +
+                        "(using SSL with cipher DHE-RSA-AES256-SHA (256/256 bits))\n" +
                         "(No client certificate requested)\n" +
                         "by scarlet.richardwhiuk.com (Postfix)\n" +
                         "with ESMTPS id C19917A8E9\n" +

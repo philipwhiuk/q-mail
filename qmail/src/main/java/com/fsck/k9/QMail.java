@@ -32,6 +32,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
+import android.support.annotation.VisibleForTesting;
 
 import com.fsck.k9.Account.SortType;
 import com.fsck.k9.activity.MessageCompose;
@@ -272,7 +273,8 @@ public class QMail extends Application {
     /**
      * @see #areDatabasesUpToDate()
      */
-    private static boolean sDatabasesUpToDate = false;
+    @VisibleForTesting
+    public static boolean sDatabasesUpToDate = false;
 
     /**
      * For use when defining that no folder is selected

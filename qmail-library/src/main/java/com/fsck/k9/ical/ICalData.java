@@ -28,7 +28,12 @@ public class ICalData {
     public ICalData(List<ICalendar> iCalendars) {
         calendarData = new ArrayList<>();
         for (ICalendar iCal : iCalendars) {
-            calendarData.add(new ICalendarData(iCal));
+            if (iCal.getEvents().size() == 0) {
+                Timber.w("No events in ICS file - other content is unsupported");
+            }
+            for (VEvent event: iCal.getEvents()) {
+                calendarData.add(new ICalendarData(iCal.getMethod(), event));
+            }
         }
     }
 
@@ -52,18 +57,17 @@ public class ICalData {
         private Attendee[] completed;
         private RecurrenceRule recurrenceRule;
 
-        private ICalendarData(ICalendar iCal) {
-            method = iCal.getMethod();
-
-            if (iCal.getEvents().size() > 0) {
-                updateContentsFromEvent(iCal.getEvents().get(0));
-            } else {
-                Timber.w("No events in ICS file - other content is unsupported");
-            }
+        private ICalendarData(Method method, VEvent event) {
+            this.method = method;
+            updateContentsFromEvent(event);
         }
 
         private void updateContentsFromEvent(VEvent event) {
-            summary = event.getSummary().getValue();
+            if (event.getSummary() != null) {
+                summary = event.getSummary().getValue();
+            } else {
+                summary = "";
+            }
             organizer = event.getOrganizer();
             if (event.getLocation() != null) {
                 location = event.getLocation().getValue();

@@ -74,6 +74,8 @@ public class MessageCryptoHelper {
     private final Context context;
     private final String openPgpProviderPackage;
     private final String sMimeProviderPackage;
+    private final boolean hasOpenPgpProvider;
+    private final boolean hasSMimeProvider;
     private final AutocryptOperations autocryptOperations;
     private final Object callbackLock = new Object();
     private final Deque<CryptoPart> partsToProcess = new ArrayDeque<>();
@@ -116,7 +118,9 @@ public class MessageCryptoHelper {
         this.autocryptOperations = autocryptOperations;
         this.openPgpApiFactory = openPgpApiFactory;
         this.sMimeApiFactory = sMimeApiFactory;
+        hasOpenPgpProvider = QMail.isOpenPgpProviderConfigured();
         openPgpProviderPackage = QMail.getOpenPgpProvider();
+        hasSMimeProvider = QMail.isSMimeProviderConfigured();
         sMimeProviderPackage = QMail.getSMimeProvider();
     }
 
@@ -252,12 +256,12 @@ public class MessageCryptoHelper {
             return;
         }
 
-        if (!isBoundToOpenPgpProviderService()) {
+        if (hasOpenPgpProvider && !isBoundToOpenPgpProviderService()) {
             connectToOpenPgpProviderService();
             return;
         }
 
-        if (!isBoundToSMimeProviderService()) {
+        if (hasSMimeProvider && !isBoundToSMimeProviderService()) {
             connectToSMimeProviderService();
             return;
         }

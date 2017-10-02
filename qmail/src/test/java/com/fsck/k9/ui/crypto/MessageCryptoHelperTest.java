@@ -33,6 +33,8 @@ import org.openintents.openpgp.util.OpenPgpApi.IOpenPgpCallback;
 import org.openintents.openpgp.util.OpenPgpApi.IOpenPgpSinkResultCallback;
 import org.openintents.openpgp.util.OpenPgpApi.OpenPgpDataSink;
 import org.openintents.openpgp.util.OpenPgpApi.OpenPgpDataSource;
+import org.openintents.smime.ISMimeService2;
+import org.openintents.smime.util.SMimeApi;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -41,7 +43,6 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -56,6 +57,7 @@ import static org.mockito.Mockito.when;
 public class MessageCryptoHelperTest {
     private MessageCryptoHelper messageCryptoHelper;
     private OpenPgpApi openPgpApi;
+    private SMimeApi sMimeApi;
     private Intent capturedApiIntent;
     private IOpenPgpSinkResultCallback capturedCallback;
     private MessageCryptoCallback messageCryptoCallback;
@@ -65,14 +67,19 @@ public class MessageCryptoHelperTest {
     @Before
     public void setUp() throws Exception {
         openPgpApi = mock(OpenPgpApi.class);
+        sMimeApi = mock(SMimeApi.class);
         autocryptOperations = mock(AutocryptOperations.class);
 
         QMail.setOpenPgpProvider("org.example.dummy");
 
         OpenPgpApiFactory openPgpApiFactory = mock(OpenPgpApiFactory.class);
-        when(openPgpApiFactory.createOpenPgpApi(any(Context.class), any(IOpenPgpService2.class))).thenReturn(openPgpApi);
+        SMimeApiFactory sMimeApiFactory = mock(SMimeApiFactory.class);
+        when(openPgpApiFactory.createOpenPgpApi(any(Context.class), any(IOpenPgpService2.class)))
+                .thenReturn(openPgpApi);
+        when(sMimeApiFactory.createSMimeApi(any(Context.class), any(ISMimeService2.class))).thenReturn(sMimeApi);
 
-        messageCryptoHelper = new MessageCryptoHelper(RuntimeEnvironment.application, openPgpApiFactory,
+        messageCryptoHelper = new MessageCryptoHelper(RuntimeEnvironment.application,
+                openPgpApiFactory, sMimeApiFactory,
                 autocryptOperations);
         messageCryptoCallback = mock(MessageCryptoCallback.class);
     }
@@ -84,7 +91,8 @@ public class MessageCryptoHelperTest {
         message.setHeader("Content-Type", "text/plain");
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null);
 
         ArgumentCaptor<MessageCryptoAnnotations> captor = ArgumentCaptor.forClass(MessageCryptoAnnotations.class);
         verify(messageCryptoCallback).onCryptoOperationsFinished(captor.capture());
@@ -103,11 +111,13 @@ public class MessageCryptoHelperTest {
         message.setHeader("Content-Type", "text/plain");
 
         when(autocryptOperations.hasAutocryptHeader(message)).thenReturn(true);
-        when(autocryptOperations.addAutocryptPeerUpdateToIntentIfPresent(same(message), any(Intent.class))).thenReturn(true);
+        when(autocryptOperations.addAutocryptPeerUpdateToIntentIfPresent(same(message), any(Intent.class)))
+                .thenReturn(true);
 
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null);
 
 
         ArgumentCaptor<MessageCryptoAnnotations> captor = ArgumentCaptor.forClass(MessageCryptoAnnotations.class);
@@ -129,9 +139,11 @@ public class MessageCryptoHelperTest {
         message.setHeader("Content-Type", "multipart/signed");
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null);
 
-        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_SIGNED_BUT_INCOMPLETE, null,
+        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_SIGNED_BUT_INCOMPLETE,
+                null,
                 null, null, null);
     }
 
@@ -142,10 +154,12 @@ public class MessageCryptoHelperTest {
         message.setHeader("Content-Type", "multipart/encrypted");
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null);
 
         assertPartAnnotationHasState(
-                message, messageCryptoCallback, CryptoError.OPENPGP_ENCRYPTED_BUT_INCOMPLETE, null, null, null, null);
+                message, messageCryptoCallback, CryptoError.OPENPGP_ENCRYPTED_BUT_INCOMPLETE, null,
+                null, null, null);
     }
 
     @Test
@@ -156,9 +170,11 @@ public class MessageCryptoHelperTest {
         message.setBody(new MimeMultipart("multipart/encrypted", "--------"));
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null);
 
-        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.ENCRYPTED_BUT_UNSUPPORTED, null, null,
+        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.ENCRYPTED_BUT_UNSUPPORTED,
+                null, null,
                 null, null);
     }
 
@@ -170,9 +186,11 @@ public class MessageCryptoHelperTest {
         message.setBody(new MimeMultipart("multipart/encrypted", "--------"));
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null);
 
-        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SIGNED_BUT_UNSUPPORTED, null, null,
+        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SIGNED_BUT_UNSUPPORTED,
+                null, null,
                 null, null);
     }
 
@@ -246,13 +264,16 @@ public class MessageCryptoHelperTest {
         verifyNoMoreInteractions(autocryptOperations);
     }
 
-    private void processEncryptedMessageAndCaptureMocks(Message message, Body encryptedBody, OutputStream outputStream)
+    private void processEncryptedMessageAndCaptureMocks(
+            Message message, Body encryptedBody, OutputStream outputStream)
             throws Exception {
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<OpenPgpDataSource> dataSourceCaptor = ArgumentCaptor.forClass(OpenPgpDataSource.class);
-        ArgumentCaptor<IOpenPgpSinkResultCallback> callbackCaptor = ArgumentCaptor.forClass(IOpenPgpSinkResultCallback.class);
+        ArgumentCaptor<IOpenPgpSinkResultCallback> callbackCaptor = ArgumentCaptor.forClass(
+                IOpenPgpSinkResultCallback.class);
         verify(openPgpApi).executeApiAsync(intentCaptor.capture(), dataSourceCaptor.capture(),
                 any(OpenPgpDataSink.class), callbackCaptor.capture());
 
@@ -266,7 +287,8 @@ public class MessageCryptoHelperTest {
 
     private void processSignedMessageAndCaptureMocks(Message message, BodyPart signedBodyPart,
             OutputStream outputStream) throws Exception {
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<OpenPgpDataSource> dataSourceCaptor = ArgumentCaptor.forClass(OpenPgpDataSource.class);
@@ -283,7 +305,8 @@ public class MessageCryptoHelperTest {
     }
 
     private void assertPartAnnotationHasState(Message message, MessageCryptoCallback messageCryptoCallback,
-            CryptoError cryptoErrorState, MimeBodyPart replacementPart, OpenPgpDecryptionResult openPgpDecryptionResult,
+            CryptoError cryptoErrorState, MimeBodyPart replacementPart,
+            OpenPgpDecryptionResult openPgpDecryptionResult,
             OpenPgpSignatureResult openPgpSignatureResult, PendingIntent openPgpPendingIntent) {
         ArgumentCaptor<MessageCryptoAnnotations> captor = ArgumentCaptor.forClass(MessageCryptoAnnotations.class);
         verify(messageCryptoCallback).onCryptoOperationsFinished(captor.capture());

@@ -110,11 +110,6 @@ public class MessageCryptoHelper {
     public MessageCryptoHelper(Context context, OpenPgpApiFactory openPgpApiFactory, SMimeApiFactory sMimeApiFactory,
             AutocryptOperations autocryptOperations) {
         this.context = context.getApplicationContext();
-
-        if (!QMail.isOpenPgpProviderConfigured()) {
-            throw new IllegalStateException("MessageCryptoHelper must only be called with a OpenPGP provider!");
-        }
-
         this.autocryptOperations = autocryptOperations;
         this.openPgpApiFactory = openPgpApiFactory;
         this.sMimeApiFactory = sMimeApiFactory;
@@ -172,7 +167,7 @@ public class MessageCryptoHelper {
             return;
         }
 
-        if (autocryptOperations.hasAutocryptHeader(currentMessage)) {
+        if (hasOpenPgpProvider && autocryptOperations.hasAutocryptHeader(currentMessage)) {
             CryptoPart cryptoPart = new CryptoPart(CryptoProviderType.OPENPGP, CryptoPartType.PLAIN_AUTOCRYPT, currentMessage);
             partsToProcess.add(cryptoPart);
         }
@@ -279,7 +274,7 @@ public class MessageCryptoHelper {
     }
 
     private boolean isBoundToSMimeProviderService() {
-        return openPgpApi != null;
+        return sMimeApi != null;
     }
 
     private void connectToOpenPgpProviderService() {
@@ -727,12 +722,10 @@ public class MessageCryptoHelper {
                 Part part = currentCryptoPart.part;
                 CryptoPartType cryptoPartType = currentCryptoPart.type;
                 Body body;
-                if (cryptoPartType == CryptoPartType.PGP_ENCRYPTED) {
+                if (cryptoPartType == CryptoPartType.SMIME_ENCRYPTED) {
                     Multipart multipartEncryptedMultipart = (Multipart) part.getBody();
                     BodyPart encryptionPayloadPart = multipartEncryptedMultipart.getBodyPart(1);
                     body = encryptionPayloadPart.getBody();
-                } else if (cryptoPartType == CryptoPartType.PGP_INLINE) {
-                    body = part.getBody();
                 } else {
                     throw new IllegalStateException("part to stream must be encrypted or inline!");
                 }
@@ -748,14 +741,11 @@ public class MessageCryptoHelper {
                 try {
                     Part part = currentCryptoPart.part;
                     CryptoPartType cryptoPartType = currentCryptoPart.type;
-                    if (cryptoPartType == CryptoPartType.PGP_ENCRYPTED) {
+                    if (cryptoPartType == CryptoPartType.SMIME_ENCRYPTED) {
                         Multipart multipartEncryptedMultipart = (Multipart) part.getBody();
                         BodyPart encryptionPayloadPart = multipartEncryptedMultipart.getBodyPart(1);
                         Body encryptionPayloadBody = encryptionPayloadPart.getBody();
                         encryptionPayloadBody.writeTo(os);
-                    } else if (cryptoPartType == CryptoPartType.PGP_INLINE) {
-                        String text = MessageExtractor.getTextFromPart(part);
-                        os.write(text.getBytes());
                     } else {
                         throw new IllegalStateException("part to stream must be encrypted or inline!");
                     }

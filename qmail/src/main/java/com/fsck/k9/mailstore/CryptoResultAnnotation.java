@@ -167,9 +167,15 @@ public final class CryptoResultAnnotation {
         return openPgpDecryptionResult != null && openPgpSignatureResult != null;
     }
 
+    public boolean isSMimeResult() {
+        return sMimeDecryptionResult != null && sMimeSignatureResult != null;
+    }
+
     public boolean hasSignatureResult() {
-        return openPgpSignatureResult != null &&
-                openPgpSignatureResult.getResult() != OpenPgpSignatureResult.RESULT_NO_SIGNATURE;
+        return (openPgpSignatureResult != null &&
+                openPgpSignatureResult.getResult() != OpenPgpSignatureResult.RESULT_NO_SIGNATURE) ||
+                (sMimeSignatureResult != null &&
+                sMimeSignatureResult.getResult() != SMimeSignatureResult.RESULT_NO_SIGNATURE);
     }
 
     @Nullable
@@ -210,6 +216,46 @@ public final class CryptoResultAnnotation {
     @Nullable
     public OpenPgpError getOpenPgpError() {
         return openPgpError;
+    }
+
+    @Nullable
+    public SMimeDecryptionResult getSMimeDecryptionResult() {
+        return sMimeDecryptionResult;
+    }
+
+    @Nullable
+    public SMimeSignatureResult getSMimeSignatureResult() {
+        return sMimeSignatureResult;
+    }
+
+    @Nullable
+    public PendingIntent getSMimeSigningKeyIntentIfAny() {
+        if (hasSignatureResult()) {
+            return getSMimePendingIntent();
+        }
+        if (encapsulatedResult != null && encapsulatedResult.hasSignatureResult()) {
+            return encapsulatedResult.getSMimePendingIntent();
+        }
+        return null;
+    }
+
+    @Nullable
+    public PendingIntent getSMimePendingIntent() {
+        return sMimePendingIntent;
+    }
+
+    public boolean hasSMimeInsecureWarningPendingIntent() {
+        return sMimeInsecureWarningPendingIntent != null;
+    }
+
+    @Nullable
+    public PendingIntent getSMimeInsecureWarningPendingIntent() {
+        return sMimeInsecureWarningPendingIntent;
+    }
+
+    @Nullable
+    public SMimeError getSMimeError() {
+        return sMimeError;
     }
 
     @NonNull

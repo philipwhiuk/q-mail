@@ -31,7 +31,7 @@ public class MessageDecryptVerifier {
     private static final String PROTOCOL_PARAMETER = "protocol";
     private static final String APPLICATION_PGP_ENCRYPTED = "application/pgp-encrypted";
     private static final String APPLICATION_PGP_SIGNATURE = "application/pgp-signature";
-    private static final String APPLICATION_SMIME_ENCRYPTED = "application/pkcs7-encrypted";
+    private static final String APPLICATION_SMIME_ENCRYPTED = "application/pkcs7-mime";
     private static final String APPLICATION_SMIME_SIGNATURE = "application/pkcs7-signature";
     private static final String TEXT_PLAIN = "text/plain";
     // APPLICATION/PGP is a special case which occurs from mutt. see http://www.mutt.org/doc/PGP-Notes.txt

@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openintents.openpgp.util.OpenPgpUtils;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowSQLiteConnection;
 
@@ -39,6 +40,7 @@ public class MigrationTest {
     Account account;
     File databaseFile;
     File attachmentDir;
+    private ShadowApplication shadowApplication = ShadowApplication.getInstance();
 
     @Before
     public void setUp() throws Exception {
@@ -717,11 +719,7 @@ public class MigrationTest {
     }
 
     private Account getNewAccount() {
-        Preferences preferences = Preferences.getPreferences(RuntimeEnvironment.application);
-
-        //FIXME: This is a hack to get Preferences into a state where it's safe to call newAccount()
-        preferences.loadAccounts();
-
+        Preferences preferences = Preferences.getPreferences(shadowApplication.getApplicationContext());
         return preferences.newAccount();
     }
 }

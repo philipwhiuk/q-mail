@@ -14,10 +14,8 @@ import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.BodyPart;
 import com.fsck.k9.mail.Message;
-import com.fsck.k9.mail.Multipart;
 import com.fsck.k9.mail.internet.MimeBodyPart;
 import com.fsck.k9.mail.internet.MimeMessage;
-import com.fsck.k9.mail.internet.MimeMultipart;
 import com.fsck.k9.mail.internet.TextBody;
 import com.fsck.k9.mailstore.CryptoResultAnnotation;
 import com.fsck.k9.mailstore.CryptoResultAnnotation.CryptoError;
@@ -47,6 +45,9 @@ import org.robolectric.annotation.Config;
 
 import static com.fsck.k9.QMail.NO_OPENPGP_PROVIDER;
 import static com.fsck.k9.QMail.NO_SMIME_PROVIDER;
+import static com.fsck.k9.message.TestMessageConstructionUtils.bodypart;
+import static com.fsck.k9.message.TestMessageConstructionUtils.messageFromBody;
+import static com.fsck.k9.message.TestMessageConstructionUtils.multipart;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
@@ -76,7 +77,6 @@ public class MessageCryptoHelperTest {
     private SMimeApi sMimeApi;
     private ISMimeSinkResultCallback capturedSMimeCallback;
 
-    //TODO: Add tests for processSignedOnly
 
     @Before
     public void setUp() throws Exception {
@@ -126,11 +126,9 @@ public class MessageCryptoHelperTest {
                 autocryptOperations);
         messageCryptoCallback = mock(MessageCryptoCallback.class);
     }
-
     @Test
     public void textPlain_withOpenPgpApi_checksForAutocryptHeader() throws Exception {
         setUpWithOpenPgpApi();
-
         MimeMessage message = new MimeMessage();
         message.setUid("msguid");
         message.setHeader("Content-Type", "text/plain");
@@ -152,14 +150,12 @@ public class MessageCryptoHelperTest {
     @Test
     public void textPlainWithAutocrypt_withOpenPgpApi() throws Exception {
         setUpWithOpenPgpApi();
-
         MimeMessage message = new MimeMessage();
         message.setUid("msguid");
         message.setHeader("Content-Type", "text/plain");
 
         when(autocryptOperations.hasAutocryptHeader(message)).thenReturn(true);
-        when(autocryptOperations.addAutocryptPeerUpdateToIntentIfPresent(same(message), any(Intent.class)))
-                .thenReturn(true);
+        when(autocryptOperations.addAutocryptPeerUpdateToIntentIfPresent(same(message), any(Intent.class))).thenReturn(true);
 
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
@@ -180,215 +176,78 @@ public class MessageCryptoHelperTest {
     }
 
     @Test
-    public void textPlain_withSMimeApi() throws Exception {
-        setUpWithSMimeApi();
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "text/plain");
+    public void multipartSignedOpenPgp__withNullBody_withOpenPgpApi__shouldReturnSignedIncomplete() throws Exception {
+        setUpWithOpenPgpApi();
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/pgp-signature\"",
+                        bodypart("text/plain"),
+                        bodypart("application/pgp-signature")
+                )
+        );
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null, null, true);
 
-        ArgumentCaptor<MessageCryptoAnnotations> captor = ArgumentCaptor.forClass(MessageCryptoAnnotations.class);
-        verify(messageCryptoCallback).onCryptoOperationsFinished(captor.capture());
-        MessageCryptoAnnotations annotations = captor.getValue();
-        assertTrue(annotations.isEmpty());
-        verifyNoMoreInteractions(messageCryptoCallback);
+        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_SIGNED_BUT_INCOMPLETE, null,
+                null, null, null, null, null, null);
     }
 
     @Test
-    public void multipartSignedOpenPgp__withNullBody_withOpenPgpApi__shouldReturnSignedIncomplete() throws Exception {
+    public void multipartEncryptedOpenPgp__withNullBody_withOpenPgpApi__shouldReturnEncryptedIncomplete() throws Exception {
         setUpWithOpenPgpApi();
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/signed");
+        Message message = messageFromBody(
+                multipart("encrypted", "protocol=\"application/pgp-encrypted\"",
+                        bodypart("application/pgp-encrypted"),
+                        bodypart("application/octet-stream")
+                )
+        );
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null, null, false);
 
-        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_SIGNED_BUT_INCOMPLETE,
+        assertPartAnnotationHasState(
+                message, messageCryptoCallback, CryptoError.OPENPGP_ENCRYPTED_BUT_INCOMPLETE,
                 null,
                 null, null, null,
                 null, null, null);
     }
 
     @Test
-    public void multipartEncryptedOpenPgp__withNullBody_withOpenPgpApi__shouldReturnEncryptedIncomplete() throws Exception {
+    public void multipartEncrypted__withUnknownProtocol_withOpenPgpApi__shouldReturnEncryptedUnsupported() throws Exception {
         setUpWithOpenPgpApi();
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/encrypted");
+        Message message = messageFromBody(
+                multipart("encrypted", "protocol=\"application/bad-protocol\"",
+                        bodypart("application/bad-protocol", "content"),
+                        bodypart("application/octet-stream", "content")
+                )
+        );
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
-
-        assertPartAnnotationHasState(
-                message, messageCryptoCallback, CryptoError.OPENPGP_ENCRYPTED_BUT_INCOMPLETE, null,
-                null, null, null,
-                null, null, null);
-    }
-
-    @Test
-    public void multipartEncryptedUnknownProtocol_withOpenPgpApi__shouldReturnEncryptedUnsupported() throws Exception {
-        setUpWithOpenPgpApi();
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/encrypted; protocol=\"unknown protocol\"");
-        message.setBody(new MimeMultipart("multipart/encrypted", "--------"));
-
-        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null, null, false);
 
         assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.ENCRYPTED_BUT_UNSUPPORTED,
+                null,
+                null,
                 null, null,
-                null, null,
-                null, null, null);
+                null,
+                null, null);
     }
 
     @Test
-    public void multipartSignedUnknownProtocol_withOpenPgpApi__shouldReturnSignedUnsupported() throws Exception {
+    public void multipartSigned__withUnknownProtocol_withOpenPgpApi__shouldReturnSignedUnsupported() throws Exception {
         setUpWithOpenPgpApi();
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/signed; protocol=\"unknown protocol\"");
-        message.setBody(new MimeMultipart("multipart/encrypted", "--------"));
-
-        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
-
-        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SIGNED_BUT_UNSUPPORTED,
-                null, null,
-                null, null,
-                null, null, null);
-    }
-
-    @Test
-    public void multipartEncryptedUnknownProtocol_withSMimeApi__shouldReturnEncryptedUnsupported() throws Exception {
-        setUpWithSMimeApi();
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/encrypted; protocol=\"unknown protocol\"");
-        message.setBody(new MimeMultipart("multipart/encrypted", "--------"));
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/bad-protocol\"",
+                        bodypart("text/plain", "content"),
+                        bodypart("application/bad-protocol", "content")
+                )
+        );
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null, null, true);
 
-        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.ENCRYPTED_BUT_UNSUPPORTED,
-                null, null,
-                null, null,
-                null, null, null);
-    }
-
-    @Test
-    public void multipartSignedUnknownProtocol_withSMimeApi__shouldReturnSignedUnsupported() throws Exception {
-        setUpWithSMimeApi();
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/signed; protocol=\"unknown protocol\"");
-        message.setBody(new MimeMultipart("multipart/encrypted", "--------"));
-
-        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
-
-        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SIGNED_BUT_UNSUPPORTED,
-                null, null,
-                null, null,
-                null, null, null);
-    }
-
-    @Test
-    public void multipartEncryptedSMime_withOpenPgpApi__shouldReturnEncryptedNoProvider() throws Exception {
-        setUpWithOpenPgpApi();
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/encrypted; protocol=\"unknown protocol\"");
-        message.setBody(new MimeMultipart("multipart/encrypted", "--------"));
-
-        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
-
-        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.ENCRYPTED_BUT_UNSUPPORTED,
-                null, null,
-                null, null,
-                null, null, null);
-    }
-
-    @Test
-    public void multipartSignedSMime_withOpenPgpApi__shouldReturnSignedNoProvider() throws Exception {
-        setUpWithOpenPgpApi();
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/signed; protocol=\"unknown protocol\"");
-        message.setBody(new MimeMultipart("multipart/encrypted", "--------"));
-
-        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
-
-        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SIGNED_BUT_UNSUPPORTED,
-                null, null,
-                null, null,
-                null, null, null);
-    }
-
-    @Test
-    public void multipartEncryptedOpenPgp_withSMimeApi__shouldReturnEncryptedNoProvider() throws Exception {
-        setUpWithSMimeApi();
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/encrypted; protocol=\"application/pgp-encrypted\"");
-        message.setBody(new MimeMultipart("multipart/encrypted", "--------"));
-
-        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
-
-        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_ENCRYPTED_NO_PROVIDER,
-                null, null,
-                null, null,
-                null, null, null);
-    }
-
-    @Test
-    public void multipartSignedOpenPgp_withSMimeApi__shouldReturnSignedUnsupported() throws Exception {
-        setUpWithSMimeApi();
-
-        BodyPart signedBodyPart = spy(new MimeBodyPart(new TextBody("text")));
-        BodyPart signatureBodyPart = new MimeBodyPart(new TextBody("text"));
-
-        Multipart messageBody = new MimeMultipart("boundary1");
-        messageBody.addBodyPart(signedBodyPart);
-        messageBody.addBodyPart(signatureBodyPart);
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/signed; protocol=\"application/pgp-signature\"");
-        message.setBody(messageBody);
-
-        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
-
-        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_SIGNED_NO_PROVIDER,
-                null, null,
+        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SIGNED_BUT_UNSUPPORTED, null,
+                null,
                 null, null,
                 null, null, null);
     }
@@ -396,23 +255,20 @@ public class MessageCryptoHelperTest {
     @Test
     public void multipartSignedOpenPgp_withOpenPgpApi__shouldCallOpenPgpApiAsync() throws Exception {
         setUpWithOpenPgpApi();
-
-        BodyPart signedBodyPart = spy(new MimeBodyPart(new TextBody("text")));
-        BodyPart signatureBodyPart = new MimeBodyPart(new TextBody("text"));
-
-        Multipart messageBody = new MimeMultipart("boundary1");
-        messageBody.addBodyPart(signedBodyPart);
-        messageBody.addBodyPart(signatureBodyPart);
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/signed; protocol=\"application/pgp-signature\"");
+        BodyPart signedBodyPart = spy(bodypart("text/plain", "content"));
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/pgp-signature\"",
+                        signedBodyPart,
+                        bodypart("application/pgp-signature", "content")
+                )
+        );
         message.setFrom(Address.parse("Test <test@example.org>")[0]);
-        message.setBody(messageBody);
 
         OutputStream outputStream = mock(OutputStream.class);
 
+
         processOpenPgpSignedMessageAndCaptureMocks(message, signedBodyPart, outputStream);
+
 
         assertEquals(OpenPgpApi.ACTION_DECRYPT_VERIFY, capturedApiIntent.getAction());
         assertEquals("test@example.org", capturedApiIntent.getStringExtra(OpenPgpApi.EXTRA_SENDER_ADDRESS));
@@ -422,22 +278,48 @@ public class MessageCryptoHelperTest {
     }
 
     @Test
+    public void multipartSignedOpenPgp_withOpenPgpApi__withSignOnlyDisabled__shouldReturnNothing() throws Exception {
+        setUpWithOpenPgpApi();
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/pgp-signature\"",
+                        bodypart("text/plain", "content"),
+                        bodypart("application/pgp-signature", "content")
+                )
+        );
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null, null, false);
+
+        assertReturnsWithNoCryptoAnnotations(messageCryptoCallback);
+    }
+
+    @Test
+    public void multipartSignedOpenPgp_withOpenPgpApi__withSignOnlyDisabledAndNullBody__shouldReturnNothing() throws Exception {
+        setUpWithOpenPgpApi();
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/pgp-signature\"",
+                        bodypart("text/plain"),
+                        bodypart("application/pgp-signature")
+                )
+        );
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null, null, false);
+
+        assertReturnsWithNoCryptoAnnotations(messageCryptoCallback);
+    }
+
+    @Test
     public void multipartEncryptedOpenPgp_withOpenPgpApi__shouldCallOpenPgpApiAsync() throws Exception {
         setUpWithOpenPgpApi();
-
-        BodyPart dummyBodyPart = new MimeBodyPart(new TextBody("text"));
         Body encryptedBody = spy(new TextBody("encrypted data"));
-        BodyPart encryptedBodyPart = spy(new MimeBodyPart(encryptedBody));
-
-        Multipart messageBody = new MimeMultipart("boundary1");
-        messageBody.addBodyPart(dummyBodyPart);
-        messageBody.addBodyPart(encryptedBodyPart);
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/encrypted; protocol=\"application/pgp-encrypted\"");
+        Message message = messageFromBody(
+                multipart("encrypted", "protocol=\"application/pgp-encrypted\"",
+                        bodypart("application/pgp-encrypted", "content"),
+                        bodypart("application/octet-stream", encryptedBody)
+                )
+        );
         message.setFrom(Address.parse("Test <test@example.org>")[0]);
-        message.setBody(messageBody);
 
         OutputStream outputStream = mock(OutputStream.class);
 
@@ -460,28 +342,288 @@ public class MessageCryptoHelperTest {
         assertEquals(OpenPgpApi.ACTION_DECRYPT_VERIFY, capturedApiIntent.getAction());
         assertEquals("test@example.org", capturedApiIntent.getStringExtra(OpenPgpApi.EXTRA_SENDER_ADDRESS));
         assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_OK, decryptedPart,
-                decryptionResult, signatureResult, pendingIntent,
-                null, null, null);
+                decryptionResult, signatureResult, pendingIntent, null, null, null);
         verify(autocryptOperations).addAutocryptPeerUpdateToIntentIfPresent(message, capturedApiIntent);
         verifyNoMoreInteractions(autocryptOperations);
+    }
+
+    private void processOpenPgpEncryptedMessageAndCaptureMocks(Message message, Body encryptedBody, OutputStream outputStream)
+            throws Exception {
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null, false);
+
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        ArgumentCaptor<OpenPgpDataSource> dataSourceCaptor = ArgumentCaptor.forClass(OpenPgpDataSource.class);
+        ArgumentCaptor<IOpenPgpSinkResultCallback> callbackCaptor = ArgumentCaptor.forClass(IOpenPgpSinkResultCallback.class);
+        verify(openPgpApi).executeApiAsync(intentCaptor.capture(), dataSourceCaptor.capture(),
+                any(OpenPgpDataSink.class), callbackCaptor.capture());
+
+        capturedApiIntent = intentCaptor.getValue();
+        capturedOpenPgpCallback = callbackCaptor.getValue();
+
+        OpenPgpDataSource dataSource = dataSourceCaptor.getValue();
+        dataSource.writeTo(outputStream);
+        verify(encryptedBody).writeTo(outputStream);
+    }
+
+    private void processOpenPgpSignedMessageAndCaptureMocks(Message message, BodyPart signedBodyPart,
+            OutputStream outputStream) throws Exception {
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback, null, null, true);
+
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        ArgumentCaptor<OpenPgpDataSource> dataSourceCaptor = ArgumentCaptor.forClass(OpenPgpDataSource.class);
+        ArgumentCaptor<IOpenPgpSinkResultCallback> callbackCaptor = ArgumentCaptor.forClass(IOpenPgpSinkResultCallback.class);
+        verify(openPgpApi).executeApiAsync(intentCaptor.capture(), dataSourceCaptor.capture(),
+                callbackCaptor.capture());
+
+        capturedApiIntent = intentCaptor.getValue();
+        capturedOpenPgpCallback = callbackCaptor.getValue();
+
+        OpenPgpDataSource dataSource = dataSourceCaptor.getValue();
+        dataSource.writeTo(outputStream);
+        verify(signedBodyPart).writeTo(outputStream);
+    }
+
+    @Test
+    public void textPlain_withSMimeApi() throws Exception {
+        setUpWithSMimeApi();
+
+        MimeMessage message = new MimeMessage();
+        message.setUid("msguid");
+        message.setHeader("Content-Type", "text/plain");
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null, false);
+
+        ArgumentCaptor<MessageCryptoAnnotations> captor = ArgumentCaptor.forClass(MessageCryptoAnnotations.class);
+        verify(messageCryptoCallback).onCryptoOperationsFinished(captor.capture());
+        MessageCryptoAnnotations annotations = captor.getValue();
+        assertTrue(annotations.isEmpty());
+        verifyNoMoreInteractions(messageCryptoCallback);
+    }
+
+    @Test
+    public void multipartEncryptedUnknownProtocol_withSMimeApi__shouldReturnEncryptedUnsupported() throws Exception {
+        setUpWithSMimeApi();
+
+        Message message = messageFromBody(
+                multipart("encrypted", "protocol=\"application/bad-protocol\"",
+                        bodypart("application/bad-protocol", "content"),
+                        bodypart("application/octet-stream", "content")
+                )
+        );
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null, false);
+
+        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.ENCRYPTED_BUT_UNSUPPORTED,
+                null, null,
+                null, null,
+                null, null, null);
+    }
+
+    @Test
+    public void multipartSignedUnknownProtocol_withSMimeApi__shouldReturnSignedUnsupported() throws Exception {
+        setUpWithSMimeApi();
+
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/bad-protocol\"",
+                        bodypart("text/plain", "content"),
+                        bodypart("application/bad-protocol", "content")
+                )
+        );
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null, true);
+
+        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SIGNED_BUT_UNSUPPORTED,
+                null, null,
+                null, null,
+                null, null, null);
+    }
+
+    @Test
+    public void multipartSignedUnknownProtocol_withSMimeApi_withSignOnlyDisabled__shouldReturnNothing() throws Exception {
+        setUpWithSMimeApi();
+
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/bad-protocol\"",
+                        bodypart("text/plain", "content"),
+                        bodypart("application/bad-protocol", "content")
+                )
+        );
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null, false);
+
+        assertReturnsWithNoCryptoAnnotations(messageCryptoCallback);
+    }
+
+
+    @Test
+    public void multipartEncryptedSMime_withOpenPgpApi__shouldReturnEncryptedNoProvider() throws Exception {
+        setUpWithOpenPgpApi();
+        Body encryptedBody = spy(new TextBody("encrypted data"));
+        Message message = messageFromBody(
+                multipart("encrypted", "protocol=\"application/pkcs7-mime\"",
+                        bodypart("application/pkcs7-mime", "content"),
+                        bodypart("application/octet-stream", encryptedBody)
+                )
+        );
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null, false);
+
+        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SMIME_ENCRYPTED_NO_PROVIDER,
+                null, null,
+                null, null,
+                null, null, null);
+    }
+
+    @Test
+    public void multipartSignedSMime_withOpenPgpApi_withSignOnlyDisabled__shouldReturnNothing() throws Exception {
+        setUpWithOpenPgpApi();
+
+        BodyPart signedBodyPart = spy(bodypart("text/plain", "content"));
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/pkcs7-signature\"",
+                        signedBodyPart,
+                        bodypart("application/pkcs7-signature", "content")
+                )
+        );
+        message.setFrom(Address.parse("Test <test@example.org>")[0]);
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null, false);
+
+        assertReturnsWithNoCryptoAnnotations(messageCryptoCallback);
+    }
+
+    @Test
+    public void multipartSignedSMime_withOpenPgpApi_withSignOnly__shouldReturnSignedNoProvider() throws Exception {
+        setUpWithOpenPgpApi();
+
+        BodyPart signedBodyPart = spy(bodypart("text/plain", "content"));
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/pkcs7-signature\"",
+                        signedBodyPart,
+                        bodypart("application/pkcs7-signature", "content")
+                )
+        );
+        message.setFrom(Address.parse("Test <test@example.org>")[0]);
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null, true);
+
+        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SMIME_SIGNED_NO_PROVIDER,
+                null, null,
+                null, null,
+                null, null, null);
+    }
+
+    @Test
+    public void multipartEncryptedOpenPgp_withSMimeApi__shouldReturnEncryptedNoProvider() throws Exception {
+        setUpWithSMimeApi();
+
+        Body encryptedBody = spy(new TextBody("encrypted data"));
+        Message message = messageFromBody(
+                multipart("encrypted", "protocol=\"application/pgp-encrypted\"",
+                        bodypart("application/pgp-encrypted", "content"),
+                        bodypart("application/octet-stream", encryptedBody)
+                )
+        );
+        message.setFrom(Address.parse("Test <test@example.org>")[0]);
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null, false);
+
+        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_ENCRYPTED_NO_PROVIDER,
+                null, null,
+                null, null,
+                null, null, null);
+    }
+
+    @Test
+    public void multipartSignedOpenPgp_withSMimeApi_withSignOnlyDisabled__shouldReturnNothing() throws Exception {
+        setUpWithSMimeApi();
+        BodyPart signedBodyPart = spy(bodypart("text/plain", "content"));
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/pgp-signature\"",
+                        signedBodyPart,
+                        bodypart("application/pgp-signature", "content")
+                )
+        );
+        message.setFrom(Address.parse("Test <test@example.org>")[0]);
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null, false);
+
+        assertReturnsWithNoCryptoAnnotations(messageCryptoCallback);
+    }
+
+    @Test
+    public void multipartSignedOpenPgp_withSMimeApi_withSignOnlyEnabled__shouldReturnSignedNoProvider() throws Exception {
+        setUpWithSMimeApi();
+        BodyPart signedBodyPart = spy(bodypart("text/plain", "content"));
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/pgp-signature\"",
+                        signedBodyPart,
+                        bodypart("application/pgp-signature", "content")
+                )
+        );
+        message.setFrom(Address.parse("Test <test@example.org>")[0]);
+
+        MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
+        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
+                null, null, true);
+
+        assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_SIGNED_NO_PROVIDER,
+                null, null,
+                null, null,
+                null, null, null);
     }
 
     @Test
     public void multipartSignedSMime_withSMimeApi__shouldCallSMimeApiAsync() throws Exception {
         setUpWithSMimeApi();
-
-        BodyPart signedBodyPart = spy(new MimeBodyPart(new TextBody("text")));
-        BodyPart signatureBodyPart = new MimeBodyPart(new TextBody("text"));
-
-        Multipart messageBody = new MimeMultipart("boundary1");
-        messageBody.addBodyPart(signedBodyPart);
-        messageBody.addBodyPart(signatureBodyPart);
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/signed; protocol=\"application/pkcs7-signature\"");
+        BodyPart signedBodyPart = spy(bodypart("text/plain", "content"));
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/pkcs7-signature\"",
+                        signedBodyPart,
+                        bodypart("application/pkcs7-signature", "content")
+                )
+        );
         message.setFrom(Address.parse("Test <test@example.org>")[0]);
-        message.setBody(messageBody);
+
+        OutputStream outputStream = mock(OutputStream.class);
+
+
+        processSMimeSignedMessageAndCaptureMocks(message, signedBodyPart, outputStream);
+
+        assertEquals(SMimeApi.ACTION_DECRYPT_VERIFY, capturedApiIntent.getAction());
+        assertEquals("test@example.org", capturedApiIntent.getStringExtra(SMimeApi.EXTRA_SENDER_ADDRESS));
+    }
+
+    @Test
+    public void multipartSignedSMime_withSMimeApi_withSignOnlyDisabled__shouldCallSMimeApiAsync() throws Exception {
+        setUpWithSMimeApi();
+        BodyPart signedBodyPart = spy(bodypart("text/plain", "content"));
+        Message message = messageFromBody(
+                multipart("signed", "protocol=\"application/pkcs7-signature\"",
+                        signedBodyPart,
+                        bodypart("application/pkcs7-signature", "content")
+                )
+        );
+        message.setFrom(Address.parse("Test <test@example.org>")[0]);
 
         OutputStream outputStream = mock(OutputStream.class);
 
@@ -495,20 +637,14 @@ public class MessageCryptoHelperTest {
     @Test
     public void multipartEncryptedSMime_withSMimeApi__shouldCallSMimeApiAsync() throws Exception {
         setUpWithSMimeApi();
-
-        BodyPart dummyBodyPart = new MimeBodyPart(new TextBody("text"));
         Body encryptedBody = spy(new TextBody("encrypted data"));
-        BodyPart encryptedBodyPart = spy(new MimeBodyPart(encryptedBody));
-
-        Multipart messageBody = new MimeMultipart("boundary1");
-        messageBody.addBodyPart(dummyBodyPart);
-        messageBody.addBodyPart(encryptedBodyPart);
-
-        MimeMessage message = new MimeMessage();
-        message.setUid("msguid");
-        message.setHeader("Content-Type", "multipart/encrypted; protocol=\"application/pkcs7-mime\"");
+        Message message = messageFromBody(
+                multipart("encrypted", "protocol=\"application/pkcs7-mime\"",
+                        bodypart("application/pkcs7-mime", "content"),
+                        bodypart("application/octet-stream", encryptedBody)
+                )
+        );
         message.setFrom(Address.parse("Test <test@example.org>")[0]);
-        message.setBody(messageBody);
 
         OutputStream outputStream = mock(OutputStream.class);
 
@@ -535,46 +671,6 @@ public class MessageCryptoHelperTest {
                 decryptionResult, signatureResult, pendingIntent);
     }
 
-    private void processOpenPgpEncryptedMessageAndCaptureMocks(
-            Message message, Body encryptedBody, OutputStream outputStream)
-            throws Exception {
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
-
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        ArgumentCaptor<OpenPgpDataSource> dataSourceCaptor = ArgumentCaptor.forClass(OpenPgpDataSource.class);
-        ArgumentCaptor<IOpenPgpSinkResultCallback> callbackCaptor = ArgumentCaptor.forClass(
-                IOpenPgpSinkResultCallback.class);
-        verify(openPgpApi).executeApiAsync(intentCaptor.capture(), dataSourceCaptor.capture(),
-                any(OpenPgpDataSink.class), callbackCaptor.capture());
-
-        capturedApiIntent = intentCaptor.getValue();
-        capturedOpenPgpCallback = callbackCaptor.getValue();
-
-        OpenPgpDataSource dataSource = dataSourceCaptor.getValue();
-        dataSource.writeTo(outputStream);
-        verify(encryptedBody).writeTo(outputStream);
-    }
-
-    private void processOpenPgpSignedMessageAndCaptureMocks(Message message, BodyPart signedBodyPart,
-            OutputStream outputStream) throws Exception {
-        messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
-
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        ArgumentCaptor<OpenPgpDataSource> dataSourceCaptor = ArgumentCaptor.forClass(OpenPgpDataSource.class);
-        ArgumentCaptor<IOpenPgpSinkResultCallback> callbackCaptor = ArgumentCaptor.forClass(IOpenPgpSinkResultCallback.class);
-        verify(openPgpApi).executeApiAsync(intentCaptor.capture(), dataSourceCaptor.capture(),
-                callbackCaptor.capture());
-
-        capturedApiIntent = intentCaptor.getValue();
-        capturedOpenPgpCallback = callbackCaptor.getValue();
-
-        OpenPgpDataSource dataSource = dataSourceCaptor.getValue();
-        dataSource.writeTo(outputStream);
-        verify(signedBodyPart).writeTo(outputStream);
-    }
-
     private void processSMimeEncryptedMessageAndCaptureMocks(
             Message message, Body encryptedBody, OutputStream outputStream)
             throws Exception {
@@ -599,7 +695,7 @@ public class MessageCryptoHelperTest {
     private void processSMimeSignedMessageAndCaptureMocks(Message message, BodyPart signedBodyPart,
             OutputStream outputStream) throws Exception {
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null, false);
+                null, null, true);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<SMimeDataSource> dataSourceCaptor = ArgumentCaptor.forClass(SMimeDataSource.class);
@@ -615,9 +711,17 @@ public class MessageCryptoHelperTest {
         verify(signedBodyPart).writeTo(outputStream);
     }
 
+    private void assertReturnsWithNoCryptoAnnotations(MessageCryptoCallback messageCryptoCallback) {
+        ArgumentCaptor<MessageCryptoAnnotations> captor = ArgumentCaptor.forClass(MessageCryptoAnnotations.class);
+        verify(messageCryptoCallback).onCryptoOperationsFinished(captor.capture());
+        verifyNoMoreInteractions(messageCryptoCallback);
+
+        MessageCryptoAnnotations annotations = captor.getValue();
+        assertTrue(annotations.isEmpty());
+    }
+
     private void assertPartAnnotationHasState(Message message, MessageCryptoCallback messageCryptoCallback,
-            CryptoError cryptoErrorState, MimeBodyPart replacementPart,
-            OpenPgpDecryptionResult openPgpDecryptionResult,
+            CryptoError cryptoErrorState, MimeBodyPart replacementPart, OpenPgpDecryptionResult openPgpDecryptionResult,
             OpenPgpSignatureResult openPgpSignatureResult, PendingIntent openPgpPendingIntent,
             SMimeDecryptionResult sMimeDecryptionResult,
             SMimeSignatureResult sMimeSignatureResult, PendingIntent sMimePendingIntent) {

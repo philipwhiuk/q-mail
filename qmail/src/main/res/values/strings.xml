@@ -1194,7 +1194,8 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="crypto_settings_cancel">Cancel</string>
     <string name="crypto_settings_ok">Proceed</string>
     <string name="account_settings_crypto_support_sign_only">Support signing of unencrypted messages</string>
-    <string name="compose_error_no_signing_key">No key configured for signing! Please check your settings.</string>
+    <string name="compose_error_no_signing_key">No signing key configured for this account! Check your settings.</string>
+    <string name="compose_error_no_encryption_key">No encryption key configured for this account! Check your settings.</string>
     <string name="crypto_mode_disabled">Don\'t encrypt</string>
     <string name="crypto_mode_opportunistic">Encrypt if possible</string>
     <string name="crypto_mode_private">Encrypt</string>

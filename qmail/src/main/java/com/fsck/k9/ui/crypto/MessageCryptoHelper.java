@@ -19,7 +19,7 @@ import android.support.annotation.WorkerThread;
 
 import com.fsck.k9.QMail;
 import com.fsck.k9.autocrypt.AutocryptOperations;
-import com.fsck.k9.crypto.MessageDecryptVerifier;
+import com.fsck.k9.crypto.MessageCryptoStructureDetector;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Body;
 import com.fsck.k9.mail.BodyPart;
@@ -51,7 +51,6 @@ import org.openintents.openpgp.util.OpenPgpApi.IOpenPgpSinkResultCallback;
 import org.openintents.openpgp.util.OpenPgpApi.OpenPgpDataSink;
 import org.openintents.openpgp.util.OpenPgpApi.OpenPgpDataSource;
 import org.openintents.openpgp.util.OpenPgpServiceConnection;
-import org.openintents.openpgp.util.OpenPgpUtils;
 import org.openintents.smime.ISMimeService2;
 import org.openintents.smime.SMimeDecryptionResult;
 import org.openintents.smime.SMimeError;
@@ -98,6 +97,7 @@ public class MessageCryptoHelper {
     private OpenPgpApi.CancelableBackgroundOperation cancelableOpenPgpBackgroundOperation;
     private SMimeApi.CancelableBackgroundOperation cancelableSMimeBackgroundOperation;
     private boolean isCancelled;
+    private boolean processSignedOnly;
 
     private OpenPgpApi openPgpApi;
     private OpenPgpServiceConnection openPgpServiceConnection;
@@ -132,7 +132,7 @@ public class MessageCryptoHelper {
     }
 
     public void asyncStartOrResumeProcessingMessage(Message message, MessageCryptoCallback callback,
-            OpenPgpDecryptionResult cachedOpenPgpDecryptionResult, SMimeDecryptionResult cachedSMimeDecryptionResult) {
+            OpenPgpDecryptionResult cachedOpenPgpDecryptionResult, SMimeDecryptionResult cachedSMimeDecryptionResult, boolean processSignedOnly) {
         if (this.currentMessage != null) {
             reattachCallback(message, callback);
             return;
@@ -144,21 +144,9 @@ public class MessageCryptoHelper {
         this.cachedOpenPgpDecryptionResult = cachedOpenPgpDecryptionResult;
         this.cachedSMimeDecryptionResult = cachedSMimeDecryptionResult;
         this.callback = callback;
+        this.processSignedOnly = processSignedOnly;
 
         nextStep();
-    }
-
-    private void findPartsForEncryptionPass() {
-        List<Part> encryptedParts = MessageDecryptVerifier.findEncryptedParts(currentMessage);
-        processFoundEncryptedParts(encryptedParts);
-    }
-
-    private void findPartsForSignaturePass() {
-        List<Part> signedParts = MessageDecryptVerifier.findSignedParts(currentMessage, messageAnnotations);
-        processFoundSignedParts(signedParts);
-
-        List<Part> inlineParts = MessageDecryptVerifier.findPgpInlineParts(currentMessage);
-        processFoundInlinePgpParts(inlineParts);
     }
 
     private void findPartsForAutocryptPass() {
@@ -173,18 +161,19 @@ public class MessageCryptoHelper {
         }
     }
 
-    private void processFoundEncryptedParts(List<Part> foundParts) {
-        for (Part part : foundParts) {
+    private void findPartsForMultipartEncryptionPass() {
+        List<Part> encryptedParts = MessageCryptoStructureDetector.findMultipartEncryptedParts(currentMessage);
+        for (Part part : encryptedParts) {
             if (!MessageHelper.isCompletePartAvailable(part)) {
                 addErrorAnnotation(part, CryptoError.OPENPGP_ENCRYPTED_BUT_INCOMPLETE, MessageHelper.createEmptyPart());
                 continue;
             }
-            if (MessageDecryptVerifier.isPgpMimeEncryptedOrSignedPart(part)) {
+            if (MessageCryptoStructureDetector.isMultipartEncryptedOpenPgpProtocol(part)) {
                 CryptoPart cryptoPart = new CryptoPart(CryptoProviderType.OPENPGP, CryptoPartType.PGP_ENCRYPTED, part);
                 partsToProcess.add(cryptoPart);
                 continue;
             }
-            if (MessageDecryptVerifier.isSMimeEncryptedOrSignedPart(part)) {
+            if (MessageCryptoStructureDetector.isMultipartEncryptedSMimeProtocol(part)) {
                 CryptoPart cryptoPart = new CryptoPart(CryptoProviderType.SMIME, CryptoPartType.SMIME_ENCRYPTED, part);
                 partsToProcess.add(cryptoPart);
                 continue;
@@ -193,19 +182,28 @@ public class MessageCryptoHelper {
         }
     }
 
-    private void processFoundSignedParts(List<Part> foundParts) {
-        for (Part part : foundParts) {
+    private void findPartsForMultipartSignaturePass() {
+        List<Part> signedParts = MessageCryptoStructureDetector
+                .findMultipartSignedParts(currentMessage, messageAnnotations);
+        for (Part part : signedParts) {
+            if (!processSignedOnly) {
+                boolean isEncapsulatedSignature =
+                        messageAnnotations.findKeyForAnnotationWithReplacementPart(part) != null;
+                if (!isEncapsulatedSignature) {
+                    continue;
+                }
+            }
             if (!MessageHelper.isCompletePartAvailable(part)) {
                 MimeBodyPart replacementPart = getMultipartSignedContentPartIfAvailable(part);
                 addErrorAnnotation(part, CryptoError.OPENPGP_SIGNED_BUT_INCOMPLETE, replacementPart);
                 continue;
             }
-            if (MessageDecryptVerifier.isPgpMimeEncryptedOrSignedPart(part)) {
+            if (MessageCryptoStructureDetector.isMultipartSignedOpenPgpProtocol(part)) {
                 CryptoPart cryptoPart = new CryptoPart(CryptoProviderType.OPENPGP, CryptoPartType.PGP_SIGNED, part);
                 partsToProcess.add(cryptoPart);
                 continue;
             }
-            if (MessageDecryptVerifier.isSMimeEncryptedOrSignedPart(part)) {
+            if (MessageCryptoStructureDetector.isMultipartSignedSMimeProtocol(part)) {
                 CryptoPart cryptoPart = new CryptoPart(CryptoProviderType.SMIME, CryptoPartType.SMIME_SIGNED, part);
                 partsToProcess.add(cryptoPart);
                 continue;
@@ -215,19 +213,18 @@ public class MessageCryptoHelper {
         }
     }
 
-    private void addErrorAnnotation(Part part, CryptoError error, MimeBodyPart replacementPart) {
-        CryptoResultAnnotation annotation = CryptoResultAnnotation.createErrorAnnotation(error, replacementPart);
-        messageAnnotations.put(part, annotation);
-    }
+    private void findPartsForPgpInlinePass() {
+        List<Part> inlineParts = MessageCryptoStructureDetector.findPgpInlineParts(currentMessage);
+        for (Part part : inlineParts) {
+            if (!processSignedOnly && !MessageCryptoStructureDetector.isPartPgpInlineEncrypted(part)) {
+                continue;
+            }
 
-    private void processFoundInlinePgpParts(List<Part> foundParts) {
-        for (Part part : foundParts) {
             if (!currentMessage.getFlags().contains(Flag.X_DOWNLOADED_FULL)) {
-                if (MessageDecryptVerifier.isPartPgpInlineEncrypted(part)) {
+                if (MessageCryptoStructureDetector.isPartPgpInlineEncrypted(part)) {
                     addErrorAnnotation(part, CryptoError.OPENPGP_ENCRYPTED_BUT_INCOMPLETE, NO_REPLACEMENT_PART);
                 } else {
-                    MimeBodyPart replacementPart = extractClearsignedTextReplacementPart(part);
-                    addErrorAnnotation(part, CryptoError.OPENPGP_SIGNED_BUT_INCOMPLETE, replacementPart);
+                    addErrorAnnotation(part, CryptoError.OPENPGP_SIGNED_BUT_INCOMPLETE, NO_REPLACEMENT_PART);
                 }
                 continue;
             }
@@ -235,6 +232,11 @@ public class MessageCryptoHelper {
             CryptoPart cryptoPart = new CryptoPart(CryptoProviderType.OPENPGP, CryptoPartType.PGP_INLINE, part);
             partsToProcess.add(cryptoPart);
         }
+    }
+
+    private void addErrorAnnotation(Part part, CryptoError error, MimeBodyPart replacementPart) {
+        CryptoResultAnnotation annotation = CryptoResultAnnotation.createErrorAnnotation(error, replacementPart);
+        messageAnnotations.put(part, annotation);
     }
 
     private void nextStep() {
@@ -504,7 +506,7 @@ public class MessageCryptoHelper {
 
         OpenPgpDataSource dataSource = getDataSourceForOpenPgpSignedData(currentCryptoPart.part);
 
-        byte[] signatureData = MessageDecryptVerifier.getSignatureData(currentCryptoPart.part);
+        byte[] signatureData = MessageCryptoStructureDetector.getSignatureData(currentCryptoPart.part);
         intent.putExtra(OpenPgpApi.EXTRA_DETACHED_SIGNATURE, signatureData);
 
         openPgpApi.executeApiAsync(intent, dataSource, new IOpenPgpSinkResultCallback<Void>() {
@@ -564,7 +566,7 @@ public class MessageCryptoHelper {
 
         SMimeDataSource dataSource = getDataSourceForSMimeSignedData(currentCryptoPart.part);
 
-        byte[] signatureData = MessageDecryptVerifier.getSignatureData(currentCryptoPart.part);
+        byte[] signatureData = MessageCryptoStructureDetector.getSignatureData(currentCryptoPart.part);
         intent.putExtra(SMimeApi.EXTRA_DETACHED_SIGNATURE, signatureData);
 
         sMimeApi.executeApiAsync(intent, dataSource, new ISMimeSinkResultCallback<Void>() {
@@ -1015,17 +1017,19 @@ public class MessageCryptoHelper {
             case START: {
                 state = State.ENCRYPTION;
 
-                findPartsForEncryptionPass();
+                findPartsForMultipartEncryptionPass();
                 return;
             }
 
             case ENCRYPTION: {
-                state = State.SIGNATURES;
+                state = State.SIGNATURES_AND_INLINE;
 
-                findPartsForSignaturePass();
+                findPartsForMultipartSignaturePass();
+                findPartsForPgpInlinePass();
                 return;
             }
-            case SIGNATURES: {
+
+            case SIGNATURES_AND_INLINE: {
                 state = State.AUTOCRYPT;
 
                 findPartsForAutocryptPass();
@@ -1154,22 +1158,7 @@ public class MessageCryptoHelper {
         return replacementPart;
     }
 
-    private static MimeBodyPart extractClearsignedTextReplacementPart(Part part) {
-        try {
-            String clearsignedText = MessageExtractor.getTextFromPart(part);
-            String replacementText = OpenPgpUtils.extractClearsignedMessage(clearsignedText);
-            if (replacementText == null) {
-                Timber.e("failed to extract clearsigned text for replacement part");
-                return NO_REPLACEMENT_PART;
-            }
-            return new MimeBodyPart(new TextBody(replacementText), "text/plain");
-        } catch (MessagingException e) {
-            Timber.e(e, "failed to create clearsigned text replacement part");
-            return NO_REPLACEMENT_PART;
-        }
-    }
-
     private enum State {
-        START, ENCRYPTION, SIGNATURES, AUTOCRYPT, FINISHED
+        START, ENCRYPTION, SIGNATURES_AND_INLINE, AUTOCRYPT, FINISHED
     }
 }

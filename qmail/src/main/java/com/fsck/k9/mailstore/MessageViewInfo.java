@@ -1,11 +1,13 @@
 package com.fsck.k9.mailstore;
 
 
+import java.util.Collections;
 import java.util.List;
 
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.Part;
 import com.fsck.k9.mail.internet.DKIMState;
+import com.fsck.k9.mail.internet.ReceivedHeaders;
 import com.fsck.k9.mail.internet.SPFState;
 import com.fsck.k9.mail.internet.SecureTransportState;
 
@@ -31,9 +33,6 @@ public class MessageViewInfo {
             String text, List<AttachmentViewInfo> attachments,
             List<ICalendarViewInfo> iCalendarEvents,
             CryptoResultAnnotation cryptoResultAnnotation,
-            SecureTransportState secureTransportState,
-            SPFState spfState,
-            DKIMState dkimState,
             AttachmentResolver attachmentResolver,
             String extraText, List<AttachmentViewInfo> extraAttachments, List<ICalendarViewInfo> extraICalendars) {
         this.message = message;
@@ -41,43 +40,47 @@ public class MessageViewInfo {
         this.rootPart = rootPart;
         this.text = text;
         this.cryptoResultAnnotation = cryptoResultAnnotation;
-        this.secureTransportState = secureTransportState;
-        this.spfState = spfState;
-        this.dkimState = dkimState;
         this.attachmentResolver = attachmentResolver;
         this.attachments = attachments;
         this.iCalendarEvents = iCalendarEvents;
         this.extraText = extraText;
         this.extraAttachments = extraAttachments;
         this.extraICalendars = extraICalendars;
+        secureTransportState = ReceivedHeaders.wasMessageTransmittedSecurely(message);
+        spfState = ReceivedHeaders.isEmailPotentialSpoof(message);
+        dkimState = ReceivedHeaders.isEmailIntegrityValid(message);
     }
 
-    public static MessageViewInfo createWithExtractedContent(
-            Message message, boolean isMessageIncomplete, Part rootPart,
+    static MessageViewInfo createWithExtractedContent(
+            Message message, boolean isMessageIncomplete,
             String text, List<AttachmentViewInfo> attachments,
             List<ICalendarViewInfo> iCalendarEvents,
-            CryptoResultAnnotation cryptoResultAnnotation,
-            SecureTransportState secureTransportState,
-            SPFState spfState,
-            DKIMState dkimState,
-            AttachmentResolver attachmentResolver,
-            String extraText, List<AttachmentViewInfo> extraAttachments, List<ICalendarViewInfo> extraICalendars
-    ) {
+            AttachmentResolver attachmentResolver) {
         return new MessageViewInfo(
-                message, isMessageIncomplete, rootPart,
+                message, isMessageIncomplete, message,
                 text, attachments, iCalendarEvents,
-                cryptoResultAnnotation,
-                secureTransportState,
-                spfState,
-                dkimState,
+                null,
                 attachmentResolver,
-                extraText, extraAttachments, extraICalendars
+                null,
+                Collections.<AttachmentViewInfo>emptyList(),
+                Collections.<ICalendarViewInfo>emptyList()
         );
     }
 
     public static MessageViewInfo createWithErrorState(Message message, boolean isMessageIncomplete) {
-        return new MessageViewInfo(message, isMessageIncomplete, null, null, null, null, null, null, null, null,
+        return new MessageViewInfo(message, isMessageIncomplete, null, null,
+                null, null, null,
                 null, null, null, null);
     }
 
+    MessageViewInfo withCryptoData(CryptoResultAnnotation rootPartAnnotation, String extraViewableText,
+            List<AttachmentViewInfo> extraAttachmentInfo, List<ICalendarViewInfo> extraCalendarInfos) {
+        return new MessageViewInfo(
+                message, isMessageIncomplete, rootPart, text, attachments,
+                iCalendarEvents,
+                rootPartAnnotation,
+                attachmentResolver,
+                extraViewableText, extraAttachmentInfo, extraCalendarInfos
+        );
+    }
 }

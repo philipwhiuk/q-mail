@@ -663,7 +663,7 @@ public class MessagingControllerTest {
 
         controller.synchronizeMailboxSynchronous(account, FOLDER_ID, FOLDER_NAME, listener, null);
 
-        verify(remoteFolder).open(Folder.OPEN_MODE_RW);
+        verify(remoteFolder).open(Folder.OPEN_MODE_RO);
     }
 
     @Test

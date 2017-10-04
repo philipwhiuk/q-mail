@@ -83,6 +83,7 @@ public class MessageLoaderHelper {
     private LoaderManager loaderManager;
     @Nullable // make this explicitly nullable, make sure to cancel/ignore any operation if this is null
     private MessageLoaderCallbacks callback;
+    private final boolean processSignedOnly;
 
 
     // transient state
@@ -103,6 +104,8 @@ public class MessageLoaderHelper {
         this.loaderManager = loaderManager;
         this.fragmentManager = fragmentManager;
         this.callback = callback;
+
+        processSignedOnly = QMail.getCryptoSupportSignOnly();
     }
 
 
@@ -281,7 +284,7 @@ public class MessageLoaderHelper {
             retainCryptoHelperFragment.setData(messageCryptoHelper);
         }
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(
-                localMessage, messageCryptoCallback, cachedOpenPgpDecryptionResult, cachedSMimeDecryptionResult);
+                localMessage, messageCryptoCallback, cachedOpenPgpDecryptionResult, cachedSMimeDecryptionResult, processSignedOnly);
     }
 
     private void cancelAndClearCryptoOperation() {

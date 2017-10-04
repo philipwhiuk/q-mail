@@ -12,28 +12,26 @@ import android.support.annotation.VisibleForTesting;
 import android.support.annotation.WorkerThread;
 
 import com.fsck.k9.Globals;
+import com.fsck.k9.QMail;
 import com.fsck.k9.R;
 import com.fsck.k9.ical.ICalPart;
+import com.fsck.k9.crypto.MessageCryptoStructureDetector;
 import com.fsck.k9.mail.Address;
 import com.fsck.k9.mail.Flag;
 import com.fsck.k9.mail.Message;
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.Part;
-import com.fsck.k9.mail.internet.DKIMState;
 import com.fsck.k9.mail.internet.MessageExtractor;
-import com.fsck.k9.mail.internet.ReceivedHeaders;
-import com.fsck.k9.mail.internet.SPFState;
-import com.fsck.k9.mail.internet.SecureTransportState;
 import com.fsck.k9.mail.internet.Viewable;
 import com.fsck.k9.mail.internet.Viewable.Flowed;
+import com.fsck.k9.mailstore.CryptoResultAnnotation.CryptoError;
 import com.fsck.k9.mailstore.util.FlowedMessageUtils;
 import com.fsck.k9.message.extractors.AttachmentInfoExtractor;
 import com.fsck.k9.message.extractors.ICalendarInfoExtractor;
 import com.fsck.k9.message.html.HtmlConverter;
 import com.fsck.k9.message.html.HtmlProcessor;
 import com.fsck.k9.ui.crypto.MessageCryptoAnnotations;
-import com.fsck.k9.ui.crypto.MessageCryptoSplitter;
-import com.fsck.k9.ui.crypto.MessageCryptoSplitter.CryptoMessageParts;
+import org.openintents.openpgp.util.OpenPgpUtils;
 import timber.log.Timber;
 
 import static com.fsck.k9.mail.internet.MimeUtility.getHeaderParameter;
@@ -77,59 +75,67 @@ public class MessageViewInfoExtractor {
     }
 
     @WorkerThread
-    public MessageViewInfo extractMessageForView(Message message, @Nullable MessageCryptoAnnotations annotations)
+    public MessageViewInfo extractMessageForView(Message message, @Nullable MessageCryptoAnnotations cryptoAnnotations)
             throws MessagingException {
-        Part rootPart;
-        CryptoResultAnnotation cryptoResultAnnotation;
-        SecureTransportState secureTransportState;
-        SPFState spfState;
-        DKIMState dkimState;
-        List<Part> insecureParts;
 
-        CryptoMessageParts cryptoMessageParts = MessageCryptoSplitter.split(message, annotations);
-        if (cryptoMessageParts != null) {
-            rootPart = cryptoMessageParts.contentPart;
-            cryptoResultAnnotation = cryptoMessageParts.contentCryptoAnnotation;
-            insecureParts = cryptoMessageParts.extraParts;
-        } else {
-            if (annotations != null && !annotations.isEmpty()) {
-                Timber.e("Got message annotations but no crypto root part!");
+        ArrayList<Part> extraParts = new ArrayList<>();
+        Part cryptoContentPart = MessageCryptoStructureDetector.findPrimaryEncryptedOrSignedPart(message, extraParts);
+
+        if (cryptoContentPart == null) {
+            if (cryptoAnnotations != null && !cryptoAnnotations.isEmpty()) {
+                Timber.e("Got crypto message cryptoContentAnnotations but no crypto root part!");
             }
-            rootPart = message;
-            cryptoResultAnnotation = null;
-            insecureParts = null;
+            return extractSimpleMessageForView(message, message);
         }
 
-        secureTransportState = ReceivedHeaders.wasMessageTransmittedSecurely(message);
-        spfState = ReceivedHeaders.isEmailPotentialSpoof(message);
-        dkimState = ReceivedHeaders.isEmailIntegrityValid(message);
+        boolean isOpenPgpEncrypted = (MessageCryptoStructureDetector.isPartMultipartEncrypted(cryptoContentPart) &&
+                        MessageCryptoStructureDetector.isMultipartEncryptedOpenPgpProtocol(cryptoContentPart)) ||
+                        MessageCryptoStructureDetector.isPartPgpInlineEncrypted(cryptoContentPart);
+        boolean isSMimeEncrypted = (MessageCryptoStructureDetector.isPartMultipartEncrypted(cryptoContentPart) &&
+                MessageCryptoStructureDetector.isMultipartEncryptedSMimeProtocol(cryptoContentPart));
+        if ((!QMail.isOpenPgpProviderConfigured() && isOpenPgpEncrypted) || (!QMail.isSMimeProviderConfigured() && isSMimeEncrypted)) {
+            CryptoResultAnnotation noProviderAnnotation = CryptoResultAnnotation.createErrorAnnotation(
+                    CryptoError.SMIME_ENCRYPTED_NO_PROVIDER, null);
+            return MessageViewInfo.createWithErrorState(message, false)
+                    .withCryptoData(noProviderAnnotation, null, null, null);
+        }
 
+        CryptoResultAnnotation cryptoContentPartAnnotation =
+                cryptoAnnotations != null ? cryptoAnnotations.get(cryptoContentPart) : null;
+        if (cryptoContentPartAnnotation != null) {
+            return extractCryptoMessageForView(message, extraParts, cryptoContentPart, cryptoContentPartAnnotation);
+        }
+
+        return extractSimpleMessageForView(message, message);
+    }
+
+    private MessageViewInfo extractCryptoMessageForView(Message message,
+            ArrayList<Part> extraParts, Part cryptoContentPart, CryptoResultAnnotation cryptoContentPartAnnotation)
+            throws MessagingException {
+        if (cryptoContentPartAnnotation != null && cryptoContentPartAnnotation.hasReplacementData()) {
+            cryptoContentPart = cryptoContentPartAnnotation.getReplacementData();
+        }
+
+        List<AttachmentViewInfo> extraAttachmentInfos = new ArrayList<>();
+        List<ICalendarViewInfo> extraCalendarInfos = new ArrayList<>();
+        ViewableExtractedText extraViewable = extractViewableAndAttachments(extraParts, extraAttachmentInfos, extraCalendarInfos);
+
+        MessageViewInfo messageViewInfo = extractSimpleMessageForView(message, cryptoContentPart);
+        return messageViewInfo.withCryptoData(cryptoContentPartAnnotation, extraViewable.text, extraAttachmentInfos, extraCalendarInfos);
+    }
+
+    private MessageViewInfo extractSimpleMessageForView(Message message, Part contentPart) throws MessagingException {
         List<AttachmentViewInfo> attachmentInfos = new ArrayList<>();
         List<ICalendarViewInfo> iCalendarInfos = new ArrayList<>();
         ViewableExtractedText viewable = extractViewableAndAttachments(
-                Collections.singletonList(rootPart), attachmentInfos, iCalendarInfos);
-
-        List<AttachmentViewInfo> insecureAttachmentInfos = new ArrayList<>();
-        List<ICalendarViewInfo> insecureICalendarInfos = new ArrayList<>();
-        String extraViewableText = null;
-        
-        if (insecureParts != null) {
-            ViewableExtractedText extraViewable =
-                    extractViewableAndAttachments(insecureParts, insecureAttachmentInfos, insecureICalendarInfos);
-            extraViewableText = extraViewable.text;
-        }
-
-
-        AttachmentResolver attachmentResolver = AttachmentResolver.createFromPart(rootPart);
-
-        boolean isMessageIncomplete = !message.isSet(Flag.X_DOWNLOADED_FULL) ||
-                MessageExtractor.hasMissingParts(message);
+                Collections.singletonList(contentPart), attachmentInfos, iCalendarInfos);
+        AttachmentResolver attachmentResolver = AttachmentResolver.createFromPart(contentPart);
+        boolean isMessageIncomplete =
+                !message.isSet(Flag.X_DOWNLOADED_FULL) || MessageExtractor.hasMissingParts(message);
 
         return MessageViewInfo.createWithExtractedContent(
-                message, isMessageIncomplete, rootPart, viewable.html,
-                attachmentInfos, iCalendarInfos,
-                cryptoResultAnnotation, secureTransportState, spfState, dkimState,
-                attachmentResolver, extraViewableText, insecureAttachmentInfos, insecureICalendarInfos);
+                message, isMessageIncomplete, viewable.html, attachmentInfos, iCalendarInfos,
+                attachmentResolver);
     }
 
     private ViewableExtractedText extractViewableAndAttachments(List<Part> parts,
@@ -253,7 +259,7 @@ public class MessageViewInfoExtractor {
             Part part = ((Textual) viewable).getPart();
             addHtmlDivider(html, part, prependDivider);
 
-            String t = MessageExtractor.getTextFromPart(part);
+            String t = getTextFromPart(part);
             if (t == null) {
                 t = "";
             } else if (viewable instanceof Flowed) {
@@ -290,7 +296,7 @@ public class MessageViewInfoExtractor {
             Part part = ((Textual)viewable).getPart();
             addTextDivider(text, part, prependDivider);
 
-            String t = MessageExtractor.getTextFromPart(part);
+            String t = getTextFromPart(part);
             if (t == null) {
                 t = "";
             } else if (viewable instanceof Html) {
@@ -339,6 +345,17 @@ public class MessageViewInfoExtractor {
             html.append(filename);
             html.append("</p>");
         }
+    }
+
+    private String getTextFromPart(Part part) {
+        String textFromPart = MessageExtractor.getTextFromPart(part);
+
+        String extractedClearsignedMessage = OpenPgpUtils.extractClearsignedMessage(textFromPart);
+        if (extractedClearsignedMessage != null) {
+            textFromPart = extractedClearsignedMessage;
+        }
+
+        return textFromPart;
     }
 
     /**
@@ -530,7 +547,7 @@ public class MessageViewInfoExtractor {
         public final String text;
         public final String html;
 
-        public ViewableExtractedText(String text, String html) {
+        ViewableExtractedText(String text, String html) {
             this.text = text;
             this.html = html;
         }

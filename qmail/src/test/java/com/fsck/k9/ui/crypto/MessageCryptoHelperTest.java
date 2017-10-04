@@ -76,6 +76,7 @@ public class MessageCryptoHelperTest {
     private SMimeApi sMimeApi;
     private ISMimeSinkResultCallback capturedSMimeCallback;
 
+    //TODO: Add tests for processSignedOnly
 
     @Before
     public void setUp() throws Exception {
@@ -136,7 +137,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         ArgumentCaptor<MessageCryptoAnnotations> captor = ArgumentCaptor.forClass(MessageCryptoAnnotations.class);
         verify(messageCryptoCallback).onCryptoOperationsFinished(captor.capture());
@@ -163,7 +164,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
 
         ArgumentCaptor<MessageCryptoAnnotations> captor = ArgumentCaptor.forClass(MessageCryptoAnnotations.class);
@@ -188,7 +189,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         ArgumentCaptor<MessageCryptoAnnotations> captor = ArgumentCaptor.forClass(MessageCryptoAnnotations.class);
         verify(messageCryptoCallback).onCryptoOperationsFinished(captor.capture());
@@ -207,7 +208,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_SIGNED_BUT_INCOMPLETE,
                 null,
@@ -225,7 +226,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         assertPartAnnotationHasState(
                 message, messageCryptoCallback, CryptoError.OPENPGP_ENCRYPTED_BUT_INCOMPLETE, null,
@@ -244,7 +245,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.ENCRYPTED_BUT_UNSUPPORTED,
                 null, null,
@@ -263,7 +264,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SIGNED_BUT_UNSUPPORTED,
                 null, null,
@@ -282,7 +283,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.ENCRYPTED_BUT_UNSUPPORTED,
                 null, null,
@@ -301,7 +302,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SIGNED_BUT_UNSUPPORTED,
                 null, null,
@@ -320,7 +321,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.ENCRYPTED_BUT_UNSUPPORTED,
                 null, null,
@@ -339,7 +340,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.SIGNED_BUT_UNSUPPORTED,
                 null, null,
@@ -358,7 +359,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_ENCRYPTED_NO_PROVIDER,
                 null, null,
@@ -384,7 +385,7 @@ public class MessageCryptoHelperTest {
 
         MessageCryptoCallback messageCryptoCallback = mock(MessageCryptoCallback.class);
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         assertPartAnnotationHasState(message, messageCryptoCallback, CryptoError.OPENPGP_SIGNED_NO_PROVIDER,
                 null, null,
@@ -538,7 +539,7 @@ public class MessageCryptoHelperTest {
             Message message, Body encryptedBody, OutputStream outputStream)
             throws Exception {
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<OpenPgpDataSource> dataSourceCaptor = ArgumentCaptor.forClass(OpenPgpDataSource.class);
@@ -558,7 +559,7 @@ public class MessageCryptoHelperTest {
     private void processOpenPgpSignedMessageAndCaptureMocks(Message message, BodyPart signedBodyPart,
             OutputStream outputStream) throws Exception {
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<OpenPgpDataSource> dataSourceCaptor = ArgumentCaptor.forClass(OpenPgpDataSource.class);
@@ -578,7 +579,7 @@ public class MessageCryptoHelperTest {
             Message message, Body encryptedBody, OutputStream outputStream)
             throws Exception {
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<SMimeDataSource> dataSourceCaptor = ArgumentCaptor.forClass(SMimeDataSource.class);
@@ -598,7 +599,7 @@ public class MessageCryptoHelperTest {
     private void processSMimeSignedMessageAndCaptureMocks(Message message, BodyPart signedBodyPart,
             OutputStream outputStream) throws Exception {
         messageCryptoHelper.asyncStartOrResumeProcessingMessage(message, messageCryptoCallback,
-                null, null);
+                null, null, false);
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         ArgumentCaptor<SMimeDataSource> dataSourceCaptor = ArgumentCaptor.forClass(SMimeDataSource.class);

@@ -283,10 +283,6 @@ public class RecipientPresenter implements PermissionPingCallback {
         ComposeCryptoStatus currentCryptoStatus = getCurrentCachedCryptoStatus();
         boolean isCryptoConfigured = currentCryptoStatus != null && currentCryptoStatus.isProviderStateOk();
         if (isCryptoConfigured) {
-            boolean pgpInlineModeEnabled = currentCryptoStatus.isPgpInlineModeEnabled();
-            menu.findItem(R.id.openpgp_inline_enable).setVisible(!pgpInlineModeEnabled);
-            menu.findItem(R.id.openpgp_inline_disable).setVisible(pgpInlineModeEnabled);
-
             boolean isEncrypting = currentCryptoStatus.isEncryptionEnabled();
             menu.findItem(R.id.openpgp_encrypt_enable).setVisible(!isEncrypting);
             menu.findItem(R.id.openpgp_encrypt_disable).setVisible(isEncrypting);
@@ -295,6 +291,11 @@ public class RecipientPresenter implements PermissionPingCallback {
             boolean isSignOnly = currentCryptoStatus.isSignOnly();
             menu.findItem(R.id.openpgp_sign_only).setVisible(showSignOnly && !isSignOnly);
             menu.findItem(R.id.openpgp_sign_only_disable).setVisible(showSignOnly && isSignOnly);
+
+            boolean pgpInlineModeEnabled = currentCryptoStatus.isPgpInlineModeEnabled();
+            boolean showPgpInlineEnable = (isEncrypting || isSignOnly) && !pgpInlineModeEnabled;
+            menu.findItem(R.id.openpgp_inline_enable).setVisible(showPgpInlineEnable);
+            menu.findItem(R.id.openpgp_inline_disable).setVisible(pgpInlineModeEnabled);
         } else {
             menu.findItem(R.id.openpgp_inline_enable).setVisible(false);
             menu.findItem(R.id.openpgp_inline_disable).setVisible(false);
@@ -634,7 +635,7 @@ public class RecipientPresenter implements PermissionPingCallback {
                     return;
                 }
 
-                if (currentCryptoStatus.isEncryptionEnabledError()) {
+                if (currentCryptoStatus.isEncryptionEnabled() && !currentCryptoStatus.allRecipientsCanEncrypt()) {
                     recipientMvpView.showOpenPgpEnabledErrorDialog(false);
                     return;
                 }
@@ -697,6 +698,9 @@ public class RecipientPresenter implements PermissionPingCallback {
                 break;
             case PROVIDER_ERROR:
                 recipientMvpView.showErrorOpenPgpConnection();
+                break;
+            case KEY_CONFIG_ERROR:
+                recipientMvpView.showErrorNoKeyConfigured();
                 break;
             default:
                 throw new AssertionError("not all error states handled, this is a bug!");
@@ -904,7 +908,7 @@ public class RecipientPresenter implements PermissionPingCallback {
             return;
         }
         if (enableEncryption) {
-            if (!cachedCryptoStatus.canEncrypt()) {
+            if (!cachedCryptoStatus.allRecipientsCanEncrypt()) {
                 onCryptoModeChanged(CryptoMode.CHOICE_ENABLED);
                 recipientMvpView.showOpenPgpEnabledErrorDialog(true);
             } else if (cachedCryptoStatus.canEncryptAndIsMutual()) {

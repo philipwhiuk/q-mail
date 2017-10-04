@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import android.app.Application;
+
 import com.fsck.k9.mail.MessagingException;
 import com.fsck.k9.mail.internet.BinaryTempFileBody;
 import com.fsck.k9.mail.internet.MimeMessage;
@@ -15,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowApplication;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -25,10 +28,12 @@ import static org.junit.Assert.assertNull;
 @Config(manifest = Config.NONE, sdk = 21)
 @SuppressWarnings("WeakerAccess")
 public class AutocryptHeaderParserTest {
+    ShadowApplication application;
     AutocryptHeaderParser autocryptHeaderParser = AutocryptHeaderParser.getInstance();
 
     @Before
     public void setUp() throws Exception {
+        application = ShadowApplication.getInstance();
         BinaryTempFileBody.setTempDirectory(RuntimeEnvironment.application.getCacheDir());
     }
 
@@ -123,7 +128,7 @@ public class AutocryptHeaderParserTest {
     }
 
     private InputStream readFromResourceFile(String name) throws FileNotFoundException {
-        return new FileInputStream(RuntimeEnvironment.application.getPackageResourcePath() + "/src/test/resources/" + name);
+        return new FileInputStream(application.getApplicationContext().getPackageResourcePath() + "/src/test/resources/" + name);
     }
 
 

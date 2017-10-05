@@ -1193,7 +1193,9 @@ Please submit bug reports, contribute new features and ask questions at
     <!-- Security - E2E -->
     <string name="crypto_settings_cancel">Cancel</string>
     <string name="crypto_settings_ok">Proceed</string>
-    <string name="account_settings_crypto_support_sign_only">Support signing of unencrypted messages</string>
+    <string name="account_settings_crypto_support_sign_only">Show unencrypted signatures</string>
+    <string name="account_settings_crypto_support_sign_only_on">Unencrypted signatures will be displayed</string>
+    <string name="account_settings_crypto_support_sign_only_off">Unencrypted signatures will be ignored</string>
     <string name="compose_error_no_signing_key">No signing key configured for this account! Check your settings.</string>
     <string name="compose_error_no_encryption_key">No encryption key configured for this account! Check your settings.</string>
     <string name="crypto_mode_disabled">Don\'t encrypt</string>
@@ -1256,7 +1258,6 @@ Please submit bug reports, contribute new features and ask questions at
         To read it, you need to install and configure a compatible OpenPGP App.</string>
     <string name="openpgp_no_provider_button">Choose OpenPGP App</string>
     <string name="no_openpgp_provider_see_global">No OpenPGP app configured, see global settings!</string>
-
     <string name="openpgp_enabled_error_title">Encryption not possible</string>
     <string name="openpgp_enabled_error_msg">Some of the selected recipients don\'t support this feature!</string>
     <string name="enable_encryption">Enable Encryption</string>
@@ -1269,7 +1270,6 @@ Please submit bug reports, contribute new features and ask questions at
     <string name="openpgp_enabled_error_disable">Disable Encryption</string>
 
     <string name="error_sign_only_no_encryption">Encryption unavailable in sign-only mode!</string>
-
 
     <!-- Security - E2E - OpenPGP - INLINE -->
     <string name="openpgp_inline_title">PGP/INLINE Mode</string>
